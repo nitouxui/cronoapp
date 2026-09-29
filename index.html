@@ -165,10 +165,6 @@
     .welcome-copy > p { max-width: 650px; color: var(--muted); font-size: clamp(17px, 1.4vw, 22px) !important; }
     .welcome-features { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 38px; }
     .welcome-features span { border: 1px solid var(--edge); background: var(--surface-raised); border-radius: 99px; padding: 9px 14px; color: var(--text); font-size: 14px; }
-    .welcome-display { width: min(100%, 540px); border: 1px solid var(--edge); background: var(--surface-raised); border-radius: 20px; padding: 22px 28px; box-shadow: 0 16px 45px #0004; }
-    .welcome-display span { display: block; color: var(--accent-soft); letter-spacing: .16em; font-weight: 700; font-size: 12px; }
-    .welcome-display strong { display: block; font-size: clamp(72px, 9vw, 138px); font-variant-numeric: tabular-nums; line-height: 1.1; letter-spacing: -.06em; }
-    .welcome-progress { height: 7px; border-radius: 99px; background: linear-gradient(90deg, var(--accent) 65%, var(--accent-dark) 65%); }
     body.no-room .landing-login { width: 100%; }
     body.no-room #controlSync { position: static; transform: none; width: 100%; max-width: none; padding: clamp(22px, 3vw, 38px); border-radius: 18px; box-shadow: 0 20px 65px #0007; font-size: 15px; }
     body.no-room #syncToggle, body.no-room #roomName, body.no-room #judgeLink { display: none !important; }
@@ -178,7 +174,6 @@
     @media (max-width: 830px) {
       body.no-room #roomWelcome .welcome-shell { grid-template-columns: 1fr; }
       body.no-room #roomWelcome { align-items: flex-start; padding: 38px 20px; }
-      .welcome-display { display: none; }
       .welcome-features { margin-bottom: 4px; }
     }
     @media (max-width: 500px) { .palette-grid { grid-template-columns: 1fr; } }
@@ -196,7 +191,6 @@
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
         <div class="welcome-features"><span>Una sala por cuenta</span><span>QR o imagen</span><span>Vista del staff</span></div>
-        <div class="welcome-display" aria-hidden="true"><span>RONDA EN CURSO</span><strong>50:00</strong><div class="welcome-progress"></div></div>
       </div>
       <div id="landingLogin" class="landing-login"></div>
     </div>
