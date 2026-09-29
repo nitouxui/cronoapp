@@ -26,6 +26,7 @@
     body.viewer-mode .container, body.viewer-mode .modal, body.viewer-mode #controlSync { display: none !important; }
     #judgeView { display: none; min-height: 100dvh; background: #101827; color: #fff; align-items: center; justify-content: center; text-align: center; padding: 16px; }
     body.viewer-mode #judgeView { display: flex; }
+    body.projection-mode #controlSync, body.projection-mode .edit-button, body.projection-mode .control-bar, body.projection-mode .modal { display: none !important; }
     body.pairings-mode .container, body.pairings-mode .modal, body.pairings-mode #controlSync, body.pairings-mode #roomWelcome { display: none !important; }
     #pairingsView { display: none; min-height: 100dvh; padding: clamp(20px, 5vw, 64px); background: var(--surface); color: var(--text); }
     body.pairings-mode #pairingsView { display: block; }
@@ -61,6 +62,8 @@
     #controlSync.collapsed #syncToggle { width: 44px; height: 44px; margin: 0; box-shadow: 0 2px 10px #0004; }
     #syncToggle:focus-visible { outline: 3px solid #1d6be0; outline-offset: 2px; }
     #controlSync input { width: 100%; margin: 4px 0; }
+    #shortRoomControl { margin-top: 12px; padding-top: 12px; border-top: 1px solid #ccc; overflow-wrap: anywhere; }
+    #shortRoomLink { display: inline-block; margin-top: 5px; }
     #controlSync button { margin: 4px 4px 4px 0; }
     #controlSync { max-width: 340px; }
     #controlSync a { display: inline-block; margin-top: 6px; }
@@ -217,6 +220,7 @@
     <button id="syncLogout" type="button" hidden>Cerrar sesión</button>
     <div><a id="judgeLink" target="_blank" rel="noopener">Abrir vista del staff</a></div>
     <div><a id="pairingsLink" target="_blank" rel="noopener">Abrir pareos</a></div>
+    <div id="shortRoomControl" hidden><strong>Enlace corto para pantalla</strong><br><a id="shortRoomLink" target="_blank" rel="noopener"></a><br><button id="copyShortRoom" type="button">Copiar enlace</button></div>
     </div>
   </div>
   <div class="container">
@@ -1832,9 +1836,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     });
 
     function generatePairingsQR() {
-      const room = new URLSearchParams(location.search).get('sala');
-      if (!room) return false;
+      const query = new URLSearchParams(location.search);
+      if (!query.get('sala') && !query.get('s')) return false;
       const target = new URL(location.href);
+      if (window.currentShortCode) { target.searchParams.delete('sala'); target.searchParams.set('s', window.currentShortCode); }
       target.searchParams.set('view', 'pareos');
       return Boolean(pairingsQrSrc = qrDataUrl(target.href));
     }
@@ -2087,17 +2092,22 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     };
     const params = new URLSearchParams(location.search);
     const rawRoom = params.get('sala');
-    const validRoom = rawRoom === null || /^[A-Za-z0-9_-]{8,64}$/.test(rawRoom);
-    const roomId = rawRoom;
+    const rawCode = params.get('s');
+    const hasRoomLink = Boolean(rawRoom || rawCode);
+    const validRoom = (!rawRoom || /^[A-Za-z0-9_-]{8,64}$/.test(rawRoom))
+      && (!rawCode || /^[A-HJ-NP-Z2-9]{6}$/.test(rawCode)) && !(rawRoom && rawCode);
+    let roomId = rawRoom;
     const isJudge = ['staff', 'juez'].includes(params.get('view')); // Legacy links remain valid.
     const isPairings = params.get('view') === 'pareos';
-    const isReadOnly = isJudge || isPairings;
+    const isProjection = params.get('view') === 'pantalla' || (Boolean(rawCode) && !params.get('view'));
+    const isReadOnly = isJudge || isPairings || isProjection;
     if (isJudge) document.body.classList.add('viewer-mode');
     else if (isPairings) document.body.classList.add('pairings-mode');
-    else if (!rawRoom) document.body.classList.add('no-room');
+    else if (isProjection) document.body.classList.add('projection-mode');
+    else if (!hasRoomLink) document.body.classList.add('no-room');
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
-    if (!isReadOnly && !rawRoom) document.getElementById('landingLogin').append(controlSync);
+    if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(controlSync);
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
@@ -2111,9 +2121,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     document.getElementById('pairingsLink').href = viewerURL.href;
     document.getElementById('staffPairingsLink').href = viewerURL.href;
     roomName.textContent = rawRoom ? `Sala: ${roomId}` : 'Aún no tienes una sala abierta';
-    judgeLink.hidden = !rawRoom;
-    document.getElementById('pairingsLink').hidden = !rawRoom;
-    document.getElementById('staffPairingsLink').hidden = !rawRoom;
+    judgeLink.hidden = !hasRoomLink;
+    document.getElementById('pairingsLink').hidden = !hasRoomLink;
+    document.getElementById('staffPairingsLink').hidden = !hasRoomLink;
     let currentState = null;
     let roomOwner = null;
     let currentUser = null;
@@ -2143,13 +2153,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const seconds = Math.ceil(ms / 1000);
       const label = formatTime(seconds);
       document.getElementById('judgeTimer').textContent = label;
-      if (!isReadOnly) {
+      if (!isJudge && !isPairings) {
         const display = document.getElementById('timer');
         display.textContent = label;
         display.style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
         document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
         window.renderTimerState(seconds, currentState.running);
-        if (lastSecond !== null && lastSecond > 0 && seconds <= 0)
+        if (!isReadOnly && lastSecond !== null && lastSecond > 0 && seconds <= 0)
           window.playEndSound();
       }
       document.getElementById('judgeTimer').style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
@@ -2165,7 +2175,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (!isReadOnly) {
         syncStatus.textContent = !currentUser ? 'Accede con Google para abrir tu sala.'
           : !verified ? 'El correo de esta cuenta no está verificado.'
-          : !rawRoom ? 'Buscando tu sala…'
+          : !roomId ? 'Buscando tu sala…'
           : !roomOwner ? 'Sala no encontrada. Abre tu sala.'
           : canControl ? 'Control conectado' : 'Esta sala pertenece a otro organizador. Solo lectura.';
       }
@@ -2187,13 +2197,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       syncStatus.textContent = 'Falta configurar el nuevo proyecto Firebase.';
       if (isJudge) judgeStatus.textContent = 'Falta configurar Firebase.';
       if (isPairings) document.getElementById('pairingsStatus').textContent = 'Falta configurar Firebase.';
-    } else if (!validRoom || (isReadOnly && !rawRoom)) {
+      if (isProjection) document.getElementById('timerStatus').textContent = 'FALTA CONFIGURAR FIREBASE';
+    } else if (!validRoom || (isReadOnly && !hasRoomLink)) {
       if (isJudge) judgeStatus.textContent = 'Enlace de sala inválido.';
       if (isPairings) document.getElementById('pairingsStatus').textContent = 'Enlace de sala inválido.';
-      else { controlSync.hidden = false; syncStatus.textContent = 'Enlace de sala inválido.'; }
+      if (isProjection) document.getElementById('timerStatus').textContent = 'ENLACE DE SALA INVÁLIDO';
+      if (!isReadOnly) { controlSync.hidden = false; syncStatus.textContent = 'Enlace de sala inválido.'; }
     } else {
       if (!isReadOnly) { controlSync.hidden = false; syncStatus.textContent = 'Conectando…'; }
-      else judgeStatus.textContent = 'Conectando…';
+      else if (isJudge) judgeStatus.textContent = 'Conectando…';
       try {
         const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
         const [{ initializeApp }, database, authentication] = await Promise.all([
@@ -2204,10 +2216,71 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
-        roomRef = rawRoom ? dbModule.ref(db, 'rooms/' + roomId) : null;
-        stateRef = rawRoom ? dbModule.ref(db, 'rooms/' + roomId + '/state') : null;
-        settingsRef = rawRoom ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
-        const pairingsRef = rawRoom ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
+        if (rawCode) {
+          const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
+          roomId = alias.val();
+          if (!roomId || !/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) throw new Error('Código de sala no encontrado.');
+          roomName.textContent = `Sala: ${rawCode}`;
+        }
+        roomRef = roomId ? dbModule.ref(db, 'rooms/' + roomId) : null;
+        stateRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/state') : null;
+        settingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
+        const pairingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
+        let shortCodePromise = null;
+        const shortControl = document.getElementById('shortRoomControl');
+        const shortLink = document.getElementById('shortRoomLink');
+        function showShortCode(code) {
+          window.currentShortCode = code;
+          const shortURL = new URL(location.href);
+          shortURL.search = '';
+          shortURL.searchParams.set('s', code);
+          shortLink.href = shortURL.href;
+          shortLink.textContent = shortURL.href;
+          shortControl.hidden = false;
+          const staffURL = new URL(shortURL.href);
+          staffURL.searchParams.set('view', 'staff');
+          judgeLink.href = staffURL.href;
+          staffURL.searchParams.set('view', 'pareos');
+          document.getElementById('pairingsLink').href = staffURL.href;
+          document.getElementById('staffPairingsLink').href = staffURL.href;
+          if (document.querySelector('input[name="leftVisualMode"]:checked')?.value === 'tdf') {
+            window.generatePairingsQR();
+            window.renderLeftVisual();
+          }
+        }
+        document.getElementById('copyShortRoom').addEventListener('click', async event => {
+          try {
+            await navigator.clipboard.writeText(shortLink.href);
+            event.currentTarget.textContent = 'Copiado';
+          } catch { syncStatus.textContent = 'Selecciona el enlace corto para copiarlo.'; }
+        });
+        async function ensureShortCode(existingCode) {
+          if (existingCode && /^[A-HJ-NP-Z2-9]{6}$/.test(existingCode)) {
+            showShortCode(existingCode);
+            return;
+          }
+          if (!canControl || !roomId || shortCodePromise) return;
+          shortCodePromise = (async () => {
+            const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for (let attempt = 0; attempt < 8; attempt++) {
+              const bytes = crypto.getRandomValues(new Uint8Array(6));
+              const code = Array.from(bytes, byte => alphabet[byte & 31]).join('');
+              const mapping = dbModule.ref(db, 'shortRooms/' + code);
+              const result = await dbModule.runTransaction(mapping, current => current === null ? roomId : undefined, { applyLocally: false });
+              if (!result.committed) continue;
+              await dbModule.set(dbModule.ref(db, 'rooms/' + roomId + '/shortCode'), code);
+              showShortCode(code);
+              return;
+            }
+            throw new Error('No se pudo reservar un código corto.');
+          })().catch(error => {
+            syncStatus.textContent = error?.code === 'PERMISSION_DENIED'
+              ? 'Actualiza las reglas de Firebase para generar el enlace corto.'
+              : 'No se pudo generar el enlace corto. Prueba recargando la sala.';
+          }).finally(() => { shortCodePromise = null; });
+          await shortCodePromise;
+        }
+
         if (pairingsRef) {
           dbModule.onValue(pairingsRef, snap => {
             try {
@@ -2257,7 +2330,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             if (snap.exists()) {
               try {
                 const settings = JSON.parse(snap.val());
-                if (isReadOnly) window.applyPalette(settings.palette);
+                if (isJudge || isPairings) window.applyPalette(settings.palette);
                 else window.loadSettings(settings);
               }
               catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
@@ -2271,6 +2344,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           roomOwner = snap.val()?.ownerUid || null;
           if (!roomOwner && isJudge) judgeStatus.textContent = 'Sala no encontrada.';
           updateAccess();
+          if (canControl) ensureShortCode(snap.val()?.shortCode);
         }, () => { if (isJudge) judgeStatus.textContent = 'No se pudo acceder a la sala.'; });
         if (stateRef) dbModule.onValue(stateRef, snap => {
           currentState = snap.val();
@@ -2314,7 +2388,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             updateAccess();
-            if (user?.emailVerified && !rawRoom) openOwnRoom(user);
+            if (user?.emailVerified && !hasRoomLink) openOwnRoom(user);
+            if (canControl) ensureShortCode();
           });
           const googleProvider = new authModule.GoogleAuthProvider();
           googleButton.addEventListener('click', async () => {
@@ -2343,9 +2418,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           window.updateTimerTime = window.resetTimer;
         }
       } catch (error) {
-        if (isJudge) judgeStatus.textContent = 'No se pudo conectar al servicio.';
-        if (isPairings) document.getElementById('pairingsStatus').textContent = 'No se pudo conectar al servicio.';
-        else syncStatus.textContent = 'No se pudo conectar al servicio.';
+        if (isJudge) judgeStatus.textContent = error.message || 'No se pudo conectar al servicio.';
+        else if (isPairings) document.getElementById('pairingsStatus').textContent = error.message || 'No se pudo conectar al servicio.';
+        else if (isProjection) document.getElementById('timerStatus').textContent = error.message || 'No se pudo conectar al servicio.';
+        else syncStatus.textContent = error.message || 'No se pudo conectar al servicio.';
       }
     }
   </script>
