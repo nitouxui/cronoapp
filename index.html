@@ -2000,7 +2000,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           card.className = 'pairing-card';
           const table = document.createElement('span');
           table.className = 'pairing-table';
-          table.textContent = `${category.name} · Ronda ${round.number} · ${match.table ? `Mesa ${match.table}` : 'BYE'}`;
+          table.textContent = `Ronda ${round.number} · ${match.table ? `Mesa ${match.table}` : 'BYE'}`;
           card.append(table);
           const playerElement = (name, playerDivision, record) => {
             const container = document.createElement('span');
