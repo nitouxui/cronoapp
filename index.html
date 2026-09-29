@@ -36,9 +36,10 @@
     .pairings-filters label { margin: 0; min-width: 160px; }
     .pairings-filters select { display: block; width: 100%; margin-top: 8px; padding: 12px; background: var(--surface-raised); border: 1px solid var(--edge); border-radius: 10px; color: var(--text); font: inherit; }
     .pairing-card { display: grid; grid-template-columns: minmax(72px, .25fr) 1fr auto 1fr; gap: 12px; align-items: center; padding: 18px; margin: 12px 0; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); font-size: clamp(16px, 2vw, 22px); }
-    .pairing-table { color: var(--accent-soft); font-weight: 800; font-size: 15px; }
+    .pairing-table { color: var(--accent-soft); font-weight: 800; font-size: 15px; overflow-wrap: anywhere; }
     .pairing-versus { color: var(--muted); font-size: 14px; }
-    .pairing-card span:last-child { text-align: right; }
+    .pairing-card > span:nth-child(4) { text-align: right; }
+    .pairing-result { grid-column: 1 / -1; color: var(--accent-soft); font-size: 15px; font-weight: 700; padding-top: 12px; border-top: 1px solid var(--edge); text-align: left; }
     #pairingsStatus { color: var(--muted); line-height: 1.5; }
     #staffPairingsLink { position: fixed; top: 18px; right: 18px; color: var(--accent-soft); font-weight: 700; font-size: 15px; }
     @media (max-width: 580px) { .pairing-card { grid-template-columns: 1fr auto 1fr; } .pairing-table { grid-column: 1 / -1; } }
@@ -198,7 +199,7 @@
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
     <p id="pairingsStatus" role="status">Conectando…</p>
-    <div class="pairings-filters"><label for="pairingsCategory">Categoría<select id="pairingsCategory"></select></label><label for="pairingsRound">Ronda<select id="pairingsRound"></select></label></div>
+    <div class="pairings-filters"><label for="pairingsCategory">Categoría<select id="pairingsCategory"></select></label><label for="pairingsRound">Ronda<select id="pairingsRound"></select></label><label for="pairingsDivision">Categoría del jugador<select id="pairingsDivision"><option value="all">Todas</option><option value="JR">Junior (JR)</option><option value="SR">Senior (SR)</option><option value="MA">Máster (MA)</option></select></label></div>
     <div id="pairingsList"></div>
   </div></section>
   <div id="controlSync" hidden>
@@ -1904,9 +1905,23 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (xml.querySelector('parsererror') || xml.documentElement.localName !== 'tournament')
         throw new Error('El archivo no tiene un formato TDF/XML válido.');
       const label = node => (node?.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+      const startDate = label(directChild(directChild(xml.documentElement, 'data'), 'startdate'));
+      const parts = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(startDate);
+      if (!parts) throw new Error('El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.');
+      const month = Number(parts[1]), day = Number(parts[2]), year = Number(parts[3]);
+      const validDate = new Date(Date.UTC(year, month - 1, day));
+      if (validDate.getUTCFullYear() !== year || validDate.getUTCMonth() !== month - 1 || validDate.getUTCDate() !== day)
+        throw new Error('La fecha del torneo en el TDF no es válida.');
+      const season = year + (month >= 9 ? 1 : 0);
+      const divisionFor = value => {
+        const birthYear = Number(/^(?:\d{1,2}\/){2}(\d{4})$/.exec(value)?.[1]);
+        if (!birthYear || birthYear > year || birthYear < 1900) return '';
+        return birthYear >= season - 12 ? 'JR' : birthYear >= season - 16 ? 'SR' : 'MA';
+      };
       const players = new Map(directChildren(directChild(xml.documentElement, 'players'), 'player').map(player => [
         player.getAttribute('userid'),
-        [label(directChild(player, 'firstname')), label(directChild(player, 'lastname'))].filter(Boolean).join(' ')
+        { name: [label(directChild(player, 'firstname')), label(directChild(player, 'lastname'))].filter(Boolean).join(' '),
+          division: divisionFor(label(directChild(player, 'birthdate'))) }
       ]));
       if (!players.size) throw new Error('No se encontraron jugadores en el TDF.');
       const categories = directChildren(directChild(xml.documentElement, 'pods'), 'pod').map((pod, index) => {
@@ -1916,66 +1931,107 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           const matches = directChildren(directChild(round, 'matches'), 'match').map(match => {
             const first = directChild(match, 'player1') || directChild(match, 'player');
             const second = directChild(match, 'player2');
-            const firstName = players.get(first?.getAttribute('userid'));
-            const secondName = second ? players.get(second.getAttribute('userid')) : 'BYE';
+            const firstPlayer = players.get(first?.getAttribute('userid'));
+            const secondPlayer = second ? players.get(second.getAttribute('userid')) : null;
             const table = Number(label(directChild(match, 'tablenumber')));
-            if (!firstName || !secondName) return null;
-            return { table: Number.isInteger(table) && table > 0 ? table : 0, first: firstName, second: secondName };
+            if (!firstPlayer?.name || (second && !secondPlayer?.name)) return null;
+            return { table: Number.isInteger(table) && table > 0 ? table : 0,
+              first: firstPlayer.name, second: second ? secondPlayer.name : 'BYE',
+              firstDivision: firstPlayer.division, secondDivision: secondPlayer?.division || '',
+              outcome: match.getAttribute('outcome') || '' };
           }).filter(Boolean).sort((a, b) => a.table - b.table);
           return { number, matches };
         }).filter(Boolean).sort((a, b) => a.number - b.number);
-        return { name: `Categoría ${pod.getAttribute('category') || index + 1}`, rounds };
+        const code = (pod.getAttribute('category') || '').trim().toUpperCase();
+        const categoryNames = { '0': 'Junior (JR)', '1': 'Senior (SR)', '2': 'Máster (MA)', '8': 'Junior / Senior (JR/SR)', JR: 'Junior (JR)', SR: 'Senior (SR)', MA: 'Máster (MA)' };
+        return { name: categoryNames[code] || `Categoría ${code || index + 1}`, rounds };
       }).filter(category => category.rounds.some(round => round.matches.length));
       if (!categories.length) throw new Error('No se encontraron pareos con jugadores en el TDF.');
-      return { version: 1, title: label(directChild(directChild(xml.documentElement, 'data'), 'name')) || 'Torneo', categories };
+      return { version: 3, season, title: label(directChild(directChild(xml.documentElement, 'data'), 'name')) || 'Torneo', categories };
     }
     window.parseTdf = parseTdf;
     let pairingsData = null;
     function renderPairings() {
-      const categorySelect = document.getElementById('pairingsCategory');
-      const roundSelect = document.getElementById('pairingsRound');
+      const group = document.getElementById('pairingsCategory').value;
+      const roundChoice = document.getElementById('pairingsRound').value;
+      const division = document.getElementById('pairingsDivision').value;
       const list = document.getElementById('pairingsList');
       list.replaceChildren();
       if (!pairingsData?.categories?.length) return;
-      const category = pairingsData.categories[Number(categorySelect.value)] || pairingsData.categories[0];
-      const round = category.rounds.find(item => String(item.number) === roundSelect.value) || category.rounds.at(-1);
-      if (!round) return;
-      document.getElementById('pairingsStatus').textContent = `${round.matches.length} pareos · Ronda ${round.number}`;
-      for (const match of round.matches) {
-        const card = document.createElement('article');
-        card.className = 'pairing-card';
-        for (const [className, value] of [['pairing-table', match.table ? `Mesa ${match.table}` : 'BYE'], ['', match.first], ['pairing-versus', 'VS'], ['', match.second]]) {
-          const span = document.createElement('span'); span.className = className; span.textContent = value; card.append(span);
-        }
-        list.append(card);
+      if (division !== 'all' && pairingsData.version < 2) {
+        document.getElementById('pairingsStatus').textContent = 'Sube nuevamente el TDF para activar el filtro por categoría del jugador.';
+        return;
       }
+      let count = 0;
+      pairingsData.categories.forEach((category, index) => {
+        if (group !== 'all' && group !== String(index)) return;
+        const round = roundChoice === 'latest' ? category.rounds.at(-1)
+          : category.rounds.find(item => String(item.number) === roundChoice);
+        if (!round) return;
+        for (const match of round.matches) {
+          if (division !== 'all' && match.firstDivision !== division && match.secondDivision !== division) continue;
+          count++;
+          const card = document.createElement('article');
+          card.className = 'pairing-card';
+          for (const [className, value] of [
+            ['pairing-table', `${category.name} · Ronda ${round.number} · ${match.table ? `Mesa ${match.table}` : 'BYE'}`],
+            ['', `${match.first}${match.firstDivision ? ` (${match.firstDivision})` : ''}`],
+            ['pairing-versus', 'VS'],
+            ['', `${match.second}${match.secondDivision ? ` (${match.secondDivision})` : ''}`]
+          ]) {
+            const span = document.createElement('span'); span.className = className; span.textContent = value; card.append(span);
+          }
+          const result = document.createElement('span');
+          result.className = 'pairing-result';
+          const pointLabels = {
+            '1': `Puntos de la ronda: ${match.first} 3 · ${match.second} 0`,
+            '2': `Puntos de la ronda: ${match.first} 0 · ${match.second} 3`,
+            '3': `Puntos de la ronda: ${match.first} 1 · ${match.second} 1`,
+            '5': `Puntos de la ronda: ${match.first} 3 · BYE`,
+            '8': 'Sin puntos asignados'
+          };
+          result.textContent = pairingsData.version >= 3
+            ? pointLabels[match.outcome] || 'Puntos pendientes'
+            : 'Sube nuevamente el TDF para mostrar los puntos';
+          card.append(result);
+          list.append(card);
+        }
+      });
+      document.getElementById('pairingsStatus').textContent = count
+        ? `${count} pareo${count === 1 ? '' : 's'}${division !== 'all' ? ` con jugadores ${division}` : ''} · Temporada ${pairingsData.season || 'sin indicar'}`
+        : 'No hay pareos para esta selección.';
     }
     function setPairings(value) {
       pairingsData = value;
       const categorySelect = document.getElementById('pairingsCategory');
-      const roundSelect = document.getElementById('pairingsRound');
       const previousCategory = categorySelect.value;
-      categorySelect.replaceChildren(); roundSelect.replaceChildren();
+      categorySelect.replaceChildren();
       document.getElementById('pairingsList').replaceChildren();
       if (!value?.categories?.length) {
         document.getElementById('pairingsStatus').textContent = 'Aún no se han publicado pareos para esta sala.';
         return;
       }
       document.getElementById('pairingsTitle').textContent = value.title;
+      categorySelect.add(new Option('Todos los grupos', 'all'));
       value.categories.forEach((category, i) => categorySelect.add(new Option(category.name, String(i))));
-      categorySelect.value = previousCategory && value.categories[Number(previousCategory)] ? previousCategory : '0';
+      categorySelect.value = previousCategory && (previousCategory === 'all' || value.categories[Number(previousCategory)]) ? previousCategory : 'all';
       updateRounds();
     }
     function updateRounds() {
-      const category = pairingsData?.categories[Number(document.getElementById('pairingsCategory').value)];
+      const group = document.getElementById('pairingsCategory').value;
+      const categories = group === 'all' ? pairingsData?.categories || [] : [pairingsData?.categories[Number(group)]].filter(Boolean);
       const selector = document.getElementById('pairingsRound');
+      const previousRound = selector.value;
       selector.replaceChildren();
-      category?.rounds.forEach(round => selector.add(new Option(`Ronda ${round.number}`, String(round.number))));
-      if (category?.rounds.length) selector.value = String(category.rounds.at(-1).number);
+      selector.add(new Option('Última de cada grupo', 'latest'));
+      const numbers = [...new Set(categories.flatMap(category => category.rounds.map(round => round.number)))].sort((a, b) => a - b);
+      numbers.forEach(number => selector.add(new Option(`Ronda ${number}`, String(number))));
+      selector.value = previousRound && (previousRound === 'latest' || numbers.includes(Number(previousRound))) ? previousRound : 'latest';
       renderPairings();
     }
     document.getElementById('pairingsCategory').addEventListener('change', updateRounds);
     document.getElementById('pairingsRound').addEventListener('change', renderPairings);
+    document.getElementById('pairingsDivision').addEventListener('change', renderPairings);
     window.setPairings = setPairings;
 
     document.getElementById('qrUrl').addEventListener('change', generateQR);
