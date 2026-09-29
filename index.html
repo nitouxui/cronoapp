@@ -35,16 +35,17 @@
     .pairings-filters { display: flex; flex-wrap: wrap; gap: 16px; margin: 28px 0; }
     .pairings-filters label { margin: 0; min-width: 160px; }
     .pairings-filters select { display: block; width: 100%; margin-top: 8px; padding: 12px; background: var(--surface-raised); border: 1px solid var(--edge); border-radius: 10px; color: var(--text); font: inherit; }
-    .pairing-card { display: grid; grid-template-columns: minmax(72px, .25fr) 1fr auto 1fr; gap: 12px; align-items: center; padding: 18px; margin: 12px 0; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); font-size: clamp(16px, 2vw, 22px); }
-    .pairing-table { color: var(--accent-soft); font-weight: 800; font-size: 15px; overflow-wrap: anywhere; }
-    .pairing-versus { color: var(--muted); font-size: 14px; }
+    .pairing-card { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 18px; margin: 12px 0; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); font-size: clamp(16px, 2vw, 22px); }
+    .pairing-table { color: var(--accent-soft); font-weight: 800; font-size: 15px; text-align: center; white-space: nowrap; }
+    #pairingsCurrentRound { color: var(--accent-soft); font-size: clamp(19px, 2.5vw, 28px); font-weight: 800; margin: 0 0 16px; }
     .pairing-player { min-width: 0; overflow-wrap: anywhere; }
     .pairing-player:last-child { text-align: right; }
     .pairing-player small { display: block; margin-top: 6px; color: var(--muted); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
     .pairing-player small strong { color: var(--accent-soft); }
     #pairingsStatus { color: var(--muted); line-height: 1.5; }
+    #pairingsStatus:empty { display: none; }
     #staffPairingsLink { position: fixed; top: 18px; right: 18px; color: var(--accent-soft); font-weight: 700; font-size: 15px; }
-    @media (max-width: 580px) { .pairing-card { grid-template-columns: 1fr auto 1fr; } .pairing-table { grid-column: 1 / -1; } }
+    @media (max-width: 580px) { .pairing-card { gap: 8px; padding: 14px; } .pairing-table { font-size: 13px; } }
     body.no-room .container { display: none; }
     #roomWelcome { display: none; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; text-align: center; background: #f4f6fa; color: #17223b; }
     body.no-room #roomWelcome { display: flex; }
@@ -200,6 +201,7 @@
   <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><div id="judgeStatus" role="status"></div></div>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
+    <p id="pairingsCurrentRound"></p>
     <p id="pairingsStatus" role="status">Conectando…</p>
     <div class="pairings-filters"><label for="pairingsRound">Ronda<select id="pairingsRound"></select></label><label for="pairingsDivision">Categoría del jugador<select id="pairingsDivision"><option value="all">Todas</option><option value="JR">Junior (JR)</option><option value="SR">Senior (SR)</option><option value="MA">Máster (MA)</option></select></label></div>
     <div id="pairingsList"></div>
@@ -1983,12 +1985,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const division = document.getElementById('pairingsDivision').value;
       const list = document.getElementById('pairingsList');
       list.replaceChildren();
+      document.getElementById('pairingsCurrentRound').textContent = '';
       if (!pairingsData?.categories?.length) return;
       if (pairingsData.version < 4) {
         document.getElementById('pairingsStatus').textContent = 'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.';
         return;
       }
       let count = 0;
+      const shownRounds = new Set();
       pairingsData.categories.forEach(category => {
         const round = roundChoice === 'latest' ? category.rounds.at(-1)
           : category.rounds.find(item => String(item.number) === roundChoice);
@@ -1996,12 +2000,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         for (const match of round.matches) {
           if (division !== 'all' && match.firstDivision !== division && match.secondDivision !== division) continue;
           count++;
+          shownRounds.add(round.number);
           const card = document.createElement('article');
           card.className = 'pairing-card';
-          const table = document.createElement('span');
-          table.className = 'pairing-table';
-          table.textContent = `Ronda ${round.number} · ${match.table ? `Mesa ${match.table}` : 'BYE'}`;
-          card.append(table);
           const playerElement = (name, playerDivision, record) => {
             const container = document.createElement('span');
             container.className = 'pairing-player';
@@ -2019,16 +2020,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             return container;
           };
           card.append(playerElement(match.first, match.firstDivision, match.firstRecord));
-          const versus = document.createElement('span');
-          versus.className = 'pairing-versus';
-          versus.textContent = 'VS';
-          card.append(versus, playerElement(match.second, match.secondDivision, match.secondRecord));
+          const table = document.createElement('span');
+          table.className = 'pairing-table';
+          table.textContent = match.table ? `Mesa ${match.table}` : 'BYE';
+          card.append(table, playerElement(match.second === 'BYE' ? '' : match.second, match.secondDivision, match.secondRecord));
           list.append(card);
         }
       });
-      document.getElementById('pairingsStatus').textContent = count
-        ? `${count} pareo${count === 1 ? '' : 's'}${division !== 'all' ? ` con jugadores ${division}` : ''} · Registro: victorias/derrotas/empates y puntos antes de la ronda`
-        : 'No hay pareos para esta selección.';
+      const numbers = [...shownRounds].sort((a, b) => a - b);
+      document.getElementById('pairingsCurrentRound').textContent = numbers.length
+        ? `${numbers.length === 1 ? 'Ronda' : 'Rondas'} ${numbers.join(' y ')}` : '';
+      document.getElementById('pairingsStatus').textContent = count ? '' : 'No hay pareos para esta selección.';
     }
     function setPairings(value) {
       pairingsData = value;
