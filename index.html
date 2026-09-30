@@ -2546,12 +2546,16 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       document.addEventListener('keydown', unlockViewSound, { once: true });
       unlockViewSound();
     }
-    if (!isReadOnly && !hasRoomLink) document.querySelector('.landing-control-entry').append(controlSync);
+    if (!isReadOnly && !hasRoomLink) {
+      document.querySelector('.landing-control-entry').append(controlSync);
+      controlSync.hidden = false;
+    }
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
     if (!isReadOnly && !hasRoomLink) createButton.after(logoutButton);
     const googleButton = document.getElementById('googleLogin');
+    if (!isReadOnly && !hasRoomLink) googleButton.hidden = false;
     const createButton = document.getElementById('createRoom');
     const staffPairingsLink = document.getElementById('staffPairingsLink');
     const copyLinkFeedback = document.getElementById('copyLinkFeedback');
