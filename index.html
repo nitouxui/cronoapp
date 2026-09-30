@@ -55,6 +55,9 @@
     #roomWelcome p { font-size: 18px; line-height: 1.5; }
     #judgeTimer { font-size: clamp(72px, 19vw, 220px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
     #judgeStatus { position: fixed; bottom: 16px; left: 16px; right: 16px; font-size: 14px; opacity: .8; }
+    #enableSound { display: none; position: fixed; z-index: 25; left: 50%; bottom: 20px; transform: translateX(-50%); align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border: 1px solid #ffffff55; border-radius: 999px; background: #202734; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0006; }
+    #enableSound:not([hidden]) { display: inline-flex; }
+    #enableSound[aria-pressed="true"] { border-color: #71d7a4; color: #b8f5d2; }
     #controlSync { position: fixed; bottom: 12px; right: 12px; z-index: 12; background: #fff; color: #111; padding: 10px; border-radius: 8px; width: min(340px, calc(100vw - 24px)); box-shadow: 0 1px 8px #0003; font-size: 13px; }
     #controlSync.collapsed { width: 44px; padding: 0; border-radius: 50%; background: transparent; box-shadow: none; }
     #controlSync.collapsed .sync-body { display: none; }
@@ -196,6 +199,7 @@
     </div>
   </section>
   <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><div id="judgeStatus" role="status"></div></div>
+  <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
     <p id="pairingsCurrentRound"></p>
@@ -1668,9 +1672,12 @@ module.exports = QRCode;
     let soundContext;
     function prepareSound() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
+      if (!AudioContextClass) return Promise.resolve(false);
       soundContext ||= new AudioContextClass();
-      if (soundContext.state === 'suspended') soundContext.resume().catch(() => {});
+      const ready = soundContext.state === 'suspended'
+        ? soundContext.resume().catch(() => false)
+        : Promise.resolve();
+      return Promise.resolve(ready).then(() => soundContext.state === 'running');
     }
     function playEndSound() {
       if (!soundContext || soundContext.state !== 'running') return;
@@ -2101,6 +2108,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     else if (!hasRoomLink) document.body.classList.add('no-room');
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
+    const enableSoundButton = document.getElementById('enableSound');
+    if (isJudge || isProjection) enableSoundButton.hidden = false;
+    enableSoundButton.addEventListener('click', async () => {
+      const ready = await prepareSound();
+      if (ready) {
+        enableSoundButton.textContent = '🔔 Sonido activado';
+        enableSoundButton.setAttribute('aria-pressed', 'true');
+      } else {
+        enableSoundButton.textContent = 'Sonido no disponible';
+      }
+    });
     if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(controlSync);
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
@@ -2153,9 +2171,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         display.style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
         document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
         window.renderTimerState(seconds, currentState.running);
-        if (!isReadOnly && lastSecond !== null && lastSecond > 0 && seconds <= 0)
-          window.playEndSound();
       }
+      if (!isPairings && lastSecond !== null && lastSecond > 0 && seconds <= 0)
+        window.playEndSound();
       document.getElementById('judgeTimer').style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
       lastSecond = seconds;
     }
