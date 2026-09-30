@@ -2656,7 +2656,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       logoutButton.hidden = !currentUser;
       createButton.hidden = !verified || canControl;
       if (!isReadOnly) {
-        syncStatus.textContent = !currentUser ? 'Accede con Google para abrir tu sala.'
+        syncStatus.textContent = !currentUser ? ''
           : !verified ? 'El correo de esta cuenta no está verificado.'
           : !roomId ? 'Buscando tu sala…'
           : !roomOwner ? 'Sala no encontrada. Abre tu sala.'
