@@ -98,12 +98,14 @@
     body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 8px; }
     body:not(.no-room) #controlSync { position: static; z-index: auto; width: auto; max-width: none; padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
     body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 14px; background: transparent; box-shadow: none; }
-    body:not(.no-room) #syncToggle, .edit-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0004; }
+    body:not(.no-room) #syncToggle,
+    body:not(.no-room) .top-actions .edit-button,
+    body:not(.no-room) #syncLogout { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; margin: 0; padding: 0 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0004; }
     body:not(.no-room) #syncToggle { position: static; width: auto; min-width: 82px; margin: 0; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
     body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 16px; }
     body:not(.no-room) .top-actions .edit-button { position: static; top: auto; right: auto; min-width: 0; }
-    body:not(.no-room) #syncLogout { display: flex; align-items: center; justify-content: center; height: 46px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    body:not(.no-room) #syncLogout { text-decoration: none; }
     body:not(.no-room) #syncLogout:hover { border-color: var(--accent); color: var(--accent-soft); }
     #syncLogout[hidden] { display: none !important; }
     body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; z-index: 32; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
@@ -164,9 +166,10 @@
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
       .edit-button { top: 8px; right: 12px; }
       body:not(.no-room) .top-actions { top: 8px; right: 10px; gap: 5px; }
-      body:not(.no-room) #syncToggle, body:not(.no-room) #controlSync.collapsed #syncToggle { height: 42px; min-width: 0; padding: 0 10px; gap: 5px; font-size: 12px; }
-      body:not(.no-room) .top-actions .edit-button { height: 42px; padding: 0 12px; font-size: 12px; }
-      body:not(.no-room) #syncLogout { height: 42px; padding: 0 10px; font-size: 11px; }
+      body:not(.no-room) #syncToggle,
+      body:not(.no-room) #controlSync.collapsed #syncToggle,
+      body:not(.no-room) .top-actions .edit-button,
+      body:not(.no-room) #syncLogout { height: 42px; min-width: 0; padding: 0 9px; gap: 5px; font-size: 12px; font-weight: 700; }
       body:not(.no-room) #syncBody { right: 0; }
       .control-bar { min-height: 88px; }
       .control-bar button { min-width: 110px; padding: 12px; }
@@ -319,6 +322,9 @@
     body:not(.no-room) #modal .modal-content .logo-control-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 14px; }
     body:not(.no-room) #modal .modal-content .logo-control-row .editor-button[hidden] { display: none !important; }
     body:not(.no-room) #modal .modal-content #removeLogoButton { border-color: var(--danger); color: var(--danger); }
+    body:not(.no-room) #modal .modal-content #removeUploadedImageButton { display: flex; margin-top: 8px; border-color: var(--danger); color: var(--danger); }
+    body:not(.no-room) #modal .modal-content #removeUploadedImageButton[hidden] { display: none !important; }
+    body:not(.no-room) #modal .modal-content #removeUploadedImageButton:hover { background: var(--surface); color: var(--danger); }
     body:not(.no-room) #modal .modal-content #removeLogoButton:hover { background: var(--surface); color: var(--danger); }
     body:not(.no-room) #modal .modal-content .editor-select { display: block; width: 100%; min-height: 44px; margin: 7px 0 16px; padding: 0 38px 0 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
     body:not(.no-room) #modal .modal-content fieldset { margin: 14px 0; padding: 12px 14px; border: 1px solid var(--edge); border-radius: 12px; }
@@ -341,10 +347,7 @@
       body:not(.no-room) #modal .modal-content .palette-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
     body[data-timer-font="system"] { --timer-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body[data-timer-font="geometric"] { --timer-font: "Trebuchet MS", Arial, sans-serif; }
     body[data-timer-font="classic"] { --timer-font: Georgia, "Times New Roman", serif; }
-    body[data-timer-font="mono"] { --timer-font: "Courier New", Courier, monospace; }
-    body[data-timer-font="condensed"] { --timer-font: "Arial Narrow", "Liberation Sans Narrow", "Roboto Condensed", Arial, sans-serif; }
     body #timer, body #judgeTimer { font-family: var(--timer-font, sans-serif); }
     body:not(.no-room) #modal .timer-font-setting { margin: 0 0 18px; }
     body:not(.no-room) #modal .timer-font-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
@@ -518,10 +521,7 @@
         <div class="timer-font-row">
           <select id="timerFontSelect" class="editor-select" onchange="applyTimerFont(this.value)">
             <option value="system">Moderna</option>
-            <option value="geometric">Geométrica</option>
             <option value="classic">Clásica</option>
-            <option value="mono">Monoespaciada</option>
-            <option value="condensed">Compacta</option>
           </select>
           <span id="timerFontPreview" aria-hidden="true">00:00</span>
         </div>
@@ -546,6 +546,7 @@
         <div id="imageControls" hidden>
           <label for="tournamentImageInput">Imagen para el panel izquierdo (máximo 2 MB):</label>
           <input type="file" accept="image/*" id="tournamentImageInput">
+          <button id="removeUploadedImageButton" class="editor-button editor-button-secondary" type="button" onclick="removeUploadedImage()" hidden>Quitar imagen</button>
         </div>
         <div id="tdfControls" hidden>
           <label for="tdfInput">Archivo .tdf exportado del torneo (máximo 2 MB)</label>
@@ -1876,10 +1877,7 @@ module.exports = QRCode;
     let savedTimerFont = 'system';
     const timerFonts = Object.freeze({
       system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      geometric: '"Trebuchet MS", Arial, sans-serif',
-      classic: 'Georgia, "Times New Roman", serif',
-      mono: '"Courier New", Courier, monospace',
-      condensed: '"Arial Narrow", "Liberation Sans Narrow", "Roboto Condensed", Arial, sans-serif'
+      classic: 'Georgia, "Times New Roman", serif'
     });
     function applyTimerFont(name) {
       const font = Object.prototype.hasOwnProperty.call(timerFonts, name) ? name : 'system';
@@ -1911,10 +1909,6 @@ module.exports = QRCode;
       }
       if (mode === 'tdf' && (!pairingsAvailable || !generatePairingsQR())) {
         document.getElementById('qrStatus').textContent = 'Publica un TDF antes de guardar esta opción.';
-        return;
-      }
-      if (mode === 'upload' && !uploadedImageSrc) {
-        document.getElementById('qrStatus').textContent = 'Selecciona una imagen antes de guardar.';
         return;
       }
       const minutes = Number(document.getElementById('timerInput').value);
@@ -1965,6 +1959,7 @@ module.exports = QRCode;
         }
         updateLogoRemoveButton();
         uploadedImageSrc = images.uploadedImageSrc || '';
+        updateUploadedImageRemoveButton();
         document.getElementById('qrUrl').value = images.qrUrl || '';
         const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
         document.getElementById('leftVisualModeSelect').value = mode;
@@ -2089,6 +2084,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       document.getElementById('removeLogoButton').hidden = !logo.getAttribute('src');
     }
 
+    function updateUploadedImageRemoveButton() {
+      document.getElementById('removeUploadedImageButton').hidden = !uploadedImageSrc;
+    }
+
+    function removeUploadedImage() {
+      uploadedImageSrc = '';
+      document.getElementById('tournamentImageInput').value = '';
+      renderLeftVisual();
+      updateUploadedImageRemoveButton();
+      document.getElementById('qrStatus').textContent = 'Imagen quitada. Presiona Guardar cambios para aplicar el cambio.';
+    }
+
     function removeLogo() {
       const logo = document.getElementById('logo');
       logo.removeAttribute('src');
@@ -2166,7 +2173,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       reader.onload = () => {
         uploadedImageSrc = reader.result;
         renderLeftVisual();
-        document.getElementById('qrStatus').textContent = 'Imagen cargada. Presiona Guardar para conservarla.';
+        updateUploadedImageRemoveButton();
+        document.getElementById('qrStatus').textContent = 'Imagen cargada. Presiona Guardar cambios para conservarla.';
       };
       reader.onerror = () => {
         document.getElementById('qrStatus').textContent = 'No se pudo leer la imagen.';
