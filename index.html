@@ -101,11 +101,18 @@
     body:not(.no-room) #syncToggle { width: auto; min-width: 82px; margin: 0; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
     body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 16px; }
-    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
-    body:not(.no-room) .room-actions { display: grid; gap: 8px; margin: 16px 0 0; }
-    body:not(.no-room) .room-actions-title { margin: 0 0 2px 2px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-    body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0; padding: 12px 14px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
-    body:not(.no-room) .share-view-button svg { width: 18px; height: 18px; flex: 0 0 18px; opacity: .78; }
+    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) .room-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 16px 0 0; }
+    body:not(.no-room) .room-actions-title { grid-column: 1 / -1; margin: 0 0 2px 2px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; gap: 5px; width: 100%; min-width: 0; margin: 0; padding: 10px 9px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+    body:not(.no-room) .share-view-button span { min-width: 0; }
+    body:not(.no-room) .share-view-button svg { width: 16px; height: 16px; flex: 0 0 16px; opacity: .78; }
+    @media (max-width: 420px) {
+      body:not(.no-room) #syncBody { width: min(400px, calc(100vw - 16px)); }
+      body:not(.no-room) .room-actions { gap: 5px; }
+      body:not(.no-room) .share-view-button { gap: 3px; padding: 9px 7px; font-size: 11px; }
+      body:not(.no-room) .share-view-button svg { width: 14px; height: 14px; flex-basis: 14px; }
+    }
     body:not(.no-room) .share-view-button:hover { border-color: var(--accent); background: var(--accent-dark); transform: translateY(-1px); }
     body:not(.no-room) .copy-link-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); font-size: 13px; font-weight: 700; }
     body:not(.no-room) .copy-link-feedback[hidden] { display: none; }
@@ -245,7 +252,7 @@
     <div class="room-actions" aria-label="Compartir vistas">
       <strong class="room-actions-title">Compartir vistas</strong>
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-      <button id="copyScreenLink" class="share-view-button" type="button"><span>Pantalla</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
+      <button id="copyScreenLink" class="share-view-button" type="button"><span>Enlace TV</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
       <button id="copyPairingsLink" class="share-view-button" type="button"><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
     </div>
     <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
@@ -2224,7 +2231,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
     [
       [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
-      [document.getElementById('copyScreenLink'), 'pantalla', 'Pantalla'],
+      [document.getElementById('copyScreenLink'), 'pantalla', 'Enlace TV'],
       [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
     ].forEach(([button, view, label]) => {
       button.hidden = !hasRoomLink;
