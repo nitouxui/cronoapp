@@ -2109,16 +2109,24 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
     const enableSoundButton = document.getElementById('enableSound');
-    if (isJudge || isProjection) enableSoundButton.hidden = false;
-    enableSoundButton.addEventListener('click', async () => {
+    async function unlockViewSound() {
       const ready = await prepareSound();
       if (ready) {
-        enableSoundButton.textContent = '🔔 Sonido activado';
+        enableSoundButton.hidden = true;
         enableSoundButton.setAttribute('aria-pressed', 'true');
       } else {
-        enableSoundButton.textContent = 'Sonido no disponible';
+        enableSoundButton.hidden = false;
+        enableSoundButton.textContent = '🔔 Toca para activar sonido';
+        enableSoundButton.setAttribute('aria-pressed', 'false');
       }
-    });
+    }
+    if (isJudge || isProjection) {
+      enableSoundButton.hidden = false;
+      enableSoundButton.addEventListener('click', unlockViewSound);
+      document.addEventListener('pointerdown', unlockViewSound, { once: true });
+      document.addEventListener('keydown', unlockViewSound, { once: true });
+      unlockViewSound();
+    }
     if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(controlSync);
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
