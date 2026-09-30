@@ -2544,7 +2544,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       document.addEventListener('keydown', unlockViewSound, { once: true });
       unlockViewSound();
     }
-    if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(controlSync);
+    if (!isReadOnly && !hasRoomLink) document.querySelector('.landing-control-entry').append(controlSync);
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
