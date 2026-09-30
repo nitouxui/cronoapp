@@ -95,13 +95,26 @@
     .control-bar #resetButton { border-color: #a94a0f; color: #ff994a; background: #301e18; }
     .edit-button { top: 14px; right: 14px; min-width: 0; z-index: 5; }
     /* Control de sala alineado con Editar */
-    body:not(.no-room) #controlSync { position: absolute; top: 14px; right: 110px; bottom: auto; z-index: 30; width: auto; max-width: calc(100vw - 24px); padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
+    body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 8px; }
+    body:not(.no-room) #controlSync { position: static; z-index: auto; width: auto; max-width: none; padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
     body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 14px; background: transparent; box-shadow: none; }
     body:not(.no-room) #syncToggle, .edit-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0004; }
-    body:not(.no-room) #syncToggle { width: auto; min-width: 82px; margin: 0; }
+    body:not(.no-room) #syncToggle { position: static; width: auto; min-width: 82px; margin: 0; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
     body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 16px; }
-    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) .top-actions .edit-button { position: static; top: auto; right: auto; min-width: 0; }
+    body:not(.no-room) #syncLogout { display: flex; align-items: center; justify-content: center; height: 46px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    body:not(.no-room) #syncLogout:hover { border-color: var(--accent); color: var(--accent-soft); }
+    #syncLogout[hidden] { display: none !important; }
+    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; z-index: 32; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) .room-duration-control { margin: 14px 0 4px; padding: 14px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); }
+    body:not(.no-room) .room-duration-control label { margin: 0 0 8px; color: var(--text); font-weight: 700; }
+    body:not(.no-room) .duration-control-row { display: flex; align-items: center; gap: 8px; }
+    body:not(.no-room) #timerInput { flex: 1; min-width: 0; width: auto; margin: 0; padding: 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; }
+    body:not(.no-room) #saveDurationButton { min-height: 42px; margin: 0; padding: 0 12px; border: 0; border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    body:not(.no-room) #saveDurationButton:disabled { opacity: .55; cursor: not-allowed; }
+    body:not(.no-room) #roomDurationStatus { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    body:not(.no-room) #roomDurationControl[hidden] { display: none !important; }
     body:not(.no-room) .room-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 16px 0 0; }
     body:not(.no-room) .room-actions-title { grid-column: 1 / -1; margin: 0 0 2px 2px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
     body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; gap: 5px; width: 100%; min-width: 0; margin: 0; padding: 10px 9px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
@@ -137,8 +150,11 @@
       #rightPanel { flex: 1; min-height: 520px; padding: 58px 20px 108px; }
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
       .edit-button { top: 8px; right: 12px; }
-      body:not(.no-room) #controlSync { top: 8px; right: 102px; }
-      body:not(.no-room) #syncBody { right: -90px; }
+      body:not(.no-room) .top-actions { top: 8px; right: 10px; gap: 5px; }
+      body:not(.no-room) #syncToggle, body:not(.no-room) #controlSync.collapsed #syncToggle { height: 42px; min-width: 0; padding: 0 10px; gap: 5px; font-size: 12px; }
+      body:not(.no-room) .top-actions .edit-button { height: 42px; padding: 0 12px; font-size: 12px; }
+      body:not(.no-room) #syncLogout { height: 42px; padding: 0 10px; font-size: 11px; }
+      body:not(.no-room) #syncBody { right: 0; }
       .control-bar { min-height: 88px; }
       .control-bar button { min-width: 110px; padding: 12px; }
     }
@@ -239,16 +255,23 @@
       <img id="leftImage" src="" alt="Contenido visual del torneo" style="display:none;">
     </div>
     <div id="rightPanel" class="panel">
-      <button class="edit-button customizable-button" onclick="openModal()">Editar</button>
+      <div class="top-actions">
   <div id="controlSync" hidden>
-    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Sala</span></button>
+    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Control Sala</span></button>
     <div id="syncBody" class="sync-body">
     <strong id="controlTitle">Control de sala</strong>
     <div id="roomName"></div>
     <div id="syncStatus" role="status">Configurando…</div>
+    <div id="roomDurationControl" class="room-duration-control" hidden>
+      <label for="timerInput">Duración del temporizador</label>
+      <div class="duration-control-row">
+        <input type="number" id="timerInput" min="1" max="1440" step="1" value="2" aria-describedby="roomDurationStatus">
+        <button id="saveDurationButton" type="button">Guardar tiempo</button>
+      </div>
+      <p id="roomDurationStatus" role="status" aria-live="polite"></p>
+    </div>
     <button id="googleLogin" type="button" hidden>Continuar con Google</button>
     <button id="createRoom" type="button" hidden>Abrir mi sala</button>
-    <button id="syncLogout" type="button" hidden>Cerrar sesión</button>
     <div class="room-actions" aria-label="Compartir vistas">
       <strong class="room-actions-title">Compartir vistas</strong>
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
@@ -259,6 +282,9 @@
 
     </div>
   </div>
+      <button class="edit-button customizable-button" onclick="openModal()">Editar</button>
+      <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
+      </div>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
       <div class="timer-stage">
         <img id="logo" src="" alt="Logo" style="display:none;">
@@ -303,8 +329,6 @@
         <p id="qrStatus" role="status" aria-live="polite"></p>
       </div>
 
-      <label for="timerInput">Duración (minutos):</label>
-      <input type="number" id="timerInput" min="1" max="1440" step="1" value="2">
       <fieldset class="palette-grid">
         <legend>Paleta de colores</legend>
         <label><input type="radio" name="palette" value="ember" checked onchange="applyPalette(this.value)"><span class="palette-swatches" style="--swatch-dark:#17181c;--swatch-accent:#ed771e;--swatch-soft:#ffad64"></span>Naranja nocturno</label>
@@ -2186,6 +2210,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
+    if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(logoutButton);
     const googleButton = document.getElementById('googleLogin');
     const createButton = document.getElementById('createRoom');
     const staffPairingsLink = document.getElementById('staffPairingsLink');
@@ -2245,12 +2270,16 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let currentUser = null;
     let serverOffset = 0;
     let canControl = false;
+    let currentRoomSettings = {};
     let lastSecond = null;
     let stateRef, roomRef, settingsRef, auth, dbModule, authModule;
     const startButton = document.getElementById('toggleButton');
     const resetButton = document.getElementById('resetButton');
     const durationInput = document.getElementById('timerInput');
-    startButton.disabled = resetButton.disabled = durationInput.disabled = true;
+    const saveDurationButton = document.getElementById('saveDurationButton');
+    const roomDurationControl = document.getElementById('roomDurationControl');
+    const roomDurationStatus = document.getElementById('roomDurationStatus');
+    startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = true;
 
     function formatTime(seconds) {
       const abs = Math.abs(seconds);
@@ -2284,7 +2313,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function updateAccess() {
       const verified = !!currentUser?.emailVerified;
       canControl = verified && currentUser.uid === roomOwner;
-      startButton.disabled = resetButton.disabled = durationInput.disabled = !canControl;
+      startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = !canControl;
+      roomDurationControl.hidden = !canControl;
       googleButton.hidden = !!currentUser;
       logoutButton.hidden = !currentUser;
       createButton.hidden = !verified || canControl;
@@ -2296,6 +2326,30 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           : canControl ? 'Control conectado' : 'Esta sala pertenece a otro organizador. Solo lectura.';
       }
     }
+    saveDurationButton.addEventListener('click', async () => {
+      const minutes = Number(durationInput.value);
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+        roomDurationStatus.textContent = 'Ingresa una duración entre 1 y 1440 minutos.';
+        return;
+      }
+      if (!canControl || typeof window.saveRoomSettings !== 'function') {
+        roomDurationStatus.textContent = 'Inicia sesión como propietario de esta sala.';
+        return;
+      }
+      saveDurationButton.disabled = true;
+      roomDurationStatus.textContent = 'Guardando duración…';
+      const settings = { ...currentRoomSettings, minutes };
+      const saved = await window.saveRoomSettings(settings);
+      if (saved) {
+        currentRoomSettings = settings;
+        if (typeof window.updateTimerTime === 'function') window.updateTimerTime();
+        roomDurationStatus.textContent = `Duración guardada: ${minutes} min. El temporizador se reinició.`;
+      } else {
+        roomDurationStatus.textContent = 'No se pudo guardar la duración.';
+      }
+      saveDurationButton.disabled = !canControl;
+    });
+
     function showError(error) {
       const code = error?.code || 'error/desconocido';
       syncStatus.textContent = code.toLowerCase().includes('permission')
@@ -2415,6 +2469,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             }
             try {
               await dbModule.set(settingsRef, JSON.stringify(settings));
+              currentRoomSettings = settings;
               syncStatus.textContent = 'Ajustes guardados en esta sala.';
               return true;
             } catch (error) {
@@ -2424,15 +2479,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             }
           };
           dbModule.onValue(settingsRef, snap => {
-            if (snap.exists()) {
-              try {
-                const settings = JSON.parse(snap.val());
-                if (isJudge || isPairings) window.applyPalette(settings.palette);
-                else window.loadSettings(settings);
-              }
-              catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
+            if (!snap.exists()) {
+              currentRoomSettings = {};
+              return;
             }
-                }, () => { syncStatus.textContent = 'No se pudieron cargar los ajustes de la sala.'; });
+            try {
+              const settings = JSON.parse(snap.val());
+              currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
+              if (isJudge || isPairings) window.applyPalette(currentRoomSettings.palette);
+              else window.loadSettings(currentRoomSettings);
+            } catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
+          }, () => { syncStatus.textContent = 'No se pudieron cargar los ajustes de la sala.'; });
         }
         dbModule.onValue(dbModule.ref(db, '.info/serverTimeOffset'), snap => {
           serverOffset = snap.val() || 0;
