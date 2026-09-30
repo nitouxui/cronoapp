@@ -118,7 +118,6 @@
     body:not(.no-room) #roomDurationStatus { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
     body:not(.no-room) #roomDurationControl[hidden] { display: none !important; }
     body:not(.no-room) .room-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 16px 0 0; }
-    body:not(.no-room) .room-actions-title { grid-column: 1 / -1; margin: 0 0 2px 2px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
     body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; gap: 5px; width: 100%; min-width: 0; margin: 0; padding: 10px 9px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
     body:not(.no-room) .share-view-button span { min-width: 0; }
     body:not(.no-room) .share-view-button svg { width: 16px; height: 16px; flex: 0 0 16px; opacity: .78; }
@@ -242,7 +241,16 @@
     .welcome-features { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 38px; }
     .welcome-features span { border: 1px solid var(--edge); background: var(--surface-raised); border-radius: 99px; padding: 9px 14px; color: var(--text); font-size: 14px; }
     body.no-room .landing-login { width: 100%; display: grid; gap: 16px; }
-    .short-code-entry { padding: clamp(20px, 2.6vw, 30px); border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 14px 42px #0005; }
+    .short-code-entry, .landing-control-entry { min-width: 0; padding: clamp(20px, 2.6vw, 30px); border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 14px 42px #0005; }
+    .landing-control-entry { display: grid; align-content: start; gap: 10px; }
+    .landing-control-entry h2 { margin: 9px 0 0; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
+    .landing-control-entry p { margin: 0 0 8px; color: var(--muted); font-size: 14px; line-height: 1.45; }
+    .landing-control-entry #controlSync { width: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; }
+    .landing-control-entry #controlTitle { display: none !important; }
+    .landing-control-entry #syncStatus { margin: 0 0 12px; color: var(--muted); line-height: 1.45; }
+    .landing-control-entry #googleLogin, .landing-control-entry #createRoom { display: block; width: 100%; min-height: 48px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+    .landing-control-entry #googleLogin:hover, .landing-control-entry #createRoom:hover { filter: brightness(1.1); }
+    .landing-control-entry #syncLogout, .landing-control-entry #roomName { display: none !important; }
     .short-code-kicker { color: var(--accent-soft); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
     .short-code-entry h2 { margin: 9px 0 6px; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
     .short-code-entry > p { margin: 0 0 16px; color: var(--muted); font-size: 14px; line-height: 1.45; }
@@ -253,11 +261,10 @@
     .short-code-form button:hover { filter: brightness(1.1); }
     .short-code-status { min-height: 18px; margin: 9px 0 0 !important; color: var(--danger) !important; font-size: 13px !important; }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-    body.no-room #controlSync { position: static; transform: none; width: 100%; max-width: none; padding: clamp(22px, 3vw, 38px); border-radius: 18px; box-shadow: 0 20px 65px #0007; font-size: 15px; }
-    body.no-room #syncToggle, body.no-room #roomName { display: none !important; }
-    body.no-room #controlTitle { display: block; font-size: 26px; margin-bottom: 12px; }
-    body.no-room #syncStatus { color: #4c535c; line-height: 1.45; margin-bottom: 22px; }
-    body.no-room #googleLogin { font-size: 17px; padding: 15px; }
+    body.no-room #controlSync { position: static; transform: none; width: 100%; max-width: none; padding: 0; border-radius: 0; box-shadow: none; font-size: 14px; }
+    body.no-room #syncToggle, body.no-room #roomName, body.no-room #controlTitle { display: none !important; }
+    body.no-room #syncStatus { color: var(--muted); line-height: 1.45; margin: 0 0 12px; }
+    body.no-room #googleLogin { min-height: 48px; font-size: 15px; }
     @media (max-width: 830px) {
       body.no-room #roomWelcome .welcome-shell { grid-template-columns: 1fr; }
       body.no-room #roomWelcome { align-items: flex-start; padding: 38px 20px; }
@@ -390,13 +397,18 @@
         <span class="welcome-eyebrow">TEMPORIZADOR PARA TORNEOS</span>
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
-        <div class="welcome-features"><span>Una sala por cuenta</span><span>QR o imagen</span><span>Vista del staff</span></div>
+        <div class="welcome-features"><span>Sincronizado en vivo</span><span>Código TV</span><span>Pareos del torneo</span></div>
       </div>
       <div id="landingLogin" class="landing-login">
+        <section class="landing-control-entry" aria-labelledby="landingControlTitle">
+          <span class="short-code-kicker">CONTROL DE SALA</span>
+          <h2 id="landingControlTitle">Administra tu temporizador</h2>
+          <p id="landingControlDescription">Inicia sesión con Google para abrir y controlar tu sala.</p>
+        </section>
         <section class="short-code-entry" aria-labelledby="shortCodeTitle">
-          <span class="short-code-kicker">¿Vienes a ver el torneo?</span>
-          <h2 id="shortCodeTitle">Entra con el código de sala</h2>
-          <p>Escribe el código de 6 caracteres y abre la pantalla TV al instante.</p>
+          <span class="short-code-kicker">PANTALLA TV</span>
+          <h2 id="shortCodeTitle">Ver temporizador</h2>
+          <p>Para ver el temporizador en una TV o pantalla, ingresa el código de sala.</p>
           <form id="shortCodeForm" class="short-code-form">
             <label class="visually-hidden" for="shortCodeInput">Código de sala</label>
             <input id="shortCodeInput" name="codigo" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-HJ-NP-Z2-9]{6}" placeholder="Ej. 7KQ2BD" aria-describedby="shortCodeStatus" required>
@@ -441,10 +453,9 @@
       </div>
       <p id="roomDurationStatus" role="status" aria-live="polite"></p>
     </div>
-    <button id="googleLogin" type="button" hidden>Continuar con Google</button>
-    <button id="createRoom" type="button" hidden>Abrir mi sala</button>
-    <div class="room-actions" aria-label="Compartir vistas">
-      <strong class="room-actions-title">Compartir vistas</strong>
+    <button id="googleLogin" type="button" hidden>Iniciar sesión con Google</button>
+    <button id="createRoom" type="button" hidden>Ir al control de mi sala</button>
+    <div class="room-actions" aria-label="Enlaces de sala">
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
       <button id="copyPairingsLink" class="share-view-button" type="button"><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
     </div>
@@ -2870,7 +2881,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             updateAccess();
-            if (user?.emailVerified && !hasRoomLink) openOwnRoom(user);
+            if (user?.emailVerified && !hasRoomLink) {
+              createButton.hidden = false;
+              createButton.disabled = false;
+              createButton.textContent = 'Ir al control de mi sala';
+              const description = document.getElementById('landingControlDescription');
+              if (description) description.textContent = 'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.';
+            }
             if (canControl) ensureShortCode();
           });
           const googleProvider = new authModule.GoogleAuthProvider();
@@ -2890,7 +2907,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             }
           });
           createButton.addEventListener('click', () => {
-            if (currentUser) openOwnRoom(currentUser);
+            if (!currentUser) {
+              syncStatus.textContent = 'Inicia sesión con Google para acceder a tu sala.';
+              googleButton.hidden = false;
+              googleButton.focus();
+              return;
+            }
+            createButton.disabled = true;
+            createButton.textContent = 'Abriendo tu sala…';
+            openOwnRoom(currentUser);
           });
           window.toggleTimer = () => {
             if (!canControl) { syncStatus.textContent = 'Sin permiso para controlar esta sala.'; return; }
