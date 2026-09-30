@@ -7,6 +7,11 @@
   <style>
     * { box-sizing: border-box; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; }
+    #languageControl { position: fixed; z-index: 60; top: 14px; left: 14px; }
+    #languageSelect { min-width: 82px; height: 38px; padding: 0 30px 0 12px; border: 1px solid var(--edge, #66402b); border-radius: 10px; background: var(--surface-raised, #24252a); color: var(--text, #fff); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+    #languageSelect:focus-visible { outline: 3px solid var(--accent-soft, #ffad64); outline-offset: 2px; }
+    body.no-room #languageControl { top: 18px; left: auto; right: 22px; }
+    @media (max-width: 600px) { body.no-room #languageControl { top: 12px; right: 12px; } #languageSelect { height: 36px; } }
     .container { display: flex; height: 100vh; }
     .panel { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .edit-button { position: absolute; top: 10px; right: 10px; z-index: 10; }
@@ -393,6 +398,14 @@
   </style>
 </head>
 <body data-palette="ember" data-timer-font="system">
+  <div id="languageControl">
+    <label class="visually-hidden" for="languageSelect">Idioma / Language / Idioma</label>
+    <select id="languageSelect" aria-label="Idioma / Language / Idioma">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+      <option value="pt">Português</option>
+    </select>
+  </div>
   <section id="roomWelcome">
     <div class="welcome-shell">
       <div class="welcome-copy">
@@ -2946,6 +2959,301 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         else syncStatus.textContent = error.message || 'No se pudo conectar al servicio.';
       }
     }
+  </script>
+  <script>
+    (() => {
+      const selector = document.getElementById('languageSelect');
+      const translations = {
+        en: {
+          'Temporizador': 'Timer', 'TEMPORIZADOR PARA TORNEOS': 'TOURNAMENT TIMER',
+          'La ronda avanza.': 'The round moves on.', 'Todos ven el mismo tiempo.': 'Everyone sees the same time.',
+          'Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the clock from your room, display it on screen, and share a synchronized view with your staff.',
+          'Sincronizado en vivo': 'Live sync', 'Código TV': 'TV code', 'Pareos del torneo': 'Tournament pairings',
+          'CONTROL DE SALA': 'ROOM CONTROL', 'Administra tu temporizador': 'Manage your timer',
+          'Inicia sesión con Google para abrir y controlar tu sala.': 'Sign in with Google to open and manage your room.',
+          'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.': 'You are signed in. Open your room whenever you are ready.',
+          'PANTALLA TV': 'TV DISPLAY', 'Ver temporizador': 'View timer',
+          'Para ver el temporizador en una TV o pantalla, ingresa el código de sala.': 'To view the timer on a TV or screen, enter the room code.',
+          'Código de sala': 'Room code', 'Ver TV': 'View TV', 'Ver pareos': 'View pairings',
+          'Configurando…': 'Setting up…', 'Conectando…': 'Connecting…', 'Conectando': 'Connecting',
+          'Ronda': 'Round', 'Categoría del jugador': 'Player category', 'Todas': 'All',
+          'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
+          'Junior / Senior (JR/SR)': 'Junior / Senior (JR/SR)', '⚙': '⚙', 'Control Sala': 'Room Control',
+          'Generando…': 'Generating…', 'Duración del temporizador': 'Timer duration', 'Guardar tiempo': 'Save time',
+          'Iniciar sesión con Google': 'Sign in with Google', 'Ir al control de mi sala': 'Go to my room control',
+          'Staff': 'Staff', 'Pareos': 'Pairings', 'Editar': 'Edit', 'Cerrar sesión': 'Sign out',
+          'LISTO PARA INICIAR': 'READY TO START', 'Iniciar': 'Start', 'Pausar': 'Pause', 'Reiniciar': 'Reset',
+          'Editar temporizador': 'Edit timer', 'Ajusta el contenido y la apariencia de la pantalla.': 'Adjust the screen content and appearance.',
+          '×': '×', 'Paleta de colores': 'Color palette', 'Naranja nocturno': 'Night orange',
+          'Azul eléctrico': 'Electric blue', 'Verde bosque': 'Forest green', 'Violeta nocturno': 'Night violet',
+          'Atardecer coral': 'Coral sunset', 'Oro cálido': 'Warm gold', 'Turquesa profundo': 'Deep turquoise',
+          'Azul hielo': 'Ice blue', 'Rojo intenso': 'Bold red', 'Lima oscuro': 'Dark lime',
+          'Naranja claro': 'Light orange', 'Azul claro': 'Light blue', 'Verde claro': 'Light green',
+          'Violeta claro': 'Light violet', 'Coral claro': 'Light coral', 'Dorado claro': 'Light gold',
+          'Turquesa claro': 'Light turquoise', 'Frambuesa clara': 'Light raspberry', 'Hielo claro': 'Light ice',
+          'Grafito claro': 'Light graphite', 'Rojo claro': 'Light red', 'Orquídea clara': 'Light orchid',
+          'Lima clara': 'Light lime', 'Cobre claro': 'Light copper', 'Paletas disponibles': 'Available palettes',
+          'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Logo': 'Logo',
+          'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Contenido del panel izquierdo': 'Left panel content',
+          'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
+          'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
+          'Enlace de destino del QR:': 'QR destination link:', 'Generar QR': 'Create QR code',
+          'Imagen para el panel izquierdo (máximo 2 MB):': 'Image for the left panel (max. 2 MB):',
+          'Quitar imagen': 'Remove image', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Tournament .tdf file (max. 2 MB)',
+          'Publicar pareos y generar QR': 'Publish pairings and create QR code',
+          'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Uploading a new TDF replaces the published pairings.',
+          'Guardar cambios': 'Save changes', 'Ej. 7KQ2BD': 'e.g. 7KQ2BD', 'Cerrar control de sala': 'Close room control',
+          'Código para abrir la vista TV': 'Code to open the TV view', 'Enlaces de sala': 'Room links',
+          'Cerrar edición': 'Close editor', 'Contenido visual del torneo': 'Tournament display content',
+          'Publica un TDF antes de guardar esta opción.': 'Publish a TDF before saving this option.',
+          'Ingresa una duración de 1 a 1440 minutos.': 'Enter a duration from 1 to 1440 minutes.',
+          'Espera a que se conecte la sala para guardar.': 'Wait for the room to connect before saving.',
+          'TIEMPO TERMINADO': 'TIME IS UP', 'EN CURSO': 'IN PROGRESS',
+          'Imagen quitada. Presiona Guardar cambios para aplicar el cambio.': 'Image removed. Select Save changes to apply it.',
+          'Logo quitado. Presiona Guardar cambios para aplicar el cambio.': 'Logo removed. Select Save changes to apply it.',
+          'Elige una imagen válida de hasta 2 MB.': 'Choose a valid image up to 2 MB.',
+          'Logo cargado. Presiona Guardar cambios para conservarlo.': 'Logo uploaded. Select Save changes to keep it.',
+          'No se pudo leer el logo.': 'Could not read the logo.', 'Código QR del enlace del torneo': 'QR code for the tournament link',
+          'Código QR para ver los pareos': 'QR code to view pairings', 'Imagen del torneo': 'Tournament image',
+          'Imagen cargada. Presiona Guardar cambios para conservarla.': 'Image uploaded. Select Save changes to keep it.',
+          'No se pudo leer la imagen.': 'Could not read the image.', 'Ingresa un enlace para generar el código QR.': 'Enter a link to create the QR code.',
+          'Protocolo inválido': 'Invalid protocol', 'Ingresa un enlace válido que comience con https:// o http://.': 'Enter a valid link beginning with https:// or http://.',
+          'QR no generado': 'QR code not created', 'Código QR generado. Presiona Guardar para conservar el enlace.': 'QR code created. Select Save to keep the link.',
+          'No fue posible generar el QR. Prueba con un enlace más corto.': 'Could not create the QR code. Try a shorter link.',
+          'El TDF contiene declaraciones XML no admitidas.': 'The TDF contains unsupported XML declarations.',
+          'El archivo no tiene un formato TDF/XML válido.': 'The file is not in a valid TDF/XML format.',
+          'El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.': 'The TDF does not contain a valid tournament date to determine JR, SR, and MA.',
+          'La fecha del torneo en el TDF no es válida.': 'The tournament date in the TDF is invalid.',
+          'No se encontraron jugadores en el TDF.': 'No players were found in the TDF.',
+          'No se encontraron pareos con jugadores en el TDF.': 'No player pairings were found in the TDF.',
+          'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.': 'Upload the TDF again to show wins, losses, draws, and points.',
+          'No hay pareos para esta selección.': 'There are no pairings for this selection.',
+          'Aún no se han publicado pareos para esta sala.': 'No pairings have been published for this room yet.',
+          'Última de cada grupo': 'Last player in each group', 'Ingresa un código válido de 6 caracteres.': 'Enter a valid 6-character code.',
+          '🔔 Activar sonido': '🔔 Enable sound', '🔔 Toca para activar sonido': '🔔 Tap to enable sound',
+          'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Could not copy the link. Check your browser permissions.',
+          'El correo de esta cuenta no está verificado.': 'This account email is not verified.',
+          'Buscando tu sala…': 'Looking for your room…', 'Sala no encontrada. Abre tu sala.': 'Room not found. Open your room.',
+          'Esta sala pertenece a otro organizador. Solo lectura.': 'This room belongs to another organizer. Read-only access.',
+          'Ingresa una duración entre 1 y 1440 minutos.': 'Enter a duration between 1 and 1440 minutes.',
+          'Inicia sesión como propietario de esta sala.': 'Sign in as this room’s owner.', 'Guardando duración…': 'Saving duration…',
+          'No se pudo guardar la duración.': 'Could not save the duration.', 'Sin permiso para modificar esta sala.': 'You do not have permission to edit this room.',
+          'Esta sala requiere iniciar sesión con su cuenta propietaria.': 'Sign in with the owner account to manage this room.',
+          'Falta configurar el nuevo proyecto Firebase.': 'The new Firebase project has not been configured.',
+          'Falta configurar Firebase.': 'Firebase has not been configured.', 'FALTA CONFIGURAR FIREBASE': 'FIREBASE NOT CONFIGURED',
+          'Enlace de sala inválido.': 'Invalid room link.', 'ENLACE DE SALA INVÁLIDO': 'INVALID ROOM LINK',
+          'No se pudo reservar un código corto.': 'Could not reserve a short code.',
+          'Actualiza las reglas de Firebase para generar el enlace corto.': 'Update the Firebase rules to create the short link.',
+          'No se pudo generar el enlace corto. Prueba recargando la sala.': 'Could not create the short link. Try reloading the room.',
+          'No se pudieron leer los pareos.': 'Could not load pairings.', 'No se pudo acceder a los pareos.': 'Could not access pairings.',
+          'Ingresa como propietario de la sala para publicar.': 'Sign in as the room owner to publish.',
+          'Selecciona un archivo TDF.': 'Select a TDF file.', 'El archivo supera los 2 MB.': 'The file exceeds 2 MB.',
+          'Leyendo el TDF…': 'Reading the TDF…', 'Los pareos superan el límite permitido.': 'The pairings exceed the allowed limit.',
+          'No se pudo publicar el TDF. Revisa las reglas de Firebase.': 'Could not publish the TDF. Check the Firebase rules.',
+          'Inicia sesión como propietario de esta sala para guardar.': 'Sign in as the room owner to save.',
+          'Ajustes guardados en esta sala.': 'Settings saved for this room.',
+          'No se pudieron guardar los ajustes. Revisa las reglas de Firebase.': 'Could not save the settings. Check the Firebase rules.',
+          'No se pudieron leer los ajustes de la sala.': 'Could not load the room settings.',
+          'No se pudieron cargar los ajustes de la sala.': 'Could not load the room settings.',
+          'Sala no encontrada.': 'Room not found.', 'No se pudo acceder a la sala.': 'Could not access the room.',
+          'Esperando al temporizador…': 'Waiting for the timer…', 'No se pudo acceder al conteo.': 'Could not access the timer.',
+          'No se pudo cerrar sesión.': 'Could not sign out.', 'Inicia sesión con Google para acceder a tu sala.': 'Sign in with Google to access your room.',
+          'Abriendo tu sala…': 'Opening your room…', 'Sin permiso para controlar esta sala.': 'You do not have permission to control this room.',
+          'No se pudo conectar al servicio.': 'Could not connect to the service.'
+          ,'Frambuesa': 'Raspberry', 'Grafito': 'Graphite', 'Orquídea': 'Orchid', 'Cobre': 'Copper',
+          'Abrir control de sala': 'Open room control', 'Temporizador para staff': 'Staff timer',
+          'https://ejemplo.com/torneo': 'https://example.com/tournament'
+        },
+        pt: {
+          'Temporizador': 'Temporizador', 'TEMPORIZADOR PARA TORNEOS': 'TEMPORIZADOR PARA TORNEIOS',
+          'La ronda avanza.': 'A rodada avança.', 'Todos ven el mismo tiempo.': 'Todos veem o mesmo tempo.',
+          'Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o relógio da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
+          'Sincronizado en vivo': 'Sincronizado ao vivo', 'Código TV': 'Código da TV', 'Pareos del torneo': 'Emparceiramentos do torneio',
+          'CONTROL DE SALA': 'CONTROLE DA SALA', 'Administra tu temporizador': 'Gerencie seu temporizador',
+          'Inicia sesión con Google para abrir y controlar tu sala.': 'Faça login com o Google para abrir e controlar sua sala.',
+          'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.': 'Você já está conectado. Acesse sua sala quando quiser.',
+          'PANTALLA TV': 'TELA DA TV', 'Ver temporizador': 'Ver temporizador',
+          'Para ver el temporizador en una TV o pantalla, ingresa el código de sala.': 'Para ver o temporizador em uma TV ou tela, digite o código da sala.',
+          'Código de sala': 'Código da sala', 'Ver TV': 'Ver na TV', 'Ver pareos': 'Ver emparceiramentos',
+          'Configurando…': 'Configurando…', 'Conectando…': 'Conectando…', 'Conectando': 'Conectando',
+          'Ronda': 'Rodada', 'Categoría del jugador': 'Categoria do jogador', 'Todas': 'Todas',
+          'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
+          'Junior / Senior (JR/SR)': 'Junior / Senior (JR/SR)', '⚙': '⚙', 'Control Sala': 'Controle da sala',
+          'Generando…': 'Gerando…', 'Duración del temporizador': 'Duração do temporizador', 'Guardar tiempo': 'Salvar tempo',
+          'Iniciar sesión con Google': 'Entrar com o Google', 'Ir al control de mi sala': 'Acessar o controle da minha sala',
+          'Staff': 'Equipe', 'Pareos': 'Emparceiramentos', 'Editar': 'Editar', 'Cerrar sesión': 'Sair',
+          'LISTO PARA INICIAR': 'PRONTO PARA COMEÇAR', 'Iniciar': 'Iniciar', 'Pausar': 'Pausar', 'Reiniciar': 'Reiniciar',
+          'Editar temporizador': 'Editar temporizador', 'Ajusta el contenido y la apariencia de la pantalla.': 'Ajuste o conteúdo e a aparência da tela.',
+          '×': '×', 'Paleta de colores': 'Paleta de cores', 'Naranja nocturno': 'Laranja noturno',
+          'Azul eléctrico': 'Azul elétrico', 'Verde bosque': 'Verde floresta', 'Violeta nocturno': 'Violeta noturno',
+          'Atardecer coral': 'Pôr do sol coral', 'Oro cálido': 'Dourado quente', 'Turquesa profundo': 'Turquesa profundo',
+          'Azul hielo': 'Azul-gelo', 'Rojo intenso': 'Vermelho intenso', 'Lima oscuro': 'Lima escuro',
+          'Naranja claro': 'Laranja claro', 'Azul claro': 'Azul claro', 'Verde claro': 'Verde claro',
+          'Violeta claro': 'Violeta claro', 'Coral claro': 'Coral claro', 'Dorado claro': 'Dourado claro',
+          'Turquesa claro': 'Turquesa claro', 'Frambuesa clara': 'Framboesa clara', 'Hielo claro': 'Gelo claro',
+          'Grafito claro': 'Grafite claro', 'Rojo claro': 'Vermelho claro', 'Orquídea clara': 'Orquídea clara',
+          'Lima clara': 'Lima claro', 'Cobre claro': 'Cobre claro', 'Paletas disponibles': 'Paletas disponíveis',
+          'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Logo': 'Logotipo',
+          'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
+          'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
+          'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
+          'Enlace de destino del QR:': 'Link de destino do QR:', 'Generar QR': 'Gerar QR',
+          'Imagen para el panel izquierdo (máximo 2 MB):': 'Imagem para o painel esquerdo (máximo 2 MB):',
+          'Quitar imagen': 'Remover imagem', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Arquivo .tdf exportado do torneio (máximo 2 MB)',
+          'Publicar pareos y generar QR': 'Publicar emparceiramentos e gerar QR',
+          'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Ao enviar um novo TDF, os emparceiramentos publicados serão substituídos.',
+          'Guardar cambios': 'Salvar alterações', 'Ej. 7KQ2BD': 'Ex.: 7KQ2BD', 'Cerrar control de sala': 'Fechar controle da sala',
+          'Código para abrir la vista TV': 'Código para abrir a visualização da TV', 'Enlaces de sala': 'Links da sala',
+          'Cerrar edición': 'Fechar edição', 'Contenido visual del torneo': 'Conteúdo visual do torneio',
+          'Publica un TDF antes de guardar esta opción.': 'Publique um TDF antes de salvar esta opção.',
+          'Ingresa una duración de 1 a 1440 minutos.': 'Digite uma duração entre 1 e 1440 minutos.',
+          'Espera a que se conecte la sala para guardar.': 'Aguarde a conexão da sala para salvar.',
+          'TIEMPO TERMINADO': 'TEMPO ESGOTADO', 'EN CURSO': 'EM ANDAMENTO',
+          'Imagen quitada. Presiona Guardar cambios para aplicar el cambio.': 'Imagem removida. Selecione Salvar alterações para aplicar.',
+          'Logo quitado. Presiona Guardar cambios para aplicar el cambio.': 'Logotipo removido. Selecione Salvar alterações para aplicar.',
+          'Elige una imagen válida de hasta 2 MB.': 'Escolha uma imagem válida de até 2 MB.',
+          'Logo cargado. Presiona Guardar cambios para conservarlo.': 'Logotipo enviado. Selecione Salvar alterações para mantê-lo.',
+          'No se pudo leer el logo.': 'Não foi possível ler o logotipo.', 'Código QR del enlace del torneo': 'QR do link do torneio',
+          'Código QR para ver los pareos': 'QR para ver os emparceiramentos', 'Imagen del torneo': 'Imagem do torneio',
+          'Imagen cargada. Presiona Guardar cambios para conservarla.': 'Imagem enviada. Selecione Salvar alterações para mantê-la.',
+          'No se pudo leer la imagen.': 'Não foi possível ler a imagem.', 'Ingresa un enlace para generar el código QR.': 'Digite um link para gerar o QR.',
+          'Protocolo inválido': 'Protocolo inválido', 'Ingresa un enlace válido que comience con https:// o http://.': 'Digite um link válido que comece com https:// ou http://.',
+          'QR no generado': 'QR não gerado', 'Código QR generado. Presiona Guardar para conservar el enlace.': 'QR gerado. Selecione Salvar para manter o link.',
+          'No fue posible generar el QR. Prueba con un enlace más corto.': 'Não foi possível gerar o QR. Tente um link mais curto.',
+          'El TDF contiene declaraciones XML no admitidas.': 'O TDF contém declarações XML não compatíveis.',
+          'El archivo no tiene un formato TDF/XML válido.': 'O arquivo não está em um formato TDF/XML válido.',
+          'El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.': 'O TDF não contém uma data válida do torneio para determinar JR, SR e MA.',
+          'La fecha del torneo en el TDF no es válida.': 'A data do torneio no TDF é inválida.',
+          'No se encontraron jugadores en el TDF.': 'Nenhum jogador foi encontrado no TDF.',
+          'No se encontraron pareos con jugadores en el TDF.': 'Nenhum emparceiramento com jogadores foi encontrado no TDF.',
+          'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.': 'Envie o TDF novamente para exibir o histórico de vitórias, derrotas, empates e pontos.',
+          'No hay pareos para esta selección.': 'Não há emparceiramentos para esta seleção.',
+          'Aún no se han publicado pareos para esta sala.': 'Ainda não há emparceiramentos publicados para esta sala.',
+          'Última de cada grupo': 'Último de cada grupo', 'Ingresa un código válido de 6 caracteres.': 'Digite um código válido de 6 caracteres.',
+          '🔔 Activar sonido': '🔔 Ativar som', '🔔 Toca para activar sonido': '🔔 Toque para ativar o som',
+          'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Não foi possível copiar o link. Verifique as permissões do navegador.',
+          'El correo de esta cuenta no está verificado.': 'O e-mail desta conta não foi verificado.',
+          'Buscando tu sala…': 'Procurando sua sala…', 'Sala no encontrada. Abre tu sala.': 'Sala não encontrada. Abra sua sala.',
+          'Esta sala pertenece a otro organizador. Solo lectura.': 'Esta sala pertence a outro organizador. Acesso somente para leitura.',
+          'Ingresa una duración entre 1 y 1440 minutos.': 'Digite uma duração entre 1 e 1440 minutos.',
+          'Inicia sesión como propietario de esta sala.': 'Entre como proprietário desta sala.', 'Guardando duración…': 'Salvando duração…',
+          'No se pudo guardar la duración.': 'Não foi possível salvar a duração.', 'Sin permiso para modificar esta sala.': 'Você não tem permissão para editar esta sala.',
+          'Esta sala requiere iniciar sesión con su cuenta propietaria.': 'Entre com a conta proprietária para controlar esta sala.',
+          'Falta configurar el nuevo proyecto Firebase.': 'O novo projeto do Firebase não foi configurado.',
+          'Falta configurar Firebase.': 'O Firebase não foi configurado.', 'FALTA CONFIGURAR FIREBASE': 'FIREBASE NÃO CONFIGURADO',
+          'Enlace de sala inválido.': 'Link da sala inválido.', 'ENLACE DE SALA INVÁLIDO': 'LINK DA SALA INVÁLIDO',
+          'No se pudo reservar un código corto.': 'Não foi possível reservar um código curto.',
+          'Actualiza las reglas de Firebase para generar el enlace corto.': 'Atualize as regras do Firebase para gerar o link curto.',
+          'No se pudo generar el enlace corto. Prueba recargando la sala.': 'Não foi possível gerar o link curto. Tente recarregar a sala.',
+          'No se pudieron leer los pareos.': 'Não foi possível carregar os emparceiramentos.', 'No se pudo acceder a los pareos.': 'Não foi possível acessar os emparceiramentos.',
+          'Ingresa como propietario de la sala para publicar.': 'Entre como proprietário da sala para publicar.',
+          'Selecciona un archivo TDF.': 'Selecione um arquivo TDF.', 'El archivo supera los 2 MB.': 'O arquivo excede 2 MB.',
+          'Leyendo el TDF…': 'Lendo o TDF…', 'Los pareos superan el límite permitido.': 'Os emparceiramentos excedem o limite permitido.',
+          'No se pudo publicar el TDF. Revisa las reglas de Firebase.': 'Não foi possível publicar o TDF. Verifique as regras do Firebase.',
+          'Inicia sesión como propietario de esta sala para guardar.': 'Entre como proprietário da sala para salvar.',
+          'Ajustes guardados en esta sala.': 'Configurações salvas nesta sala.',
+          'No se pudieron guardar los ajustes. Revisa las reglas de Firebase.': 'Não foi possível salvar as configurações. Verifique as regras do Firebase.',
+          'No se pudieron leer los ajustes de la sala.': 'Não foi possível carregar as configurações da sala.',
+          'No se pudieron cargar los ajustes de la sala.': 'Não foi possível carregar as configurações da sala.',
+          'Sala no encontrada.': 'Sala não encontrada.', 'No se pudo acceder a la sala.': 'Não foi possível acessar a sala.',
+          'Esperando al temporizador…': 'Aguardando o temporizador…', 'No se pudo acceder al conteo.': 'Não foi possível acessar o cronômetro.',
+          'No se pudo cerrar sesión.': 'Não foi possível sair.', 'Inicia sesión con Google para acceder a tu sala.': 'Entre com o Google para acessar sua sala.',
+          'Abriendo tu sala…': 'Abrindo sua sala…', 'Sin permiso para controlar esta sala.': 'Você não tem permissão para controlar esta sala.',
+          'No se pudo conectar al servicio.': 'Não foi possível conectar ao serviço.'
+          ,'Frambuesa': 'Framboesa', 'Grafito': 'Grafite', 'Orquídea': 'Orquídea', 'Cobre': 'Cobre',
+          'Abrir control de sala': 'Abrir controle da sala', 'Temporizador para staff': 'Temporizador da equipe',
+          'https://ejemplo.com/torneo': 'https://exemplo.com/torneio'
+        }
+      };
+      const originals = new WeakMap();
+      const rendered = new WeakMap();
+      const attrState = new WeakMap();
+      const localKey = 'cronoapp-language';
+      const textMap = language => translations[language] || {};
+      function translateText(node, language) {
+        const parent = node.parentElement;
+        const currentText = node.nodeValue.trim();
+        if (parent?.closest('#pairingsTitle') && !['Pareos', 'Pairings', 'Emparceiramentos'].includes(currentText)) return;
+        if (parent?.closest('.pairing-player') && !/^\d+ pts$/.test(currentText)) return;
+        const current = node.nodeValue;
+        const last = rendered.get(node);
+        let source = originals.get(node);
+        if (source === undefined || (last !== undefined && current !== last)) {
+          source = current;
+          originals.set(node, source);
+        }
+        const leading = source.match(/^\s*/)?.[0] || '';
+        const trailing = source.match(/\s*$/)?.[0] || '';
+        const key = source.trim();
+        let value = textMap(language)[key] || key;
+        const roundMatch = key.match(/^Rondas? (.+)$/);
+        if (roundMatch && language === 'en') value = `${roundMatch[1].includes(' y ') ? 'Rounds' : 'Round'} ${roundMatch[1].replace(/ y /g, ' and ')}`;
+        if (roundMatch && language === 'pt') value = `${roundMatch[1].includes(' y ') ? 'Rodadas' : 'Rodada'} ${roundMatch[1].replace(/ y /g, ' e ')}`;
+        const tableMatch = key.match(/^Mesa (\d+)$/);
+        if (tableMatch && language === 'en') value = `Table ${tableMatch[1]}`;
+        if (tableMatch && language === 'pt') value = `Mesa ${tableMatch[1]}`;
+        if (key === 'BYE' && language === 'pt') value = 'FOLGA';
+        const pointsMatch = key.match(/^(\d+) pts$/);
+        if (pointsMatch && language === 'en') value = `${pointsMatch[1]} pts`;
+        if (pointsMatch && language === 'pt') value = `${pointsMatch[1]} pts`;
+        const copyMatch = key.match(/^Enlace de (Staff|Pareos) copiado correctamente\.$/);
+        if (copyMatch && language === 'en') value = `The ${copyMatch[1] === 'Staff' ? 'staff' : 'pairings'} link was copied.`;
+        if (copyMatch && language === 'pt') value = `Link de ${copyMatch[1] === 'Staff' ? 'equipe' : 'emparceiramentos'} copiado.`;
+        const publishMatch = key.match(/^Pareos publicados: (\d+) rondas en (\d+) categoría\(s\)\./);
+        if (publishMatch && language === 'en') value = `Pairings published: ${publishMatch[1]} rounds in ${publishMatch[2]} categor${publishMatch[2] === '1' ? 'y' : 'ies'}. Select Save to show the QR code.`;
+        if (publishMatch && language === 'pt') value = `Emparceiramentos publicados: ${publishMatch[1]} rodadas em ${publishMatch[2]} categoria(s). Selecione Salvar para exibir o QR.`;
+        const loginMatch = key.match(/^No se pudo ingresar con Google \((.+)\)\.$/);
+        if (loginMatch && language === 'en') value = `Could not sign in with Google (${loginMatch[1]}).`;
+        if (loginMatch && language === 'pt') value = `Não foi possível entrar com o Google (${loginMatch[1]}).`;
+        const output = leading + value + trailing;
+        rendered.set(node, output);
+        if (current !== output) node.nodeValue = output;
+      }
+      function translateAttributes(element, language) {
+        const state = attrState.get(element) || new Map();
+        for (const name of ['placeholder', 'title', 'aria-label', 'aria-description', 'alt']) {
+          if (!element.hasAttribute(name)) continue;
+          const current = element.getAttribute(name);
+          let record = state.get(name);
+          if (!record || current !== record.rendered) record = { source: current, rendered: current };
+          const key = record.source.trim();
+          const output = textMap(language)[key] || key;
+          record.rendered = output;
+          state.set(name, record);
+          if (current !== output) element.setAttribute(name, output);
+        }
+        attrState.set(element, state);
+      }
+      function walk(root, language) {
+        if (root.nodeType === Node.TEXT_NODE) { translateText(root, language); return; }
+        if (root.nodeType === Node.ELEMENT_NODE) translateAttributes(root, language);
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) translateText(node, language);
+        if (root.nodeType === Node.ELEMENT_NODE) root.querySelectorAll('*').forEach(element => translateAttributes(element, language));
+      }
+      function applyLanguage(language) {
+        if (!translations[language] && language !== 'es') language = 'es';
+        document.documentElement.lang = language;
+        document.title = textMap(language).Temporizador || (language === 'pt' ? 'Temporizador' : language === 'en' ? 'Timer' : 'Temporizador');
+        walk(document.body, language);
+        selector.value = language;
+        try { localStorage.setItem(localKey, language); } catch (_) {}
+      }
+      let initial = 'es';
+      try { if (['es', 'en', 'pt'].includes(localStorage.getItem(localKey))) initial = localStorage.getItem(localKey); } catch (_) {}
+      selector.addEventListener('change', () => applyLanguage(selector.value));
+      applyLanguage(initial);
+      const observer = new MutationObserver(records => {
+        const language = selector.value;
+        for (const record of records) {
+          if (record.type === 'characterData') translateText(record.target, language);
+          else if (record.type === 'childList') record.addedNodes.forEach(node => walk(node, language));
+          else if (record.type === 'attributes') translateAttributes(record.target, language);
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['placeholder', 'title', 'aria-label', 'aria-description'] });
+    })();
   </script>
 </body>
 </html>
