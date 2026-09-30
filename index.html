@@ -1889,6 +1889,7 @@ module.exports = QRCode;
       const preview = document.getElementById('timerFontPreview');
       if (preview) preview.style.fontFamily = timerFonts[font];
     }
+    window.applyTimerFont = applyTimerFont;
     function applyPalette(name) {
       const palette = palettes.has(name) ? name : 'ember';
       document.body.dataset.palette = palette;
@@ -2805,8 +2806,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             try {
               const settings = JSON.parse(snap.val());
               currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
-              if (isJudge || isPairings) window.applyPalette(currentRoomSettings.palette);
-              else window.loadSettings(currentRoomSettings);
+              if (isJudge || isPairings) {
+                window.applyPalette(currentRoomSettings.palette);
+                if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
+              } else window.loadSettings(currentRoomSettings);
             } catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
           }, () => { syncStatus.textContent = 'No se pudieron cargar los ajustes de la sala.'; });
         }
