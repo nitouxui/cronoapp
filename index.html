@@ -340,6 +340,16 @@
       body:not(.no-room) #modal .modal-content .editor-actions { bottom: -18px; margin: 18px -18px -18px; padding: 11px 18px; }
       body:not(.no-room) #modal .modal-content .palette-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
+    body[data-timer-font="system"] { --timer-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body[data-timer-font="geometric"] { --timer-font: "Trebuchet MS", Arial, sans-serif; }
+    body[data-timer-font="classic"] { --timer-font: Georgia, "Times New Roman", serif; }
+    body[data-timer-font="mono"] { --timer-font: "Courier New", Courier, monospace; }
+    body[data-timer-font="condensed"] { --timer-font: "Arial Narrow", "Liberation Sans Narrow", "Roboto Condensed", Arial, sans-serif; }
+    body #timer, body #judgeTimer { font-family: var(--timer-font, sans-serif); }
+    body:not(.no-room) #modal .timer-font-setting { margin: 0 0 18px; }
+    body:not(.no-room) #modal .timer-font-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+    body:not(.no-room) #modal .timer-font-row .editor-select { min-width: 0; margin: 7px 0 0; }
+    body:not(.no-room) #modal #timerFontPreview { display: grid; place-items: center; min-width: 76px; min-height: 40px; padding: 5px 10px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--accent-soft); font-size: 17px; font-variant-numeric: tabular-nums; }
     body:not(.no-room) #modal .palette-selector { position: relative; margin: 0 0 18px; }
     body:not(.no-room) #modal .palette-selector-trigger { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 48px; margin: 0; padding: 8px 12px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; list-style: none; }
     body:not(.no-room) #modal .palette-selector-trigger::-webkit-details-marker { display: none; }
@@ -367,7 +377,7 @@
     }
   </style>
 </head>
-<body data-palette="ember">
+<body data-palette="ember" data-timer-font="system">
   <section id="roomWelcome">
     <div class="welcome-shell">
       <div class="welcome-copy">
@@ -503,6 +513,19 @@
           <label><input type="radio" name="palette" value="copper-light" onchange="applyPalette(this.value)" aria-label="Cobre claro"><span class="palette-swatches" style="--swatch-dark:#fff8f2;--swatch-accent:#874522;--swatch-soft:#e8b28e" aria-hidden="true"></span></label>
         </fieldset>
       </details>
+      <div class="timer-font-setting">
+        <label for="timerFontSelect">Tipografía del reloj</label>
+        <div class="timer-font-row">
+          <select id="timerFontSelect" class="editor-select" onchange="applyTimerFont(this.value)">
+            <option value="system">Moderna</option>
+            <option value="geometric">Geométrica</option>
+            <option value="classic">Clásica</option>
+            <option value="mono">Monoespaciada</option>
+            <option value="condensed">Compacta</option>
+          </select>
+          <span id="timerFontPreview" aria-hidden="true">00:00</span>
+        </div>
+      </div>
       <div id="imagenes" class="tab-content active">
         <label>Logo</label>
         <div class="logo-control-row">
@@ -1844,11 +1867,28 @@ module.exports = QRCode;
       applyPalette(savedPalette);
       document.querySelector(`input[name="palette"][value="${savedPalette}"]`).checked = true;
       document.getElementById('timerInput').value = savedMinutes;
+      applyTimerFont(savedTimerFont);
     }
 
     const palettes = new Set(['ember', 'ocean', 'forest', 'violet', 'sunset', 'gold', 'turquoise', 'crimson', 'ice', 'graphite', 'red', 'orchid', 'lime', 'copper', 'ember-light', 'ocean-light', 'forest-light', 'violet-light', 'sunset-light', 'gold-light', 'turquoise-light', 'crimson-light', 'ice-light', 'graphite-light', 'red-light', 'orchid-light', 'lime-light', 'copper-light']);
     let savedPalette = 'ember';
     let savedMinutes = 2;
+    let savedTimerFont = 'system';
+    const timerFonts = Object.freeze({
+      system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      geometric: '"Trebuchet MS", Arial, sans-serif',
+      classic: 'Georgia, "Times New Roman", serif',
+      mono: '"Courier New", Courier, monospace',
+      condensed: '"Arial Narrow", "Liberation Sans Narrow", "Roboto Condensed", Arial, sans-serif'
+    });
+    function applyTimerFont(name) {
+      const font = Object.prototype.hasOwnProperty.call(timerFonts, name) ? name : 'system';
+      document.body.dataset.timerFont = font;
+      const selector = document.getElementById('timerFontSelect');
+      if (selector) selector.value = font;
+      const preview = document.getElementById('timerFontPreview');
+      if (preview) preview.style.fontFamily = timerFonts[font];
+    }
     function applyPalette(name) {
       const palette = palettes.has(name) ? name : 'ember';
       document.body.dataset.palette = palette;
@@ -1889,6 +1929,7 @@ module.exports = QRCode;
           qrUrl: document.getElementById('qrUrl').value.trim()
         },
         palette: document.querySelector('input[name="palette"]:checked').value,
+        timerFont: document.getElementById('timerFontSelect').value,
         minutes
       };
       if (typeof window.saveRoomSettings !== 'function') {
@@ -1897,6 +1938,7 @@ module.exports = QRCode;
       }
       if (await window.saveRoomSettings(settings)) {
         savedPalette = settings.palette;
+        savedTimerFont = settings.timerFont;
         if (minutes !== savedMinutes) window.updateTimerTime();
         savedMinutes = minutes;
         closeModal();
@@ -1908,6 +1950,8 @@ module.exports = QRCode;
       savedPalette = palettes.has(settings.palette) ? settings.palette : 'ember';
       document.querySelector(`input[name="palette"][value="${savedPalette}"]`).checked = true;
       applyPalette(savedPalette);
+      savedTimerFont = Object.prototype.hasOwnProperty.call(timerFonts, settings.timerFont) ? settings.timerFont : 'system';
+      applyTimerFont(savedTimerFont);
       const images = settings.images;
       if (images) {
         const logo = document.getElementById('logo');
