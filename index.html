@@ -316,6 +316,11 @@
     body:not(.no-room) #modal .modal-content input[type="url"] { background: var(--surface); color: var(--text); }
     body:not(.no-room) #modal .modal-content input[type="file"]::file-selector-button { min-height: 36px; margin-right: 10px; padding: 0 11px; border: 1px solid var(--edge); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
     body:not(.no-room) #modal .modal-content input[type="file"]::file-selector-button:hover { border-color: var(--accent); }
+    body:not(.no-room) #modal .modal-content .logo-control-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 14px; }
+    body:not(.no-room) #modal .modal-content .logo-control-row .editor-button[hidden] { display: none !important; }
+    body:not(.no-room) #modal .modal-content #removeLogoButton { border-color: var(--danger); color: var(--danger); }
+    body:not(.no-room) #modal .modal-content #removeLogoButton:hover { background: var(--surface); color: var(--danger); }
+    body:not(.no-room) #modal .modal-content .editor-select { display: block; width: 100%; min-height: 44px; margin: 7px 0 16px; padding: 0 38px 0 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
     body:not(.no-room) #modal .modal-content fieldset { margin: 14px 0; padding: 12px 14px; border: 1px solid var(--edge); border-radius: 12px; }
     body:not(.no-room) #modal .modal-content fieldset legend { padding: 0 5px; font-weight: 700; }
     body:not(.no-room) #modal .modal-content #imagenes fieldset label { display: flex; align-items: center; gap: 9px; margin: 9px 0; font-weight: 500; line-height: 1.4; }
@@ -499,14 +504,17 @@
         </fieldset>
       </details>
       <div id="imagenes" class="tab-content active">
-        <label>Logo:</label>
-        <button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('logoInput').click()">Subir logo</button>
-        <fieldset>
-          <legend>Contenido del panel izquierdo</legend>
-          <label><input type="radio" name="leftVisualMode" value="qr" checked onchange="switchLeftVisualMode()"> Generar QR desde un enlace</label>
-          <label><input type="radio" name="leftVisualMode" value="upload" onchange="switchLeftVisualMode()"> Subir una imagen</label>
-          <label><input type="radio" name="leftVisualMode" value="tdf" onchange="switchLeftVisualMode()"> Subir TDF y generar QR de pareos</label>
-        </fieldset>
+        <label>Logo</label>
+        <div class="logo-control-row">
+          <button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('logoInput').click()">Subir logo</button>
+          <button id="removeLogoButton" class="editor-button editor-button-secondary" type="button" onclick="removeLogo()" hidden>Quitar logo</button>
+        </div>
+        <label for="leftVisualModeSelect">Contenido del panel izquierdo</label>
+        <select id="leftVisualModeSelect" class="editor-select" onchange="switchLeftVisualMode()">
+          <option value="qr">Generar QR desde un enlace</option>
+          <option value="upload">Subir una imagen</option>
+          <option value="tdf">Subir TDF y generar QR de pareos</option>
+        </select>
         <div id="qrControls">
           <label for="qrUrl">Enlace de destino del QR:</label>
           <input type="url" id="qrUrl" placeholder="https://ejemplo.com/torneo" inputmode="url" autocomplete="url">
@@ -1854,7 +1862,7 @@ module.exports = QRCode;
     }
 
     async function saveSettings() {
-      const mode = document.querySelector('input[name="leftVisualMode"]:checked').value;
+      const mode = document.getElementById('leftVisualModeSelect').value;
       if (mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
       if (mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
@@ -1910,11 +1918,11 @@ module.exports = QRCode;
           logo.removeAttribute('src');
           logo.style.display = 'none';
         }
+        updateLogoRemoveButton();
         uploadedImageSrc = images.uploadedImageSrc || '';
         document.getElementById('qrUrl').value = images.qrUrl || '';
         const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
-        const radio = document.querySelector(`input[name="leftVisualMode"][value="${mode}"]`);
-        if (radio) radio.checked = true;
+        document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
         else qrImageSrc = '';
         if (mode === 'tdf') generatePairingsQR();
@@ -2031,17 +2039,40 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
 
 
+    function updateLogoRemoveButton() {
+      const logo = document.getElementById('logo');
+      document.getElementById('removeLogoButton').hidden = !logo.getAttribute('src');
+    }
+
+    function removeLogo() {
+      const logo = document.getElementById('logo');
+      logo.removeAttribute('src');
+      logo.style.display = 'none';
+      document.getElementById('logoInput').value = '';
+      updateLogoRemoveButton();
+      document.getElementById('qrStatus').textContent = 'Logo quitado. Presiona Guardar cambios para aplicar el cambio.';
+    }
+
     document.getElementById('logoInput').addEventListener('change', function (event) {
       const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const logo = document.getElementById('logo');
-          logo.src = e.target.result;
-          logo.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+      if (!file.type.startsWith('image/') || file.size > 2 * 1024 * 1024) {
+        document.getElementById('qrStatus').textContent = 'Elige una imagen válida de hasta 2 MB.';
+        event.target.value = '';
+        return;
       }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const logo = document.getElementById('logo');
+        logo.src = e.target.result;
+        logo.style.display = 'block';
+        updateLogoRemoveButton();
+        document.getElementById('qrStatus').textContent = 'Logo cargado. Presiona Guardar cambios para conservarlo.';
+      };
+      reader.onerror = function () {
+        document.getElementById('qrStatus').textContent = 'No se pudo leer el logo.';
+      };
+      reader.readAsDataURL(file);
     });
 
     let qrImageSrc = '';
@@ -2056,7 +2087,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     window.pairingsCleared = () => { pairingsAvailable = false; pairingsQrSrc = ''; renderLeftVisual(); };
 
     function renderLeftVisual() {
-      const mode = document.querySelector('input[name="leftVisualMode"]:checked').value;
+      const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
       const src = mode === 'qr' ? qrImageSrc : mode === 'tdf' ? pairingsQrSrc : uploadedImageSrc;
       if (src) {
@@ -2070,7 +2101,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
 
     function switchLeftVisualMode() {
-      const mode = document.querySelector('input[name="leftVisualMode"]:checked').value;
+      const mode = document.getElementById('leftVisualModeSelect').value;
       document.getElementById('qrControls').hidden = mode !== 'qr';
       document.getElementById('imageControls').hidden = mode !== 'upload';
       document.getElementById('tdfControls').hidden = mode !== 'tdf';
@@ -2644,7 +2675,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           window.currentShortCode = code;
           document.getElementById('tvShortCode').textContent = code;
           staffPairingsLink.href = makeRoomViewURL('pareos');
-          if (document.querySelector('input[name="leftVisualMode"]:checked')?.value === 'tdf') {
+          if (document.getElementById('leftVisualModeSelect').value === 'tdf') {
             window.generatePairingsQR();
             window.renderLeftVisual();
           }
