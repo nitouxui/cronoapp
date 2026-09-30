@@ -96,6 +96,18 @@
     .control-bar button, .edit-button { min-width: 145px; border-radius: 14px; padding: 14px 22px; font-weight: 700; background: #25262c; color: white; border: 1px solid #585960; }
     .control-bar #resetButton { border-color: #a94a0f; color: #ff994a; background: #301e18; }
     .edit-button { top: 14px; right: 14px; min-width: 0; z-index: 5; }
+    /* Control de sala alineado con Editar */
+    body:not(.no-room) #controlSync { top: 14px; right: 110px; bottom: auto; z-index: 30; width: auto; max-width: calc(100vw - 24px); padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
+    body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 14px; background: transparent; box-shadow: none; }
+    body:not(.no-room) #syncToggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 82px; height: 46px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; box-shadow: 0 8px 24px #0004; }
+    body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
+    body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 14px; }
+    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) #controlTitle { color: var(--text); font-size: 19px; }
+    body:not(.no-room) #roomName { color: var(--muted); }
+    body:not(.no-room) #syncStatus { display: block; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); }
+    body:not(.no-room) #controlSync a { color: var(--accent-soft); }
+    body:not(.no-room) #controlSync button:not(#syncToggle) { border-radius: 9px; }
     #controlSync { z-index: 30; }
     #roomWelcome { background: #17181c; color: white; }
     #judgeView { background: #13151b; }
@@ -112,6 +124,8 @@
       #rightPanel { flex: 1; min-height: 520px; padding: 58px 20px 108px; }
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
       .edit-button { top: 8px; right: 12px; }
+      body:not(.no-room) #controlSync { top: 8px; right: 102px; }
+      body:not(.no-room) #syncBody { right: -90px; }
       .control-bar { min-height: 88px; }
       .control-bar button { min-width: 110px; padding: 12px; }
     }
@@ -208,7 +222,7 @@
     <div id="pairingsList"></div>
   </div></section>
   <div id="controlSync" hidden>
-    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Ocultar panel de control" title="Ocultar panel de control">⚙</button>
+    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Sala</span></button>
     <div id="syncBody" class="sync-body">
     <strong id="controlTitle">Control de sala</strong>
     <div id="roomName"></div>
@@ -2070,8 +2084,29 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const button = document.getElementById('syncToggle');
       const collapsed = panel.classList.toggle('collapsed');
       button.setAttribute('aria-expanded', String(!collapsed));
-      button.setAttribute('aria-label', collapsed ? 'Mostrar panel de control' : 'Ocultar panel de control');
-      button.title = collapsed ? 'Mostrar panel de control' : 'Ocultar panel de control';
+      button.setAttribute('aria-label', collapsed ? 'Abrir control de sala' : 'Cerrar control de sala');
+      button.title = collapsed ? 'Abrir control de sala' : 'Cerrar control de sala';
+    });
+
+    document.addEventListener('click', event => {
+      const panel = document.getElementById('controlSync');
+      if (document.body.classList.contains('no-room') || panel.classList.contains('collapsed') || panel.contains(event.target)) return;
+      panel.classList.add('collapsed');
+      const button = document.getElementById('syncToggle');
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', 'Abrir control de sala');
+      button.title = 'Abrir control de sala';
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || document.body.classList.contains('no-room')) return;
+      const panel = document.getElementById('controlSync');
+      if (panel.classList.contains('collapsed')) return;
+      panel.classList.add('collapsed');
+      const button = document.getElementById('syncToggle');
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', 'Abrir control de sala');
+      button.title = 'Abrir control de sala';
+      button.focus();
     });
 
     window.onload = () => {
