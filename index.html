@@ -2553,10 +2553,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
+    const createButton = document.getElementById('createRoom');
     if (!isReadOnly && !hasRoomLink) createButton.after(logoutButton);
     const googleButton = document.getElementById('googleLogin');
     if (!isReadOnly && !hasRoomLink) googleButton.hidden = false;
-    const createButton = document.getElementById('createRoom');
     const staffPairingsLink = document.getElementById('staffPairingsLink');
     const copyLinkFeedback = document.getElementById('copyLinkFeedback');
     function makeRoomViewURL(view) {
