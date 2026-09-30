@@ -134,9 +134,17 @@
     body:not(.no-room) .share-view-button:hover { border-color: var(--accent); background: var(--accent-dark); transform: translateY(-1px); }
     body:not(.no-room) .copy-link-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); font-size: 13px; font-weight: 700; }
     body:not(.no-room) .copy-link-feedback[hidden] { display: none; }
+    body:not(.no-room) .control-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
     body:not(.no-room) #controlTitle { color: var(--text); font-size: 19px; }
-    body:not(.no-room) #roomName { color: var(--muted); }
+    body:not(.no-room) .control-heading .tv-code-card { flex: 0 0 auto; min-width: 112px; padding: 6px 10px; }
+    body:not(.no-room) .control-heading .tv-code-card > span { font-size: 9px; }
+    body:not(.no-room) .control-heading .tv-code-card strong { font-size: 15px; }
     body:not(.no-room) #syncStatus { display: block; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); }
+    body:not(.no-room) #syncStatus:empty { display: none !important; }
+    @media (max-width: 420px) {
+      body:not(.no-room) .control-heading { gap: 8px; }
+      body:not(.no-room) .control-heading .tv-code-card { min-width: 104px; padding: 6px 7px; }
+    }
     body:not(.no-room) #controlSync a { color: var(--accent-soft); }
     body:not(.no-room) #controlSync button:not(#syncToggle) { border-radius: 9px; }
     #controlSync { z-index: 30; }
@@ -287,8 +295,13 @@
   <div id="controlSync" hidden>
     <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Control Sala</span></button>
     <div id="syncBody" class="sync-body">
-    <strong id="controlTitle">Control de sala</strong>
-    <div id="roomName"></div>
+    <div class="control-heading">
+      <strong id="controlTitle">Control Sala</strong>
+      <div id="tvCodeCard" class="tv-code-card" aria-label="Código para abrir la vista TV" hidden>
+        <span>Código TV</span>
+        <strong id="tvShortCode" aria-live="polite">Generando…</strong>
+      </div>
+    </div>
     <div id="syncStatus" role="status">Configurando…</div>
     <div id="roomDurationControl" class="room-duration-control" hidden>
       <label for="timerInput">Duración del temporizador</label>
@@ -303,10 +316,6 @@
     <div class="room-actions" aria-label="Compartir vistas">
       <strong class="room-actions-title">Compartir vistas</strong>
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-      <div id="tvCodeCard" class="tv-code-card" aria-label="Código para abrir la vista TV">
-        <span>Código TV</span>
-        <strong id="tvShortCode" aria-live="polite">Generando…</strong>
-      </div>
       <button id="copyPairingsLink" class="share-view-button" type="button"><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
     </div>
     <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
@@ -2316,7 +2325,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       button.hidden = !hasRoomLink;
       button.addEventListener('click', () => copyRoomView(view, label));
     });
-    roomName.textContent = rawRoom ? `Sala: ${roomId}` : 'Aún no tienes una sala abierta';
     staffPairingsLink.href = makeRoomViewURL('pareos');
     staffPairingsLink.hidden = !hasRoomLink;
     let currentState = null;
@@ -2377,7 +2385,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           : !verified ? 'El correo de esta cuenta no está verificado.'
           : !roomId ? 'Buscando tu sala…'
           : !roomOwner ? 'Sala no encontrada. Abre tu sala.'
-          : canControl ? 'Control conectado' : 'Esta sala pertenece a otro organizador. Solo lectura.';
+          : canControl ? '' : 'Esta sala pertenece a otro organizador. Solo lectura.';
       }
     }
     saveDurationButton.addEventListener('click', async () => {
@@ -2444,7 +2452,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
           roomId = alias.val();
           if (!roomId || !/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) throw new Error('Código de sala no encontrado.');
-          roomName.textContent = `Sala: ${rawCode}`;
         }
         roomRef = roomId ? dbModule.ref(db, 'rooms/' + roomId) : null;
         stateRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/state') : null;
