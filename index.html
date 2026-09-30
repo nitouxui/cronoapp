@@ -321,8 +321,26 @@
       body:not(.no-room) #modal .modal-content .editor-actions { bottom: -18px; margin: 18px -18px -18px; padding: 11px 18px; }
       body:not(.no-room) #modal .modal-content .palette-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
+    body:not(.no-room) #modal .palette-selector { position: relative; margin: 0 0 18px; }
+    body:not(.no-room) #modal .palette-selector-trigger { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 48px; margin: 0; padding: 8px 12px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; list-style: none; }
+    body:not(.no-room) #modal .palette-selector-trigger::-webkit-details-marker { display: none; }
+    body:not(.no-room) #modal .palette-selector-trigger:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+    body:not(.no-room) #modal .palette-selector-trailing { display: flex; align-items: center; gap: 9px; }
+    body:not(.no-room) #modal .palette-selector-preview { width: 74px; min-width: 74px; max-width: none; height: 26px; border-radius: 7px; }
+    body:not(.no-room) #modal .palette-selector-chevron { color: var(--muted); font-size: 20px; line-height: 1; transition: transform .15s ease; }
+    body:not(.no-room) #modal .palette-selector[open] .palette-selector-chevron { transform: rotate(180deg); }
+    body:not(.no-room) #modal .palette-options { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; display: none; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; width: min(100%, 420px); margin: 0; padding: 12px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); box-shadow: 0 18px 48px #0009; }
+    body:not(.no-room) #modal .palette-selector[open] .palette-options { display: grid; }
+    body:not(.no-room) #modal .palette-options label { position: relative; display: grid; place-items: center; min-width: 0; min-height: 44px; margin: 0; padding: 4px; border: 2px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; }
+    body:not(.no-room) #modal .palette-options label:has(input:checked) { border-color: var(--accent); background: var(--surface); }
+    body:not(.no-room) #modal .palette-options label:has(input:focus-visible) { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+    body:not(.no-room) #modal .palette-options input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+    body:not(.no-room) #modal .palette-options .palette-swatches { width: 100%; min-width: 0; max-width: 56px; height: 30px; border-radius: 7px; }
+    @media (max-width: 600px) {
+      body:not(.no-room) #modal .palette-options { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
     @media (max-width: 380px) {
-      body:not(.no-room) #modal .modal-content .palette-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      body:not(.no-room) #modal .palette-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     @media (max-width: 600px) {
       body:not(.no-room) #modal { inset: 60px 8px 8px auto; width: calc(100vw - 16px); }
@@ -425,6 +443,33 @@
         </div>
         <button type="button" class="editor-close" aria-label="Cerrar edición" onclick="closeModal()">×</button>
       </div>
+      <details id="paletteSelector" class="palette-selector">
+        <summary class="palette-selector-trigger">
+          <span>Paleta de colores</span>
+          <span class="palette-selector-trailing">
+            <span id="selectedPaletteSwatches" class="palette-swatches palette-selector-preview" style="--swatch-dark:#17181c;--swatch-accent:#ed771e;--swatch-soft:#ffad64" aria-hidden="true"></span>
+            <span class="palette-selector-chevron" aria-hidden="true">⌄</span>
+          </span>
+          <span id="selectedPaletteName" class="visually-hidden">Naranja nocturno</span>
+        </summary>
+        <fieldset class="palette-options">
+          <legend class="visually-hidden">Paletas disponibles</legend>
+<label><input type="radio" name="palette" value="ember" checked onchange="applyPalette(this.value)" aria-label="Naranja nocturno"><span class="palette-swatches" style="--swatch-dark:#17181c;--swatch-accent:#ed771e;--swatch-soft:#ffad64" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="ocean" onchange="applyPalette(this.value)" aria-label="Azul eléctrico"><span class="palette-swatches" style="--swatch-dark:#101a2c;--swatch-accent:#267bdc;--swatch-soft:#8dc7ff" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="forest" onchange="applyPalette(this.value)" aria-label="Verde bosque"><span class="palette-swatches" style="--swatch-dark:#111d18;--swatch-accent:#318c62;--swatch-soft:#a1e8c2" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="violet" onchange="applyPalette(this.value)" aria-label="Violeta nocturno"><span class="palette-swatches" style="--swatch-dark:#191323;--swatch-accent:#8657cf;--swatch-soft:#d0adff" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="sunset" onchange="applyPalette(this.value)" aria-label="Atardecer coral"><span class="palette-swatches" style="--swatch-dark:#20171e;--swatch-accent:#e15d55;--swatch-soft:#ffc4a4" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="gold" onchange="applyPalette(this.value)" aria-label="Oro cálido"><span class="palette-swatches" style="--swatch-dark:#1c1b17;--swatch-accent:#d6a329;--swatch-soft:#ffe4a0" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="turquoise" onchange="applyPalette(this.value)" aria-label="Turquesa profundo"><span class="palette-swatches" style="--swatch-dark:#112126;--swatch-accent:#138f9c;--swatch-soft:#9ce8e7" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="crimson" onchange="applyPalette(this.value)" aria-label="Frambuesa"><span class="palette-swatches" style="--swatch-dark:#21171d;--swatch-accent:#cf3e5a;--swatch-soft:#ffadbc" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="ice" onchange="applyPalette(this.value)" aria-label="Azul hielo"><span class="palette-swatches" style="--swatch-dark:#192433;--swatch-accent:#6a90d6;--swatch-soft:#c6ddff" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="graphite" onchange="applyPalette(this.value)" aria-label="Grafito"><span class="palette-swatches" style="--swatch-dark:#16191d;--swatch-accent:#8f9ba8;--swatch-soft:#f0f2f5" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="red" onchange="applyPalette(this.value)" aria-label="Rojo intenso"><span class="palette-swatches" style="--swatch-dark:#1e1517;--swatch-accent:#d93232;--swatch-soft:#ffaaaa" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="orchid" onchange="applyPalette(this.value)" aria-label="Orquídea"><span class="palette-swatches" style="--swatch-dark:#1e1721;--swatch-accent:#bd4ca2;--swatch-soft:#f5bce6" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="lime" onchange="applyPalette(this.value)" aria-label="Lima oscuro"><span class="palette-swatches" style="--swatch-dark:#1a1e18;--swatch-accent:#8ba92c;--swatch-soft:#def4a3" aria-hidden="true"></span></label>
+        <label><input type="radio" name="palette" value="copper" onchange="applyPalette(this.value)" aria-label="Cobre"><span class="palette-swatches" style="--swatch-dark:#201a17;--swatch-accent:#bd7448;--swatch-soft:#ffd1a9" aria-hidden="true"></span></label>
+        </fieldset>
+      </details>
       <div id="imagenes" class="tab-content active">
         <label>Logo:</label>
         <button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('logoInput').click()">Subir logo</button>
@@ -452,23 +497,7 @@
         <p id="qrStatus" role="status" aria-live="polite"></p>
       </div>
 
-      <fieldset class="palette-grid" aria-label="Selecciona una paleta de colores">
-        <legend>Paleta de colores</legend>
-        <label><input type="radio" name="palette" value="ember" checked onchange="applyPalette(this.value)" aria-label="Naranja nocturno"><span class="palette-swatches" style="--swatch-dark:#17181c;--swatch-accent:#ed771e;--swatch-soft:#ffad64" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="ocean" onchange="applyPalette(this.value)" aria-label="Azul eléctrico"><span class="palette-swatches" style="--swatch-dark:#101a2c;--swatch-accent:#267bdc;--swatch-soft:#8dc7ff" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="forest" onchange="applyPalette(this.value)" aria-label="Verde bosque"><span class="palette-swatches" style="--swatch-dark:#111d18;--swatch-accent:#318c62;--swatch-soft:#a1e8c2" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="violet" onchange="applyPalette(this.value)" aria-label="Violeta nocturno"><span class="palette-swatches" style="--swatch-dark:#191323;--swatch-accent:#8657cf;--swatch-soft:#d0adff" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="sunset" onchange="applyPalette(this.value)" aria-label="Atardecer coral"><span class="palette-swatches" style="--swatch-dark:#20171e;--swatch-accent:#e15d55;--swatch-soft:#ffc4a4" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="gold" onchange="applyPalette(this.value)" aria-label="Oro cálido"><span class="palette-swatches" style="--swatch-dark:#1c1b17;--swatch-accent:#d6a329;--swatch-soft:#ffe4a0" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="turquoise" onchange="applyPalette(this.value)" aria-label="Turquesa profundo"><span class="palette-swatches" style="--swatch-dark:#112126;--swatch-accent:#138f9c;--swatch-soft:#9ce8e7" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="crimson" onchange="applyPalette(this.value)" aria-label="Frambuesa"><span class="palette-swatches" style="--swatch-dark:#21171d;--swatch-accent:#cf3e5a;--swatch-soft:#ffadbc" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="ice" onchange="applyPalette(this.value)" aria-label="Azul hielo"><span class="palette-swatches" style="--swatch-dark:#192433;--swatch-accent:#6a90d6;--swatch-soft:#c6ddff" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="graphite" onchange="applyPalette(this.value)" aria-label="Grafito"><span class="palette-swatches" style="--swatch-dark:#16191d;--swatch-accent:#8f9ba8;--swatch-soft:#f0f2f5" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="red" onchange="applyPalette(this.value)" aria-label="Rojo intenso"><span class="palette-swatches" style="--swatch-dark:#1e1517;--swatch-accent:#d93232;--swatch-soft:#ffaaaa" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="orchid" onchange="applyPalette(this.value)" aria-label="Orquídea"><span class="palette-swatches" style="--swatch-dark:#1e1721;--swatch-accent:#bd4ca2;--swatch-soft:#f5bce6" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="lime" onchange="applyPalette(this.value)" aria-label="Lima oscuro"><span class="palette-swatches" style="--swatch-dark:#1a1e18;--swatch-accent:#8ba92c;--swatch-soft:#def4a3" aria-hidden="true"></span></label>
-        <label><input type="radio" name="palette" value="copper" onchange="applyPalette(this.value)" aria-label="Cobre"><span class="palette-swatches" style="--swatch-dark:#201a17;--swatch-accent:#bd7448;--swatch-soft:#ffd1a9" aria-hidden="true"></span></label>
-      </fieldset>
+
       <p class="settings-hint">La paleta cambia fondos, acentos, botones y estados en todas las vistas.</p>
 
 
@@ -1785,7 +1814,15 @@ module.exports = QRCode;
     let savedPalette = 'ember';
     let savedMinutes = 2;
     function applyPalette(name) {
-      document.body.dataset.palette = palettes.has(name) ? name : 'ember';
+      const palette = palettes.has(name) ? name : 'ember';
+      document.body.dataset.palette = palette;
+      const radio = document.querySelector(`input[name="palette"][value="${palette}"]`);
+      const preview = document.getElementById('selectedPaletteSwatches');
+      const accessibleName = document.getElementById('selectedPaletteName');
+      if (radio && preview) preview.style.cssText = radio.nextElementSibling.style.cssText;
+      if (radio && accessibleName) accessibleName.textContent = radio.getAttribute('aria-label') || palette;
+      const selector = document.getElementById('paletteSelector');
+      if (selector) selector.open = false;
     }
 
     async function saveSettings() {
@@ -2262,6 +2299,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
 
     document.getElementById('qrUrl').addEventListener('change', generateQR);
 
+    document.addEventListener('click', event => {
+      const selector = document.getElementById('paletteSelector');
+      if (selector?.open && !selector.contains(event.target)) selector.open = false;
+    });
     document.getElementById('syncToggle').addEventListener('click', () => {
       const modal = document.getElementById('modal');
       if (modal.style.display === 'flex') closeModal();
