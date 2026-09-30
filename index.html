@@ -250,7 +250,9 @@
     .landing-control-entry #syncStatus { margin: 0 0 12px; color: var(--muted); line-height: 1.45; }
     .landing-control-entry #googleLogin, .landing-control-entry #createRoom { display: block; width: 100%; min-height: 48px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
     .landing-control-entry #googleLogin:hover, .landing-control-entry #createRoom:hover { filter: brightness(1.1); }
-    .landing-control-entry #syncLogout, .landing-control-entry #roomName { display: none !important; }
+    .landing-control-entry #syncLogout { display: block; width: 100%; min-height: 48px; margin-top: 8px; padding: 0 16px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-weight: 800; cursor: pointer; }
+    .landing-control-entry #syncLogout[hidden] { display: none !important; }
+    .landing-control-entry #roomName { display: none !important; }
     .short-code-kicker { color: var(--accent-soft); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
     .short-code-entry h2 { margin: 9px 0 6px; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
     .short-code-entry > p { margin: 0 0 16px; color: var(--muted); font-size: 14px; line-height: 1.45; }
@@ -2548,7 +2550,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const syncStatus = document.getElementById('syncStatus');
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
-    if (!isReadOnly && !hasRoomLink) document.getElementById('landingLogin').append(logoutButton);
+    if (!isReadOnly && !hasRoomLink) createButton.after(logoutButton);
     const googleButton = document.getElementById('googleLogin');
     const createButton = document.getElementById('createRoom');
     const staffPairingsLink = document.getElementById('staffPairingsLink');
@@ -2658,6 +2660,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (!isReadOnly) {
         syncStatus.textContent = !currentUser ? ''
           : !verified ? 'El correo de esta cuenta no está verificado.'
+          : !hasRoomLink ? ''
           : !roomId ? 'Buscando tu sala…'
           : !roomOwner ? 'Sala no encontrada. Abre tu sala.'
           : canControl ? '' : 'Esta sala pertenece a otro organizador. Solo lectura.';
@@ -2855,7 +2858,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         if (!isReadOnly) {
           auth = authModule.getAuth(app);
           async function openOwnRoom(user) {
-            syncStatus.textContent = 'Buscando tu sala…';
+            if (hasRoomLink) syncStatus.textContent = 'Buscando tu sala…';
             try {
               const owned = dbModule.query(dbModule.ref(db, 'rooms'),
                 dbModule.orderByChild('ownerUid'), dbModule.equalTo(user.uid), dbModule.limitToFirst(1));
