@@ -120,11 +120,16 @@
     body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; gap: 5px; width: 100%; min-width: 0; margin: 0; padding: 10px 9px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
     body:not(.no-room) .share-view-button span { min-width: 0; }
     body:not(.no-room) .share-view-button svg { width: 16px; height: 16px; flex: 0 0 16px; opacity: .78; }
+    body:not(.no-room) .tv-code-card { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; padding: 8px 9px; border: 1px solid var(--accent); border-radius: 11px; background: var(--accent-dark); color: var(--text); text-align: center; }
+    body:not(.no-room) .tv-code-card > span { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    body:not(.no-room) .tv-code-card strong { overflow: hidden; color: var(--accent-soft); font-size: clamp(14px, 1.5vw, 18px); font-weight: 900; letter-spacing: .11em; text-overflow: ellipsis; }
     @media (max-width: 420px) {
       body:not(.no-room) #syncBody { width: min(400px, calc(100vw - 16px)); }
       body:not(.no-room) .room-actions { gap: 5px; }
       body:not(.no-room) .share-view-button { gap: 3px; padding: 9px 7px; font-size: 11px; }
       body:not(.no-room) .share-view-button svg { width: 14px; height: 14px; flex-basis: 14px; }
+      body:not(.no-room) .tv-code-card { padding: 8px 5px; }
+      body:not(.no-room) .tv-code-card strong { font-size: 14px; letter-spacing: .08em; }
     }
     body:not(.no-room) .share-view-button:hover { border-color: var(--accent); background: var(--accent-dark); transform: translateY(-1px); }
     body:not(.no-room) .copy-link-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); font-size: 13px; font-weight: 700; }
@@ -298,7 +303,10 @@
     <div class="room-actions" aria-label="Compartir vistas">
       <strong class="room-actions-title">Compartir vistas</strong>
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-      <button id="copyScreenLink" class="share-view-button" type="button"><span>Enlace TV</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
+      <div id="tvCodeCard" class="tv-code-card" aria-label="Código para abrir la vista TV">
+        <span>Código TV</span>
+        <strong id="tvShortCode" aria-live="polite">Generando…</strong>
+      </div>
       <button id="copyPairingsLink" class="share-view-button" type="button"><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
     </div>
     <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
@@ -2300,9 +2308,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       window.clearTimeout(copyLinkFeedback.hideTimer);
       copyLinkFeedback.hideTimer = window.setTimeout(() => { copyLinkFeedback.hidden = true; }, 3200);
     }
+    document.getElementById('tvCodeCard').hidden = !hasRoomLink;
     [
       [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
-      [document.getElementById('copyScreenLink'), 'pantalla', 'Enlace TV'],
       [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
     ].forEach(([button, view, label]) => {
       button.hidden = !hasRoomLink;
@@ -2445,6 +2453,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         let shortCodePromise = null;
         function showShortCode(code) {
           window.currentShortCode = code;
+          document.getElementById('tvShortCode').textContent = code;
           staffPairingsLink.href = makeRoomViewURL('pareos');
           if (document.querySelector('input[name="leftVisualMode"]:checked')?.value === 'tdf') {
             window.generatePairingsQR();
