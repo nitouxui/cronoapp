@@ -65,8 +65,6 @@
     #controlSync.collapsed #syncToggle { width: 44px; height: 44px; margin: 0; box-shadow: 0 2px 10px #0004; }
     #syncToggle:focus-visible { outline: 3px solid #1d6be0; outline-offset: 2px; }
     #controlSync input { width: 100%; margin: 4px 0; }
-    #shortRoomControl { margin-top: 12px; padding-top: 12px; border-top: 1px solid #ccc; overflow-wrap: anywhere; }
-    #shortRoomLink { display: inline-block; margin-top: 5px; }
     #controlSync button { margin: 4px 4px 4px 0; }
     #controlSync { max-width: 340px; }
     #controlSync a { display: inline-block; margin-top: 6px; }
@@ -99,10 +97,16 @@
     /* Control de sala alineado con Editar */
     body:not(.no-room) #controlSync { position: absolute; top: 14px; right: 110px; bottom: auto; z-index: 30; width: auto; max-width: calc(100vw - 24px); padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
     body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 14px; background: transparent; box-shadow: none; }
-    body:not(.no-room) #syncToggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 82px; height: 46px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; box-shadow: 0 8px 24px #0004; }
+    body:not(.no-room) #syncToggle, .edit-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0004; }
+    body:not(.no-room) #syncToggle { width: auto; min-width: 82px; margin: 0; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
-    body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 14px; }
+    body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 16px; }
     body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) .room-actions { display: grid; gap: 8px; margin: 16px 0 0; }
+    body:not(.no-room) .share-view-button { width: 100%; margin: 0; padding: 12px 14px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+    body:not(.no-room) .share-view-button:hover { border-color: var(--accent); background: var(--accent-dark); transform: translateY(-1px); }
+    body:not(.no-room) .copy-link-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); font-size: 13px; font-weight: 700; }
+    body:not(.no-room) .copy-link-feedback[hidden] { display: none; }
     body:not(.no-room) #controlTitle { color: var(--text); font-size: 19px; }
     body:not(.no-room) #roomName { color: var(--muted); }
     body:not(.no-room) #syncStatus { display: block; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-dark); color: var(--accent-soft); }
@@ -184,7 +188,7 @@
     .welcome-features span { border: 1px solid var(--edge); background: var(--surface-raised); border-radius: 99px; padding: 9px 14px; color: var(--text); font-size: 14px; }
     body.no-room .landing-login { width: 100%; }
     body.no-room #controlSync { position: static; transform: none; width: 100%; max-width: none; padding: clamp(22px, 3vw, 38px); border-radius: 18px; box-shadow: 0 20px 65px #0007; font-size: 15px; }
-    body.no-room #syncToggle, body.no-room #roomName, body.no-room #judgeLink { display: none !important; }
+    body.no-room #syncToggle, body.no-room #roomName { display: none !important; }
     body.no-room #controlTitle { display: block; font-size: 26px; margin-bottom: 12px; }
     body.no-room #syncStatus { color: #4c535c; line-height: 1.45; margin-bottom: 22px; }
     body.no-room #googleLogin { font-size: 17px; padding: 15px; }
@@ -236,9 +240,13 @@
     <button id="googleLogin" type="button" hidden>Continuar con Google</button>
     <button id="createRoom" type="button" hidden>Abrir mi sala</button>
     <button id="syncLogout" type="button" hidden>Cerrar sesión</button>
-    <div><a id="judgeLink" target="_blank" rel="noopener">Abrir vista del staff</a></div>
-    <div><a id="pairingsLink" target="_blank" rel="noopener">Abrir pareos</a></div>
-    <div id="shortRoomControl" hidden><strong>Enlace corto para pantalla</strong><br><a id="shortRoomLink" target="_blank" rel="noopener"></a><br><button id="copyShortRoom" type="button">Copiar enlace</button></div>
+    <div class="room-actions" aria-label="Copiar enlaces de las vistas">
+      <button id="copyStaffLink" class="share-view-button" type="button">Copiar enlace · Staff</button>
+      <button id="copyScreenLink" class="share-view-button" type="button">Copiar enlace · Pantalla</button>
+      <button id="copyPairingsLink" class="share-view-button" type="button">Copiar enlace · Pareos</button>
+    </div>
+    <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
+
     </div>
   </div>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
@@ -1709,6 +1717,8 @@ module.exports = QRCode;
         oscillator.stop(now + delay + 0.21);
       });
     }
+    window.prepareSound = prepareSound;
+    window.playEndSound = playEndSound;
 
     let countdown;
     let timeLeft = 120;
@@ -2168,17 +2178,58 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const logoutButton = document.getElementById('syncLogout');
     const googleButton = document.getElementById('googleLogin');
     const createButton = document.getElementById('createRoom');
-    const judgeLink = document.getElementById('judgeLink');
-    const viewerURL = new URL(location.href);
-    viewerURL.searchParams.set('view', 'staff');
-    judgeLink.href = viewerURL.href;
-    viewerURL.searchParams.set('view', 'pareos');
-    document.getElementById('pairingsLink').href = viewerURL.href;
-    document.getElementById('staffPairingsLink').href = viewerURL.href;
+    const staffPairingsLink = document.getElementById('staffPairingsLink');
+    const copyLinkFeedback = document.getElementById('copyLinkFeedback');
+    function makeRoomViewURL(view) {
+      const url = new URL(location.href);
+      const code = window.currentShortCode || rawCode;
+      url.searchParams.delete('view');
+      if (code) {
+        url.searchParams.delete('sala');
+        url.searchParams.set('s', code);
+      } else if (roomId) {
+        url.searchParams.delete('s');
+        url.searchParams.set('sala', roomId);
+      }
+      url.searchParams.set('view', view);
+      return url.href;
+    }
+    async function copyRoomView(view, label) {
+      const value = makeRoomViewURL(view);
+      try {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(value);
+        else throw new Error('clipboard unavailable');
+      } catch {
+        const field = document.createElement('textarea');
+        field.value = value;
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.append(field);
+        field.select();
+        const copied = document.execCommand('copy');
+        field.remove();
+        if (!copied) {
+          copyLinkFeedback.textContent = 'No se pudo copiar el enlace. Revisa los permisos del navegador.';
+          copyLinkFeedback.hidden = false;
+          return;
+        }
+      }
+      copyLinkFeedback.textContent = `Enlace de ${label} copiado correctamente.`;
+      copyLinkFeedback.hidden = false;
+      window.clearTimeout(copyLinkFeedback.hideTimer);
+      copyLinkFeedback.hideTimer = window.setTimeout(() => { copyLinkFeedback.hidden = true; }, 3200);
+    }
+    [
+      [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
+      [document.getElementById('copyScreenLink'), 'pantalla', 'Pantalla'],
+      [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
+    ].forEach(([button, view, label]) => {
+      button.hidden = !hasRoomLink;
+      button.addEventListener('click', () => copyRoomView(view, label));
+    });
     roomName.textContent = rawRoom ? `Sala: ${roomId}` : 'Aún no tienes una sala abierta';
-    judgeLink.hidden = !hasRoomLink;
-    document.getElementById('pairingsLink').hidden = !hasRoomLink;
-    document.getElementById('staffPairingsLink').hidden = !hasRoomLink;
+    staffPairingsLink.href = makeRoomViewURL('pareos');
+    staffPairingsLink.hidden = !hasRoomLink;
     let currentState = null;
     let roomOwner = null;
     let currentUser = null;
@@ -2282,33 +2333,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         settingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
         const pairingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         let shortCodePromise = null;
-        const shortControl = document.getElementById('shortRoomControl');
-        const shortLink = document.getElementById('shortRoomLink');
         function showShortCode(code) {
           window.currentShortCode = code;
-          const shortURL = new URL(location.href);
-          shortURL.search = '';
-          shortURL.searchParams.set('s', code);
-          shortLink.href = shortURL.href;
-          shortLink.textContent = shortURL.href;
-          shortControl.hidden = false;
-          const staffURL = new URL(shortURL.href);
-          staffURL.searchParams.set('view', 'staff');
-          judgeLink.href = staffURL.href;
-          staffURL.searchParams.set('view', 'pareos');
-          document.getElementById('pairingsLink').href = staffURL.href;
-          document.getElementById('staffPairingsLink').href = staffURL.href;
+          staffPairingsLink.href = makeRoomViewURL('pareos');
           if (document.querySelector('input[name="leftVisualMode"]:checked')?.value === 'tdf') {
             window.generatePairingsQR();
             window.renderLeftVisual();
           }
         }
-        document.getElementById('copyShortRoom').addEventListener('click', async event => {
-          try {
-            await navigator.clipboard.writeText(shortLink.href);
-            event.currentTarget.textContent = 'Copiado';
-          } catch { syncStatus.textContent = 'Selecciona el enlace corto para copiarlo.'; }
-        });
         async function ensureShortCode(existingCode) {
           if (existingCode && /^[A-HJ-NP-Z2-9]{6}$/.test(existingCode)) {
             showShortCode(existingCode);
