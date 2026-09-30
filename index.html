@@ -185,6 +185,20 @@
     body[data-palette="orchid"] { --accent: #bd4ca2; --accent-soft: #f5bce6; --accent-dark: #47233f; --surface: #1e1721; --surface-raised: #38283a; --edge: #82517f; --text: #fff; --muted: #ead9e8; --danger: #ff8989; --glow: #4b2c4a; }
     body[data-palette="lime"] { --accent: #8ba92c; --accent-soft: #def4a3; --accent-dark: #374020; --surface: #1a1e18; --surface-raised: #30382a; --edge: #617543; --text: #fff; --muted: #dce5d1; --danger: #ff8989; --glow: #384c27; }
     body[data-palette="copper"] { --accent: #bd7448; --accent-soft: #ffd1a9; --accent-dark: #443023; --surface: #201a17; --surface-raised: #392c25; --edge: #816046; --text: #fff; --muted: #e9d8cb; --danger: #ff8e82; --glow: #4e3527; }
+    body[data-palette="ember-light"] { --accent: #c65308; --accent-soft: #a44000; --accent-dark: #ffe5d2; --surface: #fff8f2; --surface-raised: #ffffff; --edge: #edb98f; --text: #24170f; --muted: #6a584b; --danger: #bd1e2d; --glow: #ffe2ce; }
+    body[data-palette="ocean-light"] { --accent: #1766b1; --accent-soft: #124f8a; --accent-dark: #deefff; --surface: #f2f8ff; --surface-raised: #ffffff; --edge: #b7d2ed; --text: #14283d; --muted: #52677d; --danger: #bc2032; --glow: #dbeeff; }
+    body[data-palette="forest-light"] { --accent: #187247; --accent-soft: #155e3d; --accent-dark: #dbf4e6; --surface: #f2fbf5; --surface-raised: #ffffff; --edge: #badfc8; --text: #173427; --muted: #53685b; --danger: #b42332; --glow: #dcf4e4; }
+    body[data-palette="violet-light"] { --accent: #6840a5; --accent-soft: #563388; --accent-dark: #eee3ff; --surface: #faf6ff; --surface-raised: #ffffff; --edge: #d1bde9; --text: #291c3d; --muted: #655474; --danger: #b42332; --glow: #eadcff; }
+    body[data-palette="sunset-light"] { --accent: #b9413e; --accent-soft: #98332f; --accent-dark: #ffe4d7; --surface: #fff7f3; --surface-raised: #ffffff; --edge: #f1c3b1; --text: #38201d; --muted: #705954; --danger: #b42332; --glow: #ffe2dc; }
+    body[data-palette="gold-light"] { --accent: #866000; --accent-soft: #755100; --accent-dark: #fff1c5; --surface: #fffaf0; --surface-raised: #ffffff; --edge: #e3d09a; --text: #382e17; --muted: #6b6048; --danger: #b42332; --glow: #fff0c7; }
+    body[data-palette="turquoise-light"] { --accent: #006d73; --accent-soft: #005d63; --accent-dark: #d8f4f2; --surface: #f0fbfb; --surface-raised: #ffffff; --edge: #b4ddda; --text: #143638; --muted: #4e696a; --danger: #b42332; --glow: #d7f2ee; }
+    body[data-palette="crimson-light"] { --accent: #ad2341; --accent-soft: #911d37; --accent-dark: #ffe0e8; --surface: #fff5f7; --surface-raised: #ffffff; --edge: #e9b8c6; --text: #381b24; --muted: #70515a; --danger: #b42332; --glow: #ffdee6; }
+    body[data-palette="ice-light"] { --accent: #3e64a1; --accent-soft: #315585; --accent-dark: #e2eeff; --surface: #f5f9ff; --surface-raised: #ffffff; --edge: #bfd0e7; --text: #1f2e45; --muted: #596a82; --danger: #b42332; --glow: #e0ecff; }
+    body[data-palette="graphite-light"] { --accent: #4d5863; --accent-soft: #414b55; --accent-dark: #e5e9ed; --surface: #f7f8fa; --surface-raised: #ffffff; --edge: #c8cdd2; --text: #252a30; --muted: #5a636b; --danger: #b42332; --glow: #e5e9ed; }
+    body[data-palette="red-light"] { --accent: #b6202a; --accent-soft: #941720; --accent-dark: #ffe2e3; --surface: #fff5f5; --surface-raised: #ffffff; --edge: #efb8bb; --text: #351a1d; --muted: #705153; --danger: #b42332; --glow: #ffe0e0; }
+    body[data-palette="orchid-light"] { --accent: #972c7b; --accent-soft: #802465; --accent-dark: #f8e0f1; --surface: #fff6fc; --surface-raised: #ffffff; --edge: #e5bfdc; --text: #351b30; --muted: #6d5368; --danger: #b42332; --glow: #f7def0; }
+    body[data-palette="lime-light"] { --accent: #586c10; --accent-soft: #4d5c0c; --accent-dark: #e9f3c7; --surface: #fbfced; --surface-raised: #ffffff; --edge: #d3dda9; --text: #2c3518; --muted: #60684b; --danger: #a32332; --glow: #e7f1c7; }
+    body[data-palette="copper-light"] { --accent: #874522; --accent-soft: #71381b; --accent-dark: #f5e0d0; --surface: #fff8f2; --surface-raised: #ffffff; --edge: #dfc0a9; --text: #352317; --muted: #6a584b; --danger: #b42332; --glow: #f5e0d0; }
     body { background: var(--surface); color: var(--text); }
     .container { padding-top: 0; background: var(--surface); }
     .panel { min-height: 100dvh; }
@@ -468,6 +482,20 @@
         <label><input type="radio" name="palette" value="orchid" onchange="applyPalette(this.value)" aria-label="Orquídea"><span class="palette-swatches" style="--swatch-dark:#1e1721;--swatch-accent:#bd4ca2;--swatch-soft:#f5bce6" aria-hidden="true"></span></label>
         <label><input type="radio" name="palette" value="lime" onchange="applyPalette(this.value)" aria-label="Lima oscuro"><span class="palette-swatches" style="--swatch-dark:#1a1e18;--swatch-accent:#8ba92c;--swatch-soft:#def4a3" aria-hidden="true"></span></label>
         <label><input type="radio" name="palette" value="copper" onchange="applyPalette(this.value)" aria-label="Cobre"><span class="palette-swatches" style="--swatch-dark:#201a17;--swatch-accent:#bd7448;--swatch-soft:#ffd1a9" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="ember-light" onchange="applyPalette(this.value)" aria-label="Naranja claro"><span class="palette-swatches" style="--swatch-dark:#fff8f2;--swatch-accent:#c65308;--swatch-soft:#ffb36b" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="ocean-light" onchange="applyPalette(this.value)" aria-label="Azul claro"><span class="palette-swatches" style="--swatch-dark:#f2f8ff;--swatch-accent:#1766b1;--swatch-soft:#8dc7ff" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="forest-light" onchange="applyPalette(this.value)" aria-label="Verde claro"><span class="palette-swatches" style="--swatch-dark:#f2fbf5;--swatch-accent:#187247;--swatch-soft:#9be0b9" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="violet-light" onchange="applyPalette(this.value)" aria-label="Violeta claro"><span class="palette-swatches" style="--swatch-dark:#faf6ff;--swatch-accent:#6840a5;--swatch-soft:#c5a5f5" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="sunset-light" onchange="applyPalette(this.value)" aria-label="Coral claro"><span class="palette-swatches" style="--swatch-dark:#fff7f3;--swatch-accent:#b9413e;--swatch-soft:#ffb19d" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="gold-light" onchange="applyPalette(this.value)" aria-label="Dorado claro"><span class="palette-swatches" style="--swatch-dark:#fffaf0;--swatch-accent:#866000;--swatch-soft:#f2d27a" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="turquoise-light" onchange="applyPalette(this.value)" aria-label="Turquesa claro"><span class="palette-swatches" style="--swatch-dark:#f0fbfb;--swatch-accent:#006d73;--swatch-soft:#83d9d5" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="crimson-light" onchange="applyPalette(this.value)" aria-label="Frambuesa clara"><span class="palette-swatches" style="--swatch-dark:#fff5f7;--swatch-accent:#ad2341;--swatch-soft:#f5a5ba" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="ice-light" onchange="applyPalette(this.value)" aria-label="Hielo claro"><span class="palette-swatches" style="--swatch-dark:#f5f9ff;--swatch-accent:#3e64a1;--swatch-soft:#a8c9f5" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="graphite-light" onchange="applyPalette(this.value)" aria-label="Grafito claro"><span class="palette-swatches" style="--swatch-dark:#f7f8fa;--swatch-accent:#4d5863;--swatch-soft:#b7c0c8" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="red-light" onchange="applyPalette(this.value)" aria-label="Rojo claro"><span class="palette-swatches" style="--swatch-dark:#fff5f5;--swatch-accent:#b6202a;--swatch-soft:#f6a2a5" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="orchid-light" onchange="applyPalette(this.value)" aria-label="Orquídea clara"><span class="palette-swatches" style="--swatch-dark:#fff6fc;--swatch-accent:#972c7b;--swatch-soft:#e6a6d5" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="lime-light" onchange="applyPalette(this.value)" aria-label="Lima clara"><span class="palette-swatches" style="--swatch-dark:#fbfced;--swatch-accent:#586c10;--swatch-soft:#cadc7c" aria-hidden="true"></span></label>
+          <label><input type="radio" name="palette" value="copper-light" onchange="applyPalette(this.value)" aria-label="Cobre claro"><span class="palette-swatches" style="--swatch-dark:#fff8f2;--swatch-accent:#874522;--swatch-soft:#e8b28e" aria-hidden="true"></span></label>
         </fieldset>
       </details>
       <div id="imagenes" class="tab-content active">
@@ -1810,7 +1838,7 @@ module.exports = QRCode;
       document.getElementById('timerInput').value = savedMinutes;
     }
 
-    const palettes = new Set(['ember', 'ocean', 'forest', 'violet', 'sunset', 'gold', 'turquoise', 'crimson', 'ice', 'graphite', 'red', 'orchid', 'lime', 'copper']);
+    const palettes = new Set(['ember', 'ocean', 'forest', 'violet', 'sunset', 'gold', 'turquoise', 'crimson', 'ice', 'graphite', 'red', 'orchid', 'lime', 'copper', 'ember-light', 'ocean-light', 'forest-light', 'violet-light', 'sunset-light', 'gold-light', 'turquoise-light', 'crimson-light', 'ice-light', 'graphite-light', 'red-light', 'orchid-light', 'lime-light', 'copper-light']);
     let savedPalette = 'ember';
     let savedMinutes = 2;
     function applyPalette(name) {
