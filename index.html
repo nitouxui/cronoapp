@@ -10,8 +10,8 @@
     #languageControl { position: fixed; z-index: 60; top: 14px; left: 14px; }
     #languageSelect { min-width: 82px; height: 38px; padding: 0 30px 0 12px; border: 1px solid var(--edge, #66402b); border-radius: 10px; background: var(--surface-raised, #24252a); color: var(--text, #fff); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
     #languageSelect:focus-visible { outline: 3px solid var(--accent-soft, #ffad64); outline-offset: 2px; }
-    body.no-room #languageControl { top: 18px; left: auto; right: 22px; }
-    @media (max-width: 600px) { body.no-room #languageControl { top: 12px; right: 12px; } #languageSelect { height: 36px; } }
+    body.no-room #languageControl { top: 18px; left: 22px; right: auto; }
+    @media (max-width: 600px) { body.no-room #languageControl { top: 12px; left: 12px; right: auto; } #languageSelect { height: 36px; } }
     .container { display: flex; height: 100vh; }
     .panel { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .edit-button { position: absolute; top: 10px; right: 10px; z-index: 10; }
@@ -419,8 +419,8 @@
       <div class="welcome-copy">
         <span class="welcome-eyebrow">TEMPORIZADOR PARA TORNEOS</span>
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
-        <p>Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
-        <div class="welcome-features"><span>Sincronizado en vivo</span><span>Código TV</span><span>Pareos del torneo</span></div>
+        <p>Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
+        <div class="welcome-features"><span>Sincronizado en vivo</span><span>Temporizador para staff</span><span>Pareos del torneo</span></div>
       </div>
       <div id="landingLogin" class="landing-login">
         <section class="landing-control-entry" aria-labelledby="landingControlTitle">
@@ -2578,6 +2578,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
     const enableSoundButton = document.getElementById('enableSound');
+    if (!isReadOnly && hasRoomLink) {
+      controlSync.classList.add('collapsed');
+      const controlButton = document.getElementById('syncToggle');
+      controlButton.setAttribute('aria-expanded', 'false');
+      controlButton.setAttribute('aria-label', 'Abrir control de sala');
+      controlButton.title = 'Abrir control de sala';
+    }
     if (isJudge) {
       const callStopwatch = document.getElementById('callStopwatch');
       const callStopwatchStatus = document.getElementById('callStopwatchStatus');
@@ -3098,7 +3105,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         en: {
           'Temporizador': 'Timer', 'TEMPORIZADOR PARA TORNEOS': 'TOURNAMENT TIMER',
           'La ronda avanza.': 'The round moves on.', 'Todos ven el mismo tiempo.': 'Everyone sees the same time.',
-          'Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the clock from your room, display it on screen, and share a synchronized view with your staff.',
+          'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the timer from your room, display it on screen, and share a synchronized view with your staff.',
           'Sincronizado en vivo': 'Live sync', 'Código TV': 'TV code', 'Pareos del torneo': 'Tournament pairings',
           'CONTROL DE SALA': 'ROOM CONTROL', 'Administra tu temporizador': 'Manage your timer',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Sign in with Google to open and manage your room.',
@@ -3202,7 +3209,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         pt: {
           'Temporizador': 'Temporizador', 'TEMPORIZADOR PARA TORNEOS': 'TEMPORIZADOR PARA TORNEIOS',
           'La ronda avanza.': 'A rodada avança.', 'Todos ven el mismo tiempo.': 'Todos veem o mesmo tempo.',
-          'Controla el reloj desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o relógio da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
+          'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o temporizador da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
           'Sincronizado en vivo': 'Sincronizado ao vivo', 'Código TV': 'Código da TV', 'Pareos del torneo': 'Emparceiramentos do torneio',
           'CONTROL DE SALA': 'CONTROLE DA SALA', 'Administra tu temporizador': 'Gerencie seu temporizador',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Faça login com o Google para abrir e controlar sua sala.',
