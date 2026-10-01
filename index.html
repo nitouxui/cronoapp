@@ -664,6 +664,7 @@
           <option value="upload">Subir una imagen</option>
           <option value="tdf">Subir TDF y generar QR de pareos</option>
         </select>
+        <p id="tdfDisabledNotice" class="settings-hint">La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.</p>
         <div id="qrControls">
           <label for="qrUrl">Enlace de destino del QR:</label>
           <input type="url" id="qrUrl" placeholder="https://ejemplo.com/torneo" inputmode="url" autocomplete="url">
@@ -1969,6 +1970,15 @@ module.exports = QRCode;
 })();
 </script>
   <script>
+    window.TDF_UPLOAD_ENABLED = false;
+    const tdfModeOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
+    const tdfFileInput = document.getElementById('tdfInput');
+    const tdfPublishButton = document.getElementById('publishPairings');
+    if (tdfModeOption) tdfModeOption.disabled = !window.TDF_UPLOAD_ENABLED;
+    if (tdfFileInput) tdfFileInput.disabled = !window.TDF_UPLOAD_ENABLED;
+    if (tdfPublishButton) tdfPublishButton.disabled = !window.TDF_UPLOAD_ENABLED;
+    document.getElementById('tdfDisabledNotice').hidden = window.TDF_UPLOAD_ENABLED;
+
     function openModal() {
       const modal = document.getElementById('modal');
       const editButton = document.getElementById('editToggle');
@@ -2044,6 +2054,7 @@ module.exports = QRCode;
 
     async function saveSettings() {
       const mode = document.getElementById('leftVisualModeSelect').value;
+      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
       if (mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
       if (mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
@@ -2103,7 +2114,10 @@ module.exports = QRCode;
         uploadedImageSrc = images.uploadedImageSrc || '';
         updateUploadedImageRemoveButton();
         document.getElementById('qrUrl').value = images.qrUrl || '';
-        const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
+        const requestedMode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
+        const mode = requestedMode === 'tdf' && !window.TDF_UPLOAD_ENABLED
+          ? (images.qrUrl ? 'qr' : uploadedImageSrc ? 'upload' : 'qr')
+          : requestedMode;
         document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
         else qrImageSrc = '';
@@ -2312,7 +2326,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
-      const src = mode === 'qr' ? qrImageSrc : mode === 'tdf' ? pairingsQrSrc : uploadedImageSrc;
+      const src = mode === 'qr' ? qrImageSrc : mode === 'tdf' && window.TDF_UPLOAD_ENABLED ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
       if (src) {
         image.src = src;
         image.alt = mode === 'qr' ? 'Código QR del enlace del torneo' : mode === 'tdf' ? 'Código QR para ver los pareos' : 'Imagen del torneo';
@@ -2324,7 +2338,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
 
     function switchLeftVisualMode() {
-      const mode = document.getElementById('leftVisualModeSelect').value;
+      const selector = document.getElementById('leftVisualModeSelect');
+      let mode = selector.value;
+      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) {
+        mode = document.getElementById('qrUrl').value.trim() ? 'qr' : uploadedImageSrc ? 'upload' : 'qr';
+        selector.value = mode;
+      }
       document.getElementById('qrControls').hidden = mode !== 'qr';
       document.getElementById('imageControls').hidden = mode !== 'upload';
       document.getElementById('tdfControls').hidden = mode !== 'tdf';
@@ -2896,6 +2915,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       const images = currentRoomSettings.images || {};
       const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
+      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) {
+        staffPairingsLink.hidden = true;
+        return;
+      }
       if (mode === 'tdf' && staffPairingsAvailable) {
         staffPairingsLink.href = makeRoomViewURL('pareos');
         staffPairingsLink.hidden = false;
@@ -3089,6 +3112,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             catch { document.getElementById('pairingsStatus').textContent = 'No se pudieron leer los pareos.'; }
           }, () => { document.getElementById('pairingsStatus').textContent = 'No se pudo acceder a los pareos.'; });
           if (!isReadOnly) document.getElementById('publishPairings').addEventListener('click', async () => {
+            if (!window.TDF_UPLOAD_ENABLED) return;
             const status = document.getElementById('tdfStatus');
             const file = document.getElementById('tdfInput').files[0];
             if (!canControl) { status.textContent = 'Ingresa como propietario de la sala para publicar.'; return; }
@@ -3304,6 +3328,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Contenido del panel izquierdo': 'Left panel content',
           'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
           'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
+          'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'TDF uploads are temporarily disabled while I check their use with Play! Pokémon.',
           'Enlace de destino del QR:': 'QR destination link:', 'Generar QR': 'Create QR code',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Image for the left panel (max. 2 MB):',
           'Quitar imagen': 'Remove image', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Tournament .tdf file (max. 2 MB)',
@@ -3420,6 +3445,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
           'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
           'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
+          'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'O envio de TDF está temporariamente desativado enquanto consulto seu uso com o Play! Pokémon.',
           'Enlace de destino del QR:': 'Link de destino do QR:', 'Generar QR': 'Gerar QR',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Imagem para o painel esquerdo (máximo 2 MB):',
           'Quitar imagen': 'Remover imagem', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Arquivo .tdf exportado do torneio (máximo 2 MB)',
