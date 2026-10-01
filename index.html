@@ -144,6 +144,7 @@
     body:not(.no-room) .room-actions-menu-content > .edit-button,
     body:not(.no-room) .room-actions-menu-content > #syncLogout { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; box-shadow: none; }
     body:not(.no-room) #syncToggle { position: static; white-space: nowrap; }
+    body:not(.no-room) .room-actions-menu #syncToggle { display: none; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"],
     body:not(.no-room) .room-actions-menu-content > .edit-button:hover,
     body:not(.no-room) .room-actions-menu-content > .edit-button[aria-expanded="true"],
@@ -2568,15 +2569,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const selector = document.getElementById('paletteSelector');
       if (selector?.open && !selector.contains(event.target)) selector.open = false;
     });
-    document.getElementById('syncToggle').addEventListener('click', () => {
-      const modal = document.getElementById('modal');
-      if (modal.style.display === 'flex') closeModal();
+    document.getElementById('roomActionsMenu').addEventListener('toggle', event => {
+      if (document.body.classList.contains('no-room')) return;
+      const menu = event.currentTarget;
       const panel = document.getElementById('controlSync');
       const button = document.getElementById('syncToggle');
-      const collapsed = panel.classList.toggle('collapsed');
-      button.setAttribute('aria-expanded', String(!collapsed));
-      button.setAttribute('aria-label', collapsed ? 'Abrir control de sala' : 'Cerrar control de sala');
-      button.title = collapsed ? 'Abrir control de sala' : 'Cerrar control de sala';
+      panel.classList.toggle('collapsed', !menu.open);
+      button.setAttribute('aria-expanded', String(menu.open));
+      button.setAttribute('aria-label', menu.open ? 'Cerrar control de sala' : 'Abrir control de sala');
+      button.title = menu.open ? 'Cerrar control de sala' : 'Abrir control de sala';
     });
 
     document.addEventListener('click', event => {
