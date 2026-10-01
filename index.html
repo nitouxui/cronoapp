@@ -63,9 +63,6 @@
     #enableSound { display: none; position: fixed; z-index: 25; left: 50%; bottom: 20px; transform: translateX(-50%); align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border: 1px solid #ffffff55; border-radius: 999px; background: #202734; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0006; }
     #enableSound:not([hidden]) { display: inline-flex; }
     #enableSound[aria-pressed="true"] { border-color: #71d7a4; color: #b8f5d2; }
-    #staffSoundTest { display: none; position: fixed; z-index: 26; right: 16px; bottom: 16px; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 14px; border: 1px solid #ffffff55; border-radius: 999px; background: #202734; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0006; }
-    body.viewer-mode #staffSoundTest:not([hidden]) { display: inline-flex; }
-    #staffSoundTestStatus { position: fixed; z-index: 26; right: 16px; bottom: 66px; max-width: min(340px, calc(100vw - 32px)); color: #fff; font-size: 13px; text-align: right; }
     #controlSync { position: fixed; bottom: 12px; right: 12px; z-index: 12; background: #fff; color: #111; padding: 10px; border-radius: 8px; width: min(340px, calc(100vw - 24px)); box-shadow: 0 1px 8px #0003; font-size: 13px; }
     #controlSync.collapsed { width: 44px; padding: 0; border-radius: 50%; background: transparent; box-shadow: none; }
     #controlSync.collapsed .sync-body { display: none; }
@@ -439,8 +436,6 @@
   </section>
   <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
-  <button id="staffSoundTest" type="button" hidden>🔊 Probar alarma</button>
-  <div id="staffSoundTestStatus" role="status" aria-live="polite"></div>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
     <p id="pairingsCurrentRound"></p>
@@ -2569,8 +2564,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
     const enableSoundButton = document.getElementById('enableSound');
-    const staffSoundTest = document.getElementById('staffSoundTest');
-    const staffSoundTestStatus = document.getElementById('staffSoundTestStatus');
     async function unlockViewSound() {
       const ready = await prepareSound();
       if (ready) {
@@ -2593,25 +2586,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       window.addEventListener('pageshow', unlockViewSound);
       window.addEventListener('focus', unlockViewSound);
       unlockViewSound();
-    }
-    if (isJudge) {
-      staffSoundTest.hidden = false;
-      staffSoundTest.addEventListener('click', async () => {
-        let ready = await prepareSound();
-        if (!ready) {
-          await unlockViewSound();
-          ready = enableSoundButton.hidden;
-        }
-        if (!ready) {
-          staffSoundTestStatus.textContent = 'No se pudo activar el audio. Toca «Activar sonido» y vuelve a probar.';
-          return;
-        }
-        enableSoundButton.hidden = true;
-        playEndSound();
-        staffSoundTestStatus.textContent = 'Prueba enviada. Si no la escuchas, revisa el volumen del dispositivo.';
-        window.clearTimeout(staffSoundTestStatus.hideTimer);
-        staffSoundTestStatus.hideTimer = window.setTimeout(() => { staffSoundTestStatus.textContent = ''; }, 6000);
-      });
     }
     if (!isReadOnly && !hasRoomLink) {
       document.querySelector('.landing-control-entry').append(controlSync);
@@ -3094,9 +3068,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Aún no se han publicado pareos para esta sala.': 'No pairings have been published for this room yet.',
           'Última de cada grupo': 'Last player in each group', 'Ingresa un código válido de 6 caracteres.': 'Enter a valid 6-character code.',
           '🔔 Activar sonido': '🔔 Enable sound', '🔔 Toca para activar sonido': '🔔 Tap to enable sound',
-          '🔊 Probar alarma': '🔊 Test alarm', 'Sincronizado': 'Synchronized',
-          'No se pudo activar el audio. Toca «Activar sonido» y vuelve a probar.': 'Audio could not be enabled. Tap “Enable sound” and try again.',
-          'Prueba enviada. Si no la escuchas, revisa el volumen del dispositivo.': 'Test sent. If you cannot hear it, check your device volume.',
+          'Sincronizado': 'Synchronized',
           'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Could not copy the link. Check your browser permissions.',
           'El correo de esta cuenta no está verificado.': 'This account email is not verified.',
           'Buscando tu sala…': 'Looking for your room…', 'Sala no encontrada. Abre tu sala.': 'Room not found. Open your room.',
@@ -3197,9 +3169,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Aún no se han publicado pareos para esta sala.': 'Ainda não há emparceiramentos publicados para esta sala.',
           'Última de cada grupo': 'Último de cada grupo', 'Ingresa un código válido de 6 caracteres.': 'Digite um código válido de 6 caracteres.',
           '🔔 Activar sonido': '🔔 Ativar som', '🔔 Toca para activar sonido': '🔔 Toque para ativar o som',
-          '🔊 Probar alarma': '🔊 Testar alarme', 'Sincronizado': 'Sincronizado',
-          'No se pudo activar el audio. Toca «Activar sonido» y vuelve a probar.': 'Não foi possível ativar o áudio. Toque em “Ativar som” e tente novamente.',
-          'Prueba enviada. Si no la escuchas, revisa el volumen del dispositivo.': 'Teste enviado. Se não ouvir, verifique o volume do dispositivo.',
+          'Sincronizado': 'Sincronizado',
           'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Não foi possível copiar o link. Verifique as permissões do navegador.',
           'El correo de esta cuenta no está verificado.': 'O e-mail desta conta não foi verificado.',
           'Buscando tu sala…': 'Procurando sua sala…', 'Sala no encontrada. Abre tu sala.': 'Sala não encontrada. Abra sua sala.',
