@@ -10,7 +10,7 @@
     #languageControl { position: fixed; z-index: 60; top: 14px; left: 14px; }
     body:not(.no-room) #languageControl, body.code-entry-mode #languageControl { display: none; }
     #languageSelect { min-width: 82px; height: 38px; padding: 0 40px 0 12px; appearance: none; -webkit-appearance: none; border: 1px solid var(--edge, #69727b); border-radius: 10px; background: var(--surface-raised, #2a3036); color: var(--text, #fff); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
-    #languageControl::after { content: ""; position: absolute; top: calc(50% - 5px); right: 14px; width: 8px; height: 8px; border-right: 2px solid var(--muted, #d1d6da); border-bottom: 2px solid var(--muted, #d1d6da); transform: rotate(45deg); pointer-events: none; }
+    #languageControl::after { content: ""; position: absolute; top: calc(50% - 5px); right: 18px; width: 8px; height: 8px; border-right: 2px solid var(--muted, #d1d6da); border-bottom: 2px solid var(--muted, #d1d6da); transform: rotate(45deg); pointer-events: none; }
     #languageSelect:focus-visible { outline: 3px solid var(--accent-soft, #ffad64); outline-offset: 2px; }
     body.no-room #languageControl { top: 18px; left: 22px; right: auto; }
     @media (max-width: 600px) { #languageControl { position: absolute; } body.no-room #languageControl { top: 12px; left: 12px; right: auto; } #languageSelect { height: 36px; } }
@@ -88,9 +88,10 @@
     #controlSync { max-width: 340px; }
     #controlSync a { display: inline-block; margin-top: 6px; }
     #controlSync [hidden] { display: none !important; }
-    .editor-language-control { margin: 0 0 18px; }
+    .editor-language-control { position: relative; margin: 0 0 18px; }
     .editor-language-control label { display: block; margin: 0 0 6px; font-weight: 700; }
-    #editorLanguageSelect { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface); color: var(--text); font: inherit; }
+    .editor-language-control::after { content: ""; position: absolute; top: 50px; right: 17px; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); pointer-events: none; }
+    #editorLanguageSelect { width: 100%; min-height: 40px; padding: 0 42px 0 12px; appearance: none; -webkit-appearance: none; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface); color: var(--text); font: inherit; }
     #languagePrompt { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: #0b111bd9; }
     #languagePrompt[hidden] { display: none !important; }
     body.language-prompt-open { overflow: hidden; }
@@ -410,12 +411,14 @@
     body[data-timer-font="classic"] { --timer-font: Georgia, "Times New Roman", serif; }
     body #timer, body #judgeTimer { font-family: var(--timer-font, sans-serif); }
     body:not(.no-room) #modal .timer-font-setting { margin: 0 0 18px; }
-    body:not(.no-room) #modal .palette-selector { position: relative; margin: 0 0 18px; }
-    body:not(.no-room) #modal .palette-selector-trigger { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 44px; margin: 7px 0 16px; padding: 0 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
+    body:not(.no-room) #modal .palette-setting { margin: 0 0 18px; }
+    body:not(.no-room) #modal .palette-setting-label { display: block; margin: 0 0 6px; color: var(--text); font-size: 14px; font-weight: 700; }
+    body:not(.no-room) #modal .palette-selector { position: relative; margin: 0; }
+    body:not(.no-room) #modal .palette-selector-trigger { display: flex; align-items: center; justify-content: flex-start; gap: 14px; height: 48px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
     body:not(.no-room) #modal .palette-selector-trigger::-webkit-details-marker { display: none; }
     body:not(.no-room) #modal .palette-selector-trigger:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
-    body:not(.no-room) #modal .palette-selector-trailing { display: flex; align-items: center; gap: 9px; }
-    body:not(.no-room) #modal .palette-selector-preview { width: 74px; min-width: 74px; max-width: none; height: 26px; border-radius: 7px; }
+    body:not(.no-room) #modal .palette-selector-trailing { display: flex; flex: 1; align-items: center; gap: 12px; }
+    body:not(.no-room) #modal .palette-selector-preview { flex: 1; width: 100%; min-width: 0; max-width: none; height: 26px; border-radius: 7px; }
     body:not(.no-room) #modal .palette-selector-chevron { display: block; flex: 0 0 18px; width: 18px; height: 18px; color: var(--muted); transition: transform .15s ease; }
     body:not(.no-room) #modal .palette-selector[open] .palette-selector-chevron { transform: rotate(180deg); }
     body:not(.no-room) #modal .palette-options { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; display: none; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; width: 100%; margin: 0; padding: 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); box-shadow: 0 18px 48px #0009; }
@@ -566,9 +569,10 @@
           <option value="pt">Português</option>
         </select>
       </div>
+      <div class="palette-setting" role="group" aria-labelledby="paletteSelectorLabel">
+      <span id="paletteSelectorLabel" class="palette-setting-label">Paleta de colores</span>
       <details id="paletteSelector" class="palette-selector">
-        <summary class="palette-selector-trigger">
-          <span>Paleta de colores</span>
+        <summary class="palette-selector-trigger" aria-labelledby="paletteSelectorLabel selectedPaletteName">
           <span class="palette-selector-trailing">
             <span id="selectedPaletteSwatches" class="palette-swatches palette-selector-preview" style="--swatch-dark:#16191d;--swatch-accent:#8f9ba8;--swatch-soft:#f0f2f5" aria-hidden="true"></span>
             <svg class="palette-selector-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
@@ -607,6 +611,7 @@
           <label><input type="radio" name="palette" value="copper-light" onchange="applyPalette(this.value)" aria-label="Cobre claro"><span class="palette-swatches" style="--swatch-dark:#fff8f2;--swatch-accent:#874522;--swatch-soft:#e8b28e" aria-hidden="true"></span></label>
         </fieldset>
       </details>
+      </div>
       <div class="timer-font-setting">
         <label for="timerFontSelect">Tipografía del reloj</label>
         <select id="timerFontSelect" class="editor-select" onchange="applyTimerFont(this.value)">
