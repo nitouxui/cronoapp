@@ -231,6 +231,12 @@
     .control-bar #resetButton { color: var(--accent-soft); background: var(--accent-dark); border-color: var(--accent); }
     #roomWelcome, #judgeView { background: var(--surface); color: var(--text); }
     #judgeTimer { color: var(--text); }
+    #roomWelcome, .container, #judgeView, #pairingsView { opacity: 1; transition: opacity 180ms ease; }
+    body.palette-fade #roomWelcome, body.palette-fade .container,
+    body.palette-fade #judgeView, body.palette-fade #pairingsView { opacity: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      #roomWelcome, .container, #judgeView, #pairingsView { transition: none; }
+    }
     #controlSync { border: 2px solid var(--accent); }
     #controlSync.collapsed { border: 0; }
     #syncToggle { border-color: var(--accent); }
@@ -1921,9 +1927,26 @@ module.exports = QRCode;
       if (selector) selector.value = font;
     }
     window.applyTimerFont = applyTimerFont;
-    function applyPalette(name) {
+    let paletteFadeTimer = null;
+    function applyPalette(name, fade = false) {
       const palette = palettes.has(name) ? name : 'graphite';
-      document.body.dataset.palette = palette;
+      const body = document.body;
+      if (paletteFadeTimer) window.clearTimeout(paletteFadeTimer);
+      paletteFadeTimer = null;
+      if (fade && body.dataset.palette !== palette
+        && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        body.classList.add('palette-fade');
+        paletteFadeTimer = window.setTimeout(() => {
+          body.dataset.palette = palette;
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+            body.classList.remove('palette-fade');
+            paletteFadeTimer = null;
+          }));
+        }, 180);
+      } else {
+        body.classList.remove('palette-fade');
+        body.dataset.palette = palette;
+      }
       const radio = document.querySelector(`input[name="palette"][value="${palette}"]`);
       const preview = document.getElementById('selectedPaletteSwatches');
       const accessibleName = document.getElementById('selectedPaletteName');
@@ -1977,7 +2000,7 @@ module.exports = QRCode;
       if (!settings || typeof settings !== 'object') return;
       savedPalette = palettes.has(settings.palette) ? settings.palette : 'graphite';
       document.querySelector(`input[name="palette"][value="${savedPalette}"]`).checked = true;
-      applyPalette(savedPalette);
+      applyPalette(savedPalette, true);
       savedTimerFont = Object.prototype.hasOwnProperty.call(timerFonts, settings.timerFont) ? settings.timerFont : 'system';
       applyTimerFont(savedTimerFont);
       const images = settings.images;
@@ -2983,7 +3006,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
               updateStaffPairingsLink();
               if (isJudge || isPairings) {
-                window.applyPalette(currentRoomSettings.palette);
+                window.applyPalette(currentRoomSettings.palette, true);
                 if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
               } else window.loadSettings(currentRoomSettings);
             } catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
