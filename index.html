@@ -12,7 +12,7 @@
     #languageControl::after { content: ""; position: absolute; top: calc(50% - 5px); right: 14px; width: 8px; height: 8px; border-right: 2px solid var(--muted, #d1d6da); border-bottom: 2px solid var(--muted, #d1d6da); transform: rotate(45deg); pointer-events: none; }
     #languageSelect:focus-visible { outline: 3px solid var(--accent-soft, #ffad64); outline-offset: 2px; }
     body.no-room #languageControl { top: 18px; left: 22px; right: auto; }
-    @media (max-width: 600px) { body.no-room #languageControl { top: 12px; left: 12px; right: auto; } #languageSelect { height: 36px; } }
+    @media (max-width: 600px) { #languageControl { position: absolute; } body.no-room #languageControl { top: 12px; left: 12px; right: auto; } #languageSelect { height: 36px; } }
     .container { display: flex; height: 100vh; }
     .panel { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .edit-button { position: absolute; top: 10px; right: 10px; z-index: 10; }
@@ -63,7 +63,7 @@
     #roomWelcome > div { max-width: 560px; }
     #roomWelcome h1 { font-size: clamp(28px, 6vw, 48px); margin-bottom: 12px; }
     #roomWelcome p { font-size: 18px; line-height: 1.5; }
-    #judgeTimer { font-size: clamp(72px, 19vw, 220px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    #judgeTimer { max-width: 100%; font-size: clamp(48px, 13vw, 108px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; white-space: nowrap; }
     .staff-timer-module { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 12px 36px #0004; }
     .staff-timer-module h2 { margin: 0 0 8px; color: var(--muted); font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     #callStopwatch { color: var(--text); font-size: clamp(48px, 10vw, 68px); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -462,7 +462,7 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
@@ -3177,7 +3177,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Generando…': 'Generating…', 'Duración del temporizador': 'Timer duration', 'Guardar tiempo': 'Save time',
           'Iniciar sesión con Google': 'Sign in with Google', 'Ir al control de mi sala': 'Go to my room control',
           'Staff': 'Staff', 'Pareos': 'Pairings', 'Editar': 'Edit', 'Cerrar sesión': 'Sign out',
-          'Salir sala': 'Leave room', 'Navegación de Staff': 'Staff navigation',
+          'Salir de la sala': 'Leave room', 'Navegación de Staff': 'Staff navigation',
           'LISTO PARA INICIAR': 'READY TO START', 'Iniciar': 'Start', 'Pausar': 'Pause', 'Reiniciar': 'Reset',
           'Editar temporizador': 'Edit timer', 'Ajusta el contenido y la apariencia de la pantalla.': 'Adjust the screen content and appearance.',
           '×': '×', 'Paleta de colores': 'Color palette', 'Naranja nocturno': 'Night orange',
@@ -3287,7 +3287,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Generando…': 'Gerando…', 'Duración del temporizador': 'Duração do temporizador', 'Guardar tiempo': 'Salvar tempo',
           'Iniciar sesión con Google': 'Entrar com o Google', 'Ir al control de mi sala': 'Acessar o controle da minha sala',
           'Staff': 'Equipe', 'Pareos': 'Emparceiramentos', 'Editar': 'Editar', 'Cerrar sesión': 'Sair',
-          'Salir sala': 'Sair da sala', 'Navegación de Staff': 'Navegação da equipe',
+          'Salir de la sala': 'Sair da sala', 'Navegación de Staff': 'Navegação da equipe',
           'LISTO PARA INICIAR': 'PRONTO PARA COMEÇAR', 'Iniciar': 'Iniciar', 'Pausar': 'Pausar', 'Reiniciar': 'Reiniciar',
           'Editar temporizador': 'Editar temporizador', 'Ajusta el contenido y la apariencia de la pantalla.': 'Ajuste o conteúdo e a aparência da tela.',
           '×': '×', 'Paleta de colores': 'Paleta de cores', 'Naranja nocturno': 'Laranja noturno',
