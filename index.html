@@ -52,6 +52,8 @@
     .pairing-player small strong { color: var(--accent-soft); }
     #pairingsStatus { color: var(--muted); line-height: 1.5; }
     #pairingsStatus:empty { display: none; }
+    #pairingsStaffLink { position: fixed; z-index: 15; top: 12px; right: 12px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
+    #pairingsStaffLink[hidden] { display: none; }
     .staff-top-actions { position: fixed; z-index: 15; top: 12px; right: 12px; display: flex; align-items: center; gap: 8px; }
     #staffPairingsLink, #exitStaffRoom { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
     #exitStaffRoom { border-color: var(--accent); background: var(--accent); color: #fff; }
@@ -417,7 +419,7 @@
     body:not(.no-room) #modal .palette-selector-trigger { display: flex; align-items: center; justify-content: flex-start; gap: 14px; height: 48px; margin: 0; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
     body:not(.no-room) #modal .palette-selector-trigger::-webkit-details-marker { display: none; }
     body:not(.no-room) #modal .palette-selector-trigger:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
-    body:not(.no-room) #modal .palette-selector-trailing { display: flex; flex: 1; align-items: center; gap: 12px; }
+    body:not(.no-room) #modal .palette-selector-trailing { display: flex; flex: 1; align-items: center; gap: 12px; width: 100%; min-width: 0; }
     body:not(.no-room) #modal .palette-selector-preview { flex: 1; width: 100%; min-width: 0; max-width: none; height: 26px; border-radius: 7px; }
     body:not(.no-room) #modal .palette-selector-chevron { display: block; flex: 0 0 18px; width: 18px; height: 18px; color: var(--muted); transition: transform .15s ease; }
     body:not(.no-room) #modal .palette-selector[open] .palette-selector-chevron { transform: rotate(180deg); }
@@ -493,7 +495,7 @@
   </section>
   <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
-  <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
+  <section id="pairingsView" aria-label="Pareos del torneo"><a id="pairingsStaffLink" href="/staff/" hidden>← Volver a Staff</a><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
     <p id="pairingsCurrentRound"></p>
     <p id="pairingsStatus" role="status">Conectando…</p>
@@ -2760,11 +2762,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const googleButton = document.getElementById('googleLogin');
     if (!isReadOnly && !hasRoomLink) googleButton.hidden = false;
     const staffPairingsLink = document.getElementById('staffPairingsLink');
+    const pairingsStaffLink = document.getElementById('pairingsStaffLink');
     const copyLinkFeedback = document.getElementById('copyLinkFeedback');
     function makeRoomViewURL(view) {
       const url = new URL(location.href);
       const code = window.currentShortCode || rawCode;
-      if (view === 'staff' || view === 'pantalla') url.pathname = view === 'staff' ? '/staff/' : '/tv/';
+      if (view === 'staff' || view === 'pantalla' || view === 'pareos')
+        url.pathname = view === 'staff' ? '/staff/' : view === 'pantalla' ? '/tv/' : '/';
       url.searchParams.delete('view');
       url.searchParams.delete('entry');
       if (code) {
@@ -2776,6 +2780,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       url.searchParams.set('view', view);
       return url.href;
+    }
+    if (isPairings && hasRoomLink) {
+      pairingsStaffLink.href = makeRoomViewURL('staff');
+      pairingsStaffLink.hidden = false;
     }
     async function copyRoomView(view, label) {
       const value = makeRoomViewURL(view);
@@ -2830,6 +2838,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
 
     function updateStaffPairingsLink(pairingsExist = staffPairingsAvailable) {
       staffPairingsAvailable = Boolean(pairingsExist);
+      staffPairingsLink.removeAttribute('target');
+      staffPairingsLink.removeAttribute('rel');
       if (!isJudge || !hasRoomLink) {
         staffPairingsLink.hidden = true;
         return;
@@ -2846,6 +2856,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           const externalLink = new URL(images.qrUrl);
           if (['http:', 'https:'].includes(externalLink.protocol)) {
             staffPairingsLink.href = externalLink.href;
+            staffPairingsLink.target = '_blank';
+            staffPairingsLink.rel = 'noopener noreferrer';
             staffPairingsLink.hidden = false;
             return;
           }
@@ -3215,7 +3227,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Ingresa el código de sala': 'Enter room code', 'Acceder a vista Staff': 'Open Staff view',
           'Ingresa el código de sala para abrir las herramientas de Staff.': 'Enter the room code to open Staff tools.',
           'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Enter the room code to display the timer on a screen.',
-          'Continuar': 'Continue', 'Ingresar a Staff': 'Open Staff', 'Volver al inicio': 'Back to home',
+          'Continuar': 'Continue', 'Ingresar a Staff': 'Open Staff', 'Volver al inicio': 'Back to home', '← Volver a Staff': '← Back to Staff',
           'Configurando…': 'Setting up…', 'Conectando…': 'Connecting…', 'Conectando': 'Connecting',
           'Ronda': 'Round', 'Categoría del jugador': 'Player category', 'Todas': 'All',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
@@ -3328,7 +3340,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Ingresa el código de sala': 'Digite o código da sala', 'Acceder a vista Staff': 'Acessar a vista Staff',
           'Ingresa el código de sala para abrir las herramientas de Staff.': 'Digite o código da sala para abrir as ferramentas de Staff.',
           'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Digite o código da sala para exibir o temporizador em uma tela.',
-          'Continuar': 'Continuar', 'Ingresar a Staff': 'Acessar Staff', 'Volver al inicio': 'Voltar ao início',
+          'Continuar': 'Continuar', 'Ingresar a Staff': 'Acessar Staff', 'Volver al inicio': 'Voltar ao início', '← Volver a Staff': '← Voltar para Staff',
           'Configurando…': 'Configurando…', 'Conectando…': 'Conectando…', 'Conectando': 'Conectando',
           'Ronda': 'Rodada', 'Categoría del jugador': 'Categoria do jogador', 'Todas': 'Todas',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
