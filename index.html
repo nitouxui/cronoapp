@@ -263,6 +263,14 @@
     .welcome-features span { border: 1px solid var(--edge); background: var(--surface-raised); border-radius: 99px; padding: 9px 14px; color: var(--text); font-size: 14px; }
     body.no-room .landing-login { width: 100%; display: grid; gap: 16px; }
     .short-code-entry, .landing-control-entry { min-width: 0; padding: clamp(20px, 2.6vw, 30px); border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 14px 42px #0005; }
+    .short-code-entry { display: none; }
+    body.code-entry-mode #roomWelcome { align-items: center; padding: 80px 20px 32px; }
+    body.code-entry-mode #roomWelcome .welcome-shell { width: min(100%, 560px); display: block; }
+    body.code-entry-mode .welcome-copy, body.code-entry-mode .landing-control-entry { display: none !important; }
+    body.code-entry-mode #landingLogin { display: block; }
+    body.code-entry-mode .short-code-entry { display: block; }
+    .entry-home-link { display: none; margin-top: 16px; color: var(--accent-soft); font-weight: 700; }
+    body.code-entry-mode .entry-home-link { display: inline-block; }
     .landing-control-entry { display: grid; align-content: start; gap: 10px; }
     .landing-control-entry h2 { margin: 9px 0 0; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
     .landing-control-entry p { margin: 0 0 8px; color: var(--muted); font-size: 14px; line-height: 1.45; }
@@ -437,15 +445,16 @@
           <p id="landingControlDescription">Inicia sesión con Google para abrir y controlar tu sala.</p>
         </section>
         <section class="short-code-entry" aria-labelledby="shortCodeTitle">
-          <span class="short-code-kicker">PANTALLA TV</span>
-          <h2 id="shortCodeTitle">Ver temporizador</h2>
-          <p>Para ver el temporizador en una TV o pantalla, ingresa el código de sala.</p>
+          <span id="entryKicker" class="short-code-kicker">INGRESO A SALA</span>
+          <h2 id="shortCodeTitle">Ingresa el código de sala</h2>
+          <p id="shortCodeDescription">Ingresa el código de sala para continuar.</p>
           <form id="shortCodeForm" class="short-code-form">
             <label class="visually-hidden" for="shortCodeInput">Código de sala</label>
             <input id="shortCodeInput" name="codigo" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-HJ-NP-Z2-9]{6}" placeholder="Ej. 7KQ2BD" aria-describedby="shortCodeStatus" required>
-            <button type="submit">Ver TV <span aria-hidden="true">→</span></button>
+            <button type="submit"><span id="shortCodeButtonLabel">Continuar</span> <span aria-hidden="true">→</span></button>
           </form>
           <p id="shortCodeStatus" class="short-code-status" role="status" aria-live="polite"></p>
+          <a class="entry-home-link" href="/">Volver al inicio</a>
         </section>
       </div>
     </div>
@@ -470,8 +479,8 @@
     <div id="syncBody" class="sync-body">
     <div class="control-heading">
       <strong id="controlTitle">Control Sala</strong>
-      <div id="tvCodeCard" class="tv-code-card" aria-label="Código para abrir la vista TV" hidden>
-        <span>Código TV</span>
+      <div id="tvCodeCard" class="tv-code-card" aria-label="Código de sala" hidden>
+        <span>Código de sala</span>
         <strong id="tvShortCode" aria-live="polite">Generando…</strong>
       </div>
     </div>
@@ -2565,6 +2574,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const params = new URLSearchParams(location.search);
     const rawRoom = params.get('sala');
     const rawCode = params.get('s');
+    const entryMode = ['tv', 'staff'].includes(params.get('entry')) ? params.get('entry') : '';
+    if (entryMode) {
+      document.body.classList.add('code-entry-mode');
+      const copy = entryMode === 'staff'
+        ? { kicker: 'VISTA STAFF', title: 'Acceder a vista Staff', description: 'Ingresa el código de sala para abrir las herramientas de Staff.', button: 'Ingresar a Staff' }
+        : { kicker: 'TEMPORIZADOR PARA TV', title: 'Ver temporizador', description: 'Ingresa el código de sala para mostrar el temporizador en una pantalla.', button: 'Ver temporizador' };
+      document.getElementById('entryKicker').textContent = copy.kicker;
+      document.getElementById('shortCodeTitle').textContent = copy.title;
+      document.getElementById('shortCodeDescription').textContent = copy.description;
+      document.getElementById('shortCodeButtonLabel').textContent = copy.button;
+    }
     const shortCodeForm = document.getElementById('shortCodeForm');
     const shortCodeInput = document.getElementById('shortCodeInput');
     const shortCodeStatus = document.getElementById('shortCodeStatus');
@@ -2581,11 +2601,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         return;
       }
       const target = new URL(location.href);
+      target.pathname = '/';
+      target.searchParams.delete('entry');
       target.searchParams.delete('sala');
       target.searchParams.delete('s');
       target.searchParams.delete('view');
       target.searchParams.set('s', code);
-      target.searchParams.set('view', 'pantalla');
+      target.searchParams.set('view', entryMode === 'staff' ? 'staff' : 'pantalla');
       location.assign(target.href);
     });
     const hasRoomLink = Boolean(rawRoom || rawCode);
@@ -2700,7 +2722,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function makeRoomViewURL(view) {
       const url = new URL(location.href);
       const code = window.currentShortCode || rawCode;
+      if (view === 'staff' || view === 'pantalla') url.pathname = view === 'staff' ? '/staff/' : '/tv/';
       url.searchParams.delete('view');
+      url.searchParams.delete('entry');
       if (code) {
         url.searchParams.delete('sala');
         url.searchParams.set('s', code);
@@ -3131,13 +3155,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Temporizador': 'Timer', 'TEMPORIZADOR PARA TORNEOS': 'TOURNAMENT TIMER',
           'La ronda avanza.': 'The round moves on.', 'Todos ven el mismo tiempo.': 'Everyone sees the same time.',
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the timer from your room, display it on screen, and share a synchronized view with your staff.',
-          'Sincronizado en vivo': 'Live sync', 'Código TV': 'TV code', 'Pareos del torneo': 'Tournament pairings',
+          'Sincronizado en vivo': 'Live sync', 'Pareos del torneo': 'Tournament pairings',
           'CONTROL DE SALA': 'ROOM CONTROL', 'Administra tu temporizador': 'Manage your timer',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Sign in with Google to open and manage your room.',
           'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.': 'You are signed in. Open your room whenever you are ready.',
           'PANTALLA TV': 'TV DISPLAY', 'Ver temporizador': 'View timer',
           'Para ver el temporizador en una TV o pantalla, ingresa el código de sala.': 'To view the timer on a TV or screen, enter the room code.',
           'Código de sala': 'Room code', 'Ver TV': 'View TV', 'Ver pareos': 'View pairings',
+          'INGRESO A SALA': 'ROOM ACCESS', 'VISTA STAFF': 'STAFF VIEW', 'TEMPORIZADOR PARA TV': 'TV TIMER',
+          'Ingresa el código de sala': 'Enter room code', 'Acceder a vista Staff': 'Open Staff view',
+          'Ingresa el código de sala para abrir las herramientas de Staff.': 'Enter the room code to open Staff tools.',
+          'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Enter the room code to display the timer on a screen.',
+          'Continuar': 'Continue', 'Ingresar a Staff': 'Open Staff', 'Volver al inicio': 'Back to home',
           'Configurando…': 'Setting up…', 'Conectando…': 'Connecting…', 'Conectando': 'Connecting',
           'Ronda': 'Round', 'Categoría del jugador': 'Player category', 'Todas': 'All',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
@@ -3235,13 +3264,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Temporizador': 'Temporizador', 'TEMPORIZADOR PARA TORNEOS': 'TEMPORIZADOR PARA TORNEIOS',
           'La ronda avanza.': 'A rodada avança.', 'Todos ven el mismo tiempo.': 'Todos veem o mesmo tempo.',
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o temporizador da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
-          'Sincronizado en vivo': 'Sincronizado ao vivo', 'Código TV': 'Código da TV', 'Pareos del torneo': 'Emparceiramentos do torneio',
+          'Sincronizado en vivo': 'Sincronizado ao vivo', 'Pareos del torneo': 'Emparceiramentos do torneio',
           'CONTROL DE SALA': 'CONTROLE DA SALA', 'Administra tu temporizador': 'Gerencie seu temporizador',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Faça login com o Google para abrir e controlar sua sala.',
           'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.': 'Você já está conectado. Acesse sua sala quando quiser.',
           'PANTALLA TV': 'TELA DA TV', 'Ver temporizador': 'Ver temporizador',
           'Para ver el temporizador en una TV o pantalla, ingresa el código de sala.': 'Para ver o temporizador em uma TV ou tela, digite o código da sala.',
           'Código de sala': 'Código da sala', 'Ver TV': 'Ver na TV', 'Ver pareos': 'Ver emparceiramentos',
+          'INGRESO A SALA': 'ACESSO À SALA', 'VISTA STAFF': 'VISTA STAFF', 'TEMPORIZADOR PARA TV': 'TEMPORIZADOR PARA TV',
+          'Ingresa el código de sala': 'Digite o código da sala', 'Acceder a vista Staff': 'Acessar a vista Staff',
+          'Ingresa el código de sala para abrir las herramientas de Staff.': 'Digite o código da sala para abrir as ferramentas de Staff.',
+          'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Digite o código da sala para exibir o temporizador em uma tela.',
+          'Continuar': 'Continuar', 'Ingresar a Staff': 'Acessar Staff', 'Volver al inicio': 'Voltar ao início',
           'Configurando…': 'Configurando…', 'Conectando…': 'Conectando…', 'Conectando': 'Conectando',
           'Ronda': 'Rodada', 'Categoría del jugador': 'Categoria do jogador', 'Todas': 'Todas',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
