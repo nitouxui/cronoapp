@@ -52,6 +52,7 @@
     #pairingsStatus { color: var(--muted); line-height: 1.5; }
     #pairingsStatus:empty { display: none; }
     #staffPairingsLink { position: fixed; top: 18px; right: 18px; color: var(--accent-soft); font-weight: 700; font-size: 15px; }
+    @media (max-width: 600px) { #pairingsView { padding-top: 76px; } }
     @media (max-width: 580px) { .pairing-card { gap: 8px; padding: 14px; } .pairing-table { font-size: 13px; } }
     body.no-room .container { display: none; }
     #roomWelcome { display: none; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; text-align: center; background: #f4f6fa; color: #17223b; }
@@ -173,7 +174,7 @@
     @media (max-width: 800px) {
       .container { padding-top: 0; display: flex; flex-direction: column; }
       .panel { min-height: 0; }
-      #leftPanel { flex: none; padding: 20px; border-right: 0; border-bottom: 1px solid #4c3023; }
+      #leftPanel { flex: none; padding: 64px 20px 20px; border-right: 0; border-bottom: 1px solid #4c3023; }
       #leftImage { max-width: min(58vw, 320px); max-height: 320px; }
       #rightPanel { flex: 1; min-height: 520px; padding: 58px 20px 108px; }
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
@@ -289,7 +290,7 @@
     body.no-room #googleLogin { min-height: 48px; font-size: 15px; }
     @media (max-width: 830px) {
       body.no-room #roomWelcome .welcome-shell { grid-template-columns: 1fr; }
-      body.no-room #roomWelcome { align-items: flex-start; padding: 38px 20px; }
+      body.no-room #roomWelcome { align-items: flex-start; padding: 76px 20px 38px; }
       .welcome-features { margin-bottom: 4px; }
     }
     @media (max-width: 500px) { .palette-grid { grid-template-columns: 1fr; } }
