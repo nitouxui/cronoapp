@@ -2002,17 +2002,32 @@ module.exports = QRCode;
     }
 
     let soundContext;
+    let pendingEndSoundUntil = 0;
     function prepareSound() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return Promise.resolve(false);
       soundContext ||= new AudioContextClass();
-      const ready = soundContext.state === 'suspended'
+      if (soundContext.state === 'closed') soundContext = new AudioContextClass();
+      const ready = soundContext.state !== 'running'
         ? soundContext.resume().catch(() => false)
         : Promise.resolve();
-      return Promise.resolve(ready).then(() => soundContext.state === 'running');
+      return Promise.resolve(ready).then(() => {
+        const isReady = soundContext.state === 'running';
+        if (isReady && pendingEndSoundUntil) {
+          const shouldPlay = Date.now() <= pendingEndSoundUntil;
+          pendingEndSoundUntil = 0;
+          if (shouldPlay) playEndSound();
+        }
+        return isReady;
+      });
     }
     function playEndSound() {
-      if (!soundContext || soundContext.state !== 'running') return;
+      if (!soundContext) return;
+      if (soundContext.state !== 'running') {
+        pendingEndSoundUntil = Date.now() + 8000;
+        prepareSound();
+        return;
+      }
       const now = soundContext.currentTime;
       const alarmNotes = [880, 660, 880, 660, 880, 1046];
       const pulseDuration = 0.3;
@@ -2564,6 +2579,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       enableSoundButton.addEventListener('click', unlockViewSound);
       document.addEventListener('pointerdown', unlockViewSound, { once: true });
       document.addEventListener('keydown', unlockViewSound, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) unlockViewSound();
+      });
+      window.addEventListener('pageshow', unlockViewSound);
+      window.addEventListener('focus', unlockViewSound);
       unlockViewSound();
     }
     if (!isReadOnly && !hasRoomLink) {
