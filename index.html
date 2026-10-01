@@ -88,10 +88,9 @@
     #controlSync { max-width: 340px; }
     #controlSync a { display: inline-block; margin-top: 6px; }
     #controlSync [hidden] { display: none !important; }
-    .control-language-control { margin: 0 0 12px; }
-    .control-language-control label { display: block; margin: 0 0 6px; font-weight: 700; }
-    #controlLanguageSelect { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface); color: var(--text); font: inherit; }
-    body.no-room .control-language-control { display: none; }
+    .editor-language-control { margin: 0 0 18px; }
+    .editor-language-control label { display: block; margin: 0 0 6px; font-weight: 700; }
+    #editorLanguageSelect { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface); color: var(--text); font: inherit; }
     #languagePrompt { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: #0b111bd9; }
     #languagePrompt[hidden] { display: none !important; }
     body.language-prompt-open { overflow: hidden; }
@@ -450,7 +449,7 @@
   <section id="languagePrompt" role="dialog" aria-modal="true" aria-labelledby="languagePromptTitle" aria-describedby="languagePromptDescription" hidden>
     <div class="language-prompt-card">
       <h1 id="languagePromptTitle">¿En qué idioma quieres usar Cronoapp?</h1>
-      <p id="languagePromptDescription">Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o el control de sala.</p>
+      <p id="languagePromptDescription">Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o la edición del temporizador.</p>
       <label for="firstLanguageSelect">Selecciona tu idioma</label>
       <select id="firstLanguageSelect">
         <option value="es">Español</option>
@@ -507,14 +506,6 @@
   <div id="controlSync" hidden>
     <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Control Sala</span></button>
     <div id="syncBody" class="sync-body">
-    <div class="control-language-control">
-      <label for="controlLanguageSelect">Idioma</label>
-      <select id="controlLanguageSelect" aria-label="Idioma / Language / Idioma">
-        <option value="es">Español</option>
-        <option value="en">English</option>
-        <option value="pt">Português</option>
-      </select>
-    </div>
     <div class="control-heading">
       <strong id="controlTitle">Control Sala</strong>
       <div id="tvCodeCard" class="tv-code-card" aria-label="Código de sala" hidden>
@@ -566,6 +557,14 @@
           <p>Ajusta el contenido y la apariencia de la pantalla.</p>
         </div>
         <button type="button" class="editor-close" aria-label="Cerrar edición" onclick="closeModal()">×</button>
+      </div>
+      <div class="editor-language-control">
+        <label for="editorLanguageSelect">Idioma</label>
+        <select id="editorLanguageSelect" aria-label="Idioma / Language / Idioma">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+        </select>
       </div>
       <details id="paletteSelector" class="palette-selector">
         <summary class="palette-selector-trigger">
@@ -3188,7 +3187,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
   <script>
     (() => {
       const selector = document.getElementById('languageSelect');
-      const controlSelector = document.getElementById('controlLanguageSelect');
+      const editorSelector = document.getElementById('editorLanguageSelect');
       const firstLanguageSelector = document.getElementById('firstLanguageSelect');
       const languagePrompt = document.getElementById('languagePrompt');
       const confirmLanguage = document.getElementById('confirmLanguage');
@@ -3199,7 +3198,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the timer from your room, display it on screen, and share a synchronized view with your staff.',
           'Sincronizado en vivo': 'Live sync', 'Pareos del torneo': 'Tournament pairings',
           '¿En qué idioma quieres usar Cronoapp?': 'Which language would you like to use for Cronoapp?',
-          'Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o el control de sala.': 'Choose your preferred language. You can change it later from the home page or room control.',
+          'Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o la edición del temporizador.': 'Choose your preferred language. You can change it later from the home page or timer settings.',
           'Selecciona tu idioma': 'Select your language', 'Guardar idioma': 'Save language', 'Idioma': 'Language',
           'CONTROL DE SALA': 'ROOM CONTROL', 'Administra tu temporizador': 'Manage your timer',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Sign in with Google to open and manage your room.',
@@ -3312,7 +3311,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o temporizador da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
           'Sincronizado en vivo': 'Sincronizado ao vivo', 'Pareos del torneo': 'Emparceiramentos do torneio',
           '¿En qué idioma quieres usar Cronoapp?': 'Qual idioma você quer usar no Cronoapp?',
-          'Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o el control de sala.': 'Escolha o idioma que prefere. Você poderá alterá-lo depois no início ou no controle da sala.',
+          'Elige el idioma que prefieres. Puedes cambiarlo después desde el inicio o la edición del temporizador.': 'Escolha o idioma que prefere. Você poderá alterá-lo depois no início ou nas configurações do temporizador.',
           'Selecciona tu idioma': 'Selecione seu idioma', 'Guardar idioma': 'Salvar idioma', 'Idioma': 'Idioma',
           'CONTROL DE SALA': 'CONTROLE DA SALA', 'Administra tu temporizador': 'Gerencie seu temporizador',
           'Inicia sesión con Google para abrir y controlar tu sala.': 'Faça login com o Google para abrir e controlar sua sala.',
@@ -3494,7 +3493,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.title = textMap(language).Temporizador || (language === 'pt' ? 'Temporizador' : language === 'en' ? 'Timer' : 'Temporizador');
         walk(document.body, language);
         selector.value = language;
-        controlSelector.value = language;
+        editorSelector.value = language;
         firstLanguageSelector.value = language;
         if (persist) try {
           localStorage.setItem(localKey, language);
@@ -3512,7 +3511,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         initial = suggestedLanguage || 'es';
       }
       selector.addEventListener('change', () => applyLanguage(selector.value));
-      controlSelector.addEventListener('change', () => applyLanguage(controlSelector.value));
+      editorSelector.addEventListener('change', () => applyLanguage(editorSelector.value));
       firstLanguageSelector.addEventListener('change', () => applyLanguage(firstLanguageSelector.value, false));
       confirmLanguage.addEventListener('click', () => {
         applyLanguage(firstLanguageSelector.value);
