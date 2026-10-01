@@ -138,12 +138,12 @@
     body:not(.no-room) .room-actions-menu[open] > summary { border-color: var(--accent); color: var(--accent-soft); }
     body:not(.no-room) .room-actions-menu > summary:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
     body:not(.no-room) .room-actions-menu-content { position: absolute; top: calc(100% + 8px); right: 0; z-index: 32; display: grid; gap: 6px; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 10px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
-    body:not(.no-room) #controlSync { position: static; z-index: auto; width: auto; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
-    body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+    body:not(.no-room) #controlSync { position: static; z-index: auto; width: 100%; min-width: 0; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
+    body:not(.no-room) #controlSync.collapsed { width: 100%; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
     body:not(.no-room) #syncToggle,
     body:not(.no-room) .room-actions-menu-content > .edit-button,
     body:not(.no-room) .room-actions-menu-content > #syncLogout { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; box-shadow: none; }
-    body:not(.no-room) #syncToggle { position: static; }
+    body:not(.no-room) #syncToggle { position: static; white-space: nowrap; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"],
     body:not(.no-room) .room-actions-menu-content > .edit-button:hover,
     body:not(.no-room) .room-actions-menu-content > .edit-button[aria-expanded="true"],
@@ -520,7 +520,7 @@
     </summary>
     <div class="room-actions-menu-content">
   <div id="controlSync" hidden>
-    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Control Sala</span></button>
+    <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala">Control Sala</button>
     <div id="syncBody" class="sync-body">
     <div class="control-heading">
       <strong id="controlTitle">Control Sala</strong>
