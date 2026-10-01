@@ -2190,8 +2190,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       pairingsAvailable = true;
       generatePairingsQR();
       renderLeftVisual();
+      window.updateStaffPairingsLink?.(true);
     };
-    window.pairingsCleared = () => { pairingsAvailable = false; pairingsQrSrc = ''; renderLeftVisual(); };
+    window.pairingsCleared = () => {
+      pairingsAvailable = false;
+      pairingsQrSrc = '';
+      renderLeftVisual();
+      window.updateStaffPairingsLink?.(false);
+    };
 
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
@@ -2706,14 +2712,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       button.hidden = !hasRoomLink;
       button.addEventListener('click', () => copyRoomView(view, label));
     });
-    staffPairingsLink.href = makeRoomViewURL('pareos');
-    staffPairingsLink.hidden = !hasRoomLink;
+    staffPairingsLink.hidden = true;
     let currentState = null;
     let roomOwner = null;
     let currentUser = null;
     let serverOffset = 0;
     let canControl = false;
     let currentRoomSettings = {};
+    let staffPairingsAvailable = false;
     let lastSecond = null;
     let lastAlarmStartedAt = null;
     let stateRef, roomRef, settingsRef, auth, dbModule, authModule;
@@ -2723,6 +2729,34 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const saveDurationButton = document.getElementById('saveDurationButton');
     const roomDurationControl = document.getElementById('roomDurationControl');
     const roomDurationStatus = document.getElementById('roomDurationStatus');
+
+    function updateStaffPairingsLink(pairingsExist = staffPairingsAvailable) {
+      staffPairingsAvailable = Boolean(pairingsExist);
+      if (!isJudge || !hasRoomLink) {
+        staffPairingsLink.hidden = true;
+        return;
+      }
+      const images = currentRoomSettings.images || {};
+      const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
+      if (mode === 'tdf' && staffPairingsAvailable) {
+        staffPairingsLink.href = makeRoomViewURL('pareos');
+        staffPairingsLink.hidden = false;
+        return;
+      }
+      if (mode === 'qr' && images.qrUrl) {
+        try {
+          const externalLink = new URL(images.qrUrl);
+          if (['http:', 'https:'].includes(externalLink.protocol)) {
+            staffPairingsLink.href = externalLink.href;
+            staffPairingsLink.hidden = false;
+            return;
+          }
+        } catch (_) {}
+      }
+      staffPairingsLink.hidden = true;
+    }
+    window.updateStaffPairingsLink = updateStaffPairingsLink;
+    updateStaffPairingsLink(false);
     startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = true;
 
     function formatTime(seconds) {
@@ -2852,7 +2886,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         function showShortCode(code) {
           window.currentShortCode = code;
           document.getElementById('tvShortCode').textContent = code;
-          staffPairingsLink.href = makeRoomViewURL('pareos');
+          updateStaffPairingsLink();
           if (document.getElementById('leftVisualModeSelect').value === 'tdf') {
             window.generatePairingsQR();
             window.renderLeftVisual();
@@ -2939,6 +2973,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             try {
               const settings = JSON.parse(snap.val());
               currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
+              updateStaffPairingsLink();
               if (isJudge || isPairings) {
                 window.applyPalette(currentRoomSettings.palette);
                 if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
