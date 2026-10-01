@@ -210,8 +210,9 @@
       #rightPanel { flex: 1; min-height: 520px; padding: 58px 20px 108px; }
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
       .edit-button { top: 8px; right: 12px; }
-      body:not(.no-room) .top-actions { top: 8px; right: 10px; }
+      body:not(.no-room) .top-actions { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); z-index: 50; }
       body:not(.no-room) .room-actions-menu > summary { width: 42px; height: 42px; }
+      body:not(.no-room) .room-actions-menu-content { position: fixed; top: calc(58px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); width: min(400px, calc(100vw - 20px)); max-height: calc(100dvh - 74px - env(safe-area-inset-top)); }
       .control-bar { min-height: 88px; }
       .control-bar button { min-width: 110px; padding: 12px; }
     }
