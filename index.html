@@ -2597,9 +2597,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     if (isJudge) {
       staffSoundTest.hidden = false;
       staffSoundTest.addEventListener('click', async () => {
-        const ready = await prepareSound();
+        let ready = await prepareSound();
         if (!ready) {
           await unlockViewSound();
+          ready = enableSoundButton.hidden;
+        }
+        if (!ready) {
           staffSoundTestStatus.textContent = 'No se pudo activar el audio. Toca «Activar sonido» y vuelve a probar.';
           return;
         }
