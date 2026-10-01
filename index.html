@@ -29,7 +29,7 @@
     label { display: block; margin-top: 10px; font-weight: bold; }
     button.customizable-button { padding: 8px 16px; font-size: 16px; border: none; cursor: pointer; }
     body.viewer-mode .container, body.viewer-mode .modal, body.viewer-mode #controlSync { display: none !important; }
-    #judgeView { display: none; min-height: 100dvh; background: #101827; color: #fff; align-items: center; justify-content: center; text-align: center; padding: 16px; }
+    #judgeView { display: none; min-height: 100dvh; background: #101827; color: #fff; align-items: center; justify-content: center; flex-direction: column; gap: clamp(22px, 4vh, 38px); text-align: center; padding: 78px 16px 72px; }
     body.viewer-mode #judgeView { display: flex; }
     body.projection-mode #controlSync, body.projection-mode .edit-button, body.projection-mode .control-bar, body.projection-mode .modal { display: none !important; }
     body.pairings-mode .container, body.pairings-mode .modal, body.pairings-mode #controlSync, body.pairings-mode #roomWelcome { display: none !important; }
@@ -59,6 +59,14 @@
     #roomWelcome h1 { font-size: clamp(28px, 6vw, 48px); margin-bottom: 12px; }
     #roomWelcome p { font-size: 18px; line-height: 1.5; }
     #judgeTimer { font-size: clamp(72px, 19vw, 220px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .staff-call-clock { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 12px 36px #0004; }
+    .staff-call-clock h2 { margin: 0 0 8px; color: var(--muted); font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    #callStopwatch { color: var(--text); font-size: clamp(48px, 10vw, 68px); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    #callStopwatchStatus { min-height: 1.4em; margin: 5px 0 14px; color: var(--muted); font-size: 14px; }
+    .staff-call-actions { display: flex; justify-content: center; gap: 10px; }
+    .staff-call-actions button { min-height: 48px; padding: 0 18px; border: 1px solid var(--edge); border-radius: 12px; background: var(--accent); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+    .staff-call-actions #callStopwatchReset { background: var(--surface); color: var(--text); }
+    .staff-call-actions button:disabled { opacity: .45; cursor: not-allowed; }
     #judgeStatus { position: fixed; bottom: 16px; left: 16px; right: 16px; font-size: 14px; opacity: .8; }
     #enableSound { display: none; position: fixed; z-index: 25; left: 50%; bottom: 20px; transform: translateX(-50%); align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border: 1px solid #ffffff55; border-radius: 999px; background: #202734; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0006; }
     #enableSound:not([hidden]) { display: inline-flex; }
@@ -434,7 +442,7 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><section class="staff-call-clock" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
@@ -2564,6 +2572,57 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const judgeStatus = document.getElementById('judgeStatus');
     const controlSync = document.getElementById('controlSync');
     const enableSoundButton = document.getElementById('enableSound');
+    if (isJudge) {
+      const callStopwatch = document.getElementById('callStopwatch');
+      const callStopwatchStatus = document.getElementById('callStopwatchStatus');
+      const callStopwatchToggle = document.getElementById('callStopwatchToggle');
+      const callStopwatchReset = document.getElementById('callStopwatchReset');
+      const storageKey = `cronoapp-call-stopwatch:${rawRoom || rawCode || location.pathname}`;
+      let callState = { running: false, startedAt: 0, elapsedMs: 0 };
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (saved && typeof saved.running === 'boolean'
+          && Number.isFinite(saved.startedAt) && Number.isFinite(saved.elapsedMs)
+          && saved.startedAt >= 0 && saved.elapsedMs >= 0) callState = saved;
+      } catch (_) {}
+      function callElapsedMs() {
+        return callState.elapsedMs + (callState.running ? Math.max(0, Date.now() - callState.startedAt) : 0);
+      }
+      function renderCallStopwatch() {
+        const totalSeconds = Math.floor(callElapsedMs() / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        callStopwatch.textContent = hours
+          ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          : `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        callStopwatchToggle.textContent = callState.running
+          ? 'Finalizar llamada'
+          : totalSeconds > 0 ? 'Nueva llamada' : 'Iniciar llamada';
+        callStopwatchStatus.textContent = callState.running
+          ? 'Llamada en curso' : totalSeconds > 0 ? 'Tiempo detenido' : 'Listo para iniciar';
+        callStopwatchReset.disabled = !callState.running && totalSeconds === 0;
+        try { localStorage.setItem(storageKey, JSON.stringify(callState)); } catch (_) {}
+      }
+      callStopwatchToggle.addEventListener('click', () => {
+        if (callState.running) {
+          callState.elapsedMs = callElapsedMs();
+          callState.startedAt = 0;
+          callState.running = false;
+        } else {
+          callState.elapsedMs = 0;
+          callState.startedAt = Date.now();
+          callState.running = true;
+        }
+        renderCallStopwatch();
+      });
+      callStopwatchReset.addEventListener('click', () => {
+        callState = { running: false, startedAt: 0, elapsedMs: 0 };
+        renderCallStopwatch();
+      });
+      renderCallStopwatch();
+      window.setInterval(renderCallStopwatch, 250);
+    }
     async function unlockViewSound() {
       const ready = await prepareSound();
       if (ready) {
@@ -3069,6 +3128,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Última de cada grupo': 'Last player in each group', 'Ingresa un código válido de 6 caracteres.': 'Enter a valid 6-character code.',
           '🔔 Activar sonido': '🔔 Enable sound', '🔔 Toca para activar sonido': '🔔 Tap to enable sound',
           'Sincronizado': 'Synchronized',
+          'Cronómetro de llamada': 'Call stopwatch', 'Listo para iniciar': 'Ready to start',
+          'Iniciar llamada': 'Start call', 'Finalizar llamada': 'End call', 'Nueva llamada': 'New call',
+          'Llamada en curso': 'Call in progress', 'Tiempo detenido': 'Time stopped',
           'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Could not copy the link. Check your browser permissions.',
           'El correo de esta cuenta no está verificado.': 'This account email is not verified.',
           'Buscando tu sala…': 'Looking for your room…', 'Sala no encontrada. Abre tu sala.': 'Room not found. Open your room.',
@@ -3170,6 +3232,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Última de cada grupo': 'Último de cada grupo', 'Ingresa un código válido de 6 caracteres.': 'Digite um código válido de 6 caracteres.',
           '🔔 Activar sonido': '🔔 Ativar som', '🔔 Toca para activar sonido': '🔔 Toque para ativar o som',
           'Sincronizado': 'Sincronizado',
+          'Cronómetro de llamada': 'Cronômetro da chamada', 'Listo para iniciar': 'Pronto para iniciar',
+          'Iniciar llamada': 'Iniciar chamada', 'Finalizar llamada': 'Finalizar chamada', 'Nueva llamada': 'Nova chamada',
+          'Llamada en curso': 'Chamada em andamento', 'Tiempo detenido': 'Tempo parado',
           'No se pudo copiar el enlace. Revisa los permisos del navegador.': 'Não foi possível copiar o link. Verifique as permissões do navegador.',
           'El correo de esta cuenta no está verificado.': 'O e-mail desta conta não foi verificado.',
           'Buscando tu sala…': 'Procurando sua sala…', 'Sala no encontrada. Abre tu sala.': 'Sala não encontrada. Abra sua sala.',
