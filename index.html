@@ -2007,17 +2007,34 @@ module.exports = QRCode;
     }
 
     let soundContext;
+    let alarmBuffer = null;
+    let alarmBufferPromise = null;
     let pendingEndSoundUntil = 0;
+    function loadAlarmBuffer() {
+      if (alarmBuffer) return Promise.resolve(alarmBuffer);
+      if (!alarmBufferPromise) {
+        alarmBufferPromise = fetch('./alarm.mp3', { cache: 'force-cache' })
+          .then(response => {
+            if (!response.ok) throw new Error('No se pudo cargar el audio de alarma.');
+            return response.arrayBuffer();
+          })
+          .then(data => soundContext.decodeAudioData(data))
+          .then(buffer => (alarmBuffer = buffer))
+          .catch(error => { alarmBufferPromise = null; throw error; });
+      }
+      return alarmBufferPromise;
+    }
     function prepareSound() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return Promise.resolve(false);
       soundContext ||= new AudioContextClass();
       if (soundContext.state === 'closed') soundContext = new AudioContextClass();
-      const ready = soundContext.state !== 'running'
+      const resume = soundContext.state !== 'running'
         ? soundContext.resume().catch(() => false)
         : Promise.resolve();
-      return Promise.resolve(ready).then(() => {
-        const isReady = soundContext.state === 'running';
+      const loaded = loadAlarmBuffer().catch(() => null);
+      return Promise.all([resume, loaded]).then(() => {
+        const isReady = soundContext.state === 'running' && !!alarmBuffer;
         if (isReady && pendingEndSoundUntil) {
           const shouldPlay = Date.now() <= pendingEndSoundUntil;
           pendingEndSoundUntil = 0;
@@ -2028,32 +2045,15 @@ module.exports = QRCode;
     }
     function playEndSound() {
       try { if (typeof navigator.vibrate === 'function') navigator.vibrate([220, 100, 220, 100, 320]); } catch (_) {}
-      if (!soundContext) return;
-      if (soundContext.state !== 'running') {
+      if (!soundContext || soundContext.state !== 'running' || !alarmBuffer) {
         pendingEndSoundUntil = Date.now() + 8000;
         prepareSound();
         return;
       }
-      const now = soundContext.currentTime;
-      const alarmNotes = [880, 660, 880, 660, 880, 1046];
-      const pulseDuration = 0.3;
-      const pulseGap = 0.12;
-      alarmNotes.forEach((frequency, index) => {
-        const startAt = now + index * (pulseDuration + pulseGap);
-        [[frequency, 0.58, 'triangle'], [frequency * 2, 0.18, 'sine']].forEach(([tone, volume, wave]) => {
-          const oscillator = soundContext.createOscillator();
-          const gain = soundContext.createGain();
-          oscillator.type = wave;
-          oscillator.frequency.value = tone;
-          gain.gain.setValueAtTime(0.0001, startAt);
-          gain.gain.linearRampToValueAtTime(volume, startAt + 0.012);
-          gain.gain.setValueAtTime(volume * 0.88, startAt + pulseDuration * 0.72);
-          gain.gain.exponentialRampToValueAtTime(0.0001, startAt + pulseDuration);
-          oscillator.connect(gain).connect(soundContext.destination);
-          oscillator.start(startAt);
-          oscillator.stop(startAt + pulseDuration + 0.01);
-        });
-      });
+      const source = soundContext.createBufferSource();
+      source.buffer = alarmBuffer;
+      source.connect(soundContext.destination);
+      source.start();
     }
     window.prepareSound = prepareSound;
     window.playEndSound = playEndSound;
