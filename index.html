@@ -59,8 +59,8 @@
     #roomWelcome h1 { font-size: clamp(28px, 6vw, 48px); margin-bottom: 12px; }
     #roomWelcome p { font-size: 18px; line-height: 1.5; }
     #judgeTimer { font-size: clamp(72px, 19vw, 220px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
-    .staff-call-clock { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 12px 36px #0004; }
-    .staff-call-clock h2 { margin: 0 0 8px; color: var(--muted); font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .staff-timer-module { width: min(480px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 12px 36px #0004; }
+    .staff-timer-module h2 { margin: 0 0 8px; color: var(--muted); font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     #callStopwatch { color: var(--text); font-size: clamp(48px, 10vw, 68px); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
     #callStopwatchStatus { min-height: 1.4em; margin: 5px 0 14px; color: var(--muted); font-size: 14px; }
     .staff-call-actions { display: flex; justify-content: center; gap: 10px; }
@@ -442,7 +442,7 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><div id="judgeTimer" role="timer">02:00</div><section class="staff-call-clock" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><a id="staffPairingsLink" hidden>Ver pareos</a><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
