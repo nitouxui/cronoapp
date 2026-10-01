@@ -128,21 +128,31 @@
     .control-bar button, .edit-button { min-width: 145px; border-radius: 14px; padding: 14px 22px; font-weight: 700; background: #25262c; color: white; border: 1px solid #585960; }
     .control-bar #resetButton { border-color: #a94a0f; color: #ff994a; background: #301e18; }
     .edit-button { top: 14px; right: 14px; min-width: 0; z-index: 5; }
-    /* Control de sala alineado con Editar */
-    body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 8px; }
-    body:not(.no-room) #controlSync { position: static; z-index: auto; width: auto; max-width: none; padding: 0; border-radius: 14px; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
-    body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 14px; background: transparent; box-shadow: none; }
+    /* Menú compacto para las acciones principales de la sala. */
+    body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; }
+    body:not(.no-room) .room-actions-menu { position: relative; }
+    body:not(.no-room) .room-actions-menu > summary { display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 8px 24px #0004; cursor: pointer; list-style: none; }
+    body:not(.no-room) .room-actions-menu > summary::-webkit-details-marker { display: none; }
+    body:not(.no-room) .room-actions-menu > summary svg { width: 22px; height: 22px; }
+    body:not(.no-room) .room-actions-menu > summary:hover,
+    body:not(.no-room) .room-actions-menu[open] > summary { border-color: var(--accent); color: var(--accent-soft); }
+    body:not(.no-room) .room-actions-menu > summary:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
+    body:not(.no-room) .room-actions-menu-content { position: absolute; top: calc(100% + 8px); right: 0; z-index: 32; display: grid; gap: 6px; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 10px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) #controlSync { position: static; z-index: auto; width: auto; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--text); box-shadow: none; font-size: 14px; }
+    body:not(.no-room) #controlSync.collapsed { width: auto; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
     body:not(.no-room) #syncToggle,
-    body:not(.no-room) .top-actions .edit-button,
-    body:not(.no-room) #syncLogout { display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; margin: 0; padding: 0 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0004; }
-    body:not(.no-room) #syncToggle { position: static; width: auto; min-width: 82px; margin: 0; }
-    body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
-    body:not(.no-room) #controlSync.collapsed #syncToggle { width: auto; height: 46px; min-width: 82px; margin: 0; padding: 0 16px; }
-    body:not(.no-room) .top-actions .edit-button { position: static; top: auto; right: auto; min-width: 0; }
+    body:not(.no-room) .room-actions-menu-content > .edit-button,
+    body:not(.no-room) .room-actions-menu-content > #syncLogout { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; box-shadow: none; }
+    body:not(.no-room) #syncToggle { position: static; }
+    body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"],
+    body:not(.no-room) .room-actions-menu-content > .edit-button:hover,
+    body:not(.no-room) .room-actions-menu-content > .edit-button[aria-expanded="true"],
+    body:not(.no-room) .room-actions-menu-content > #syncLogout:hover { border-color: var(--edge); background: var(--surface); color: var(--accent-soft); }
+    body:not(.no-room) #controlSync.collapsed #syncToggle { height: 44px; margin: 0; padding: 0 12px; }
+    body:not(.no-room) .room-actions-menu-content > .edit-button { position: static; top: auto; right: auto; z-index: auto; }
     body:not(.no-room) #syncLogout { text-decoration: none; }
-    body:not(.no-room) #syncLogout:hover { border-color: var(--accent); color: var(--accent-soft); }
     #syncLogout[hidden] { display: none !important; }
-    body:not(.no-room) #syncBody { position: absolute; top: calc(100% + 10px); right: 0; z-index: 32; width: min(400px, calc(100vw - 24px)); max-height: calc(100dvh - 86px); overflow: auto; padding: 20px; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); color: var(--text); box-shadow: 0 22px 60px #0009; }
+    body:not(.no-room) #syncBody { position: static; width: auto; max-height: none; margin: 8px 0 0; padding: 16px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: none; }
     body:not(.no-room) .room-duration-control { margin: 14px 0 4px; padding: 14px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); }
     body:not(.no-room) .room-duration-control label { margin: 0 0 8px; color: var(--text); font-weight: 700; }
     body:not(.no-room) .duration-control-row { display: flex; align-items: center; gap: 8px; }
@@ -159,7 +169,8 @@
     body:not(.no-room) .tv-code-card > span { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     body:not(.no-room) .tv-code-card strong { overflow: hidden; color: var(--accent-soft); font-size: clamp(14px, 1.5vw, 18px); font-weight: 900; letter-spacing: .11em; text-overflow: ellipsis; }
     @media (max-width: 420px) {
-      body:not(.no-room) #syncBody { width: min(400px, calc(100vw - 16px)); }
+      body:not(.no-room) .room-actions-menu-content { width: min(400px, calc(100vw - 16px)); }
+      body:not(.no-room) #syncBody { width: auto; }
       body:not(.no-room) .room-actions { gap: 5px; }
       body:not(.no-room) .share-view-button { gap: 3px; padding: 9px 7px; font-size: 11px; }
       body:not(.no-room) .share-view-button svg { width: 14px; height: 14px; flex-basis: 14px; }
@@ -198,12 +209,8 @@
       #rightPanel { flex: 1; min-height: 520px; padding: 58px 20px 108px; }
       #timer { font-size: clamp(74px, 18vw, min(var(--timer-size, 290px), 170px)); }
       .edit-button { top: 8px; right: 12px; }
-      body:not(.no-room) .top-actions { top: 8px; right: 10px; gap: 5px; }
-      body:not(.no-room) #syncToggle,
-      body:not(.no-room) #controlSync.collapsed #syncToggle,
-      body:not(.no-room) .top-actions .edit-button,
-      body:not(.no-room) #syncLogout { height: 42px; min-width: 0; padding: 0 9px; gap: 5px; font-size: 12px; font-weight: 700; }
-      body:not(.no-room) #syncBody { right: 0; }
+      body:not(.no-room) .top-actions { top: 8px; right: 10px; }
+      body:not(.no-room) .room-actions-menu > summary { width: 42px; height: 42px; }
       .control-bar { min-height: 88px; }
       .control-bar button { min-width: 110px; padding: 12px; }
     }
@@ -325,10 +332,9 @@
       #leftPanel { min-height: 0; }
       #rightPanel { min-height: 520px; }
     }
-      /* El editor se despliega como un panel junto a Control Sala. */
-    body:not(.no-room) .top-actions .edit-button:hover,
-    body:not(.no-room) .top-actions .edit-button[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
-    body:not(.no-room) .top-actions .edit-button:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+    body:not(.no-room) .room-actions-menu-content > .edit-button:focus-visible,
+    body:not(.no-room) .room-actions-menu-content > #syncLogout:focus-visible,
+    body:not(.no-room) #syncToggle:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
     body:not(.no-room) #modal {
       inset: 70px 14px 14px auto;
       width: min(560px, calc(100vw - 28px));
@@ -508,6 +514,11 @@
     </div>
     <div id="rightPanel" class="panel">
       <div class="top-actions">
+  <details id="roomActionsMenu" class="room-actions-menu">
+    <summary aria-label="Acciones de sala" title="Acciones de sala">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </summary>
+    <div class="room-actions-menu-content">
   <div id="controlSync" hidden>
     <button id="syncToggle" type="button" aria-controls="syncBody" aria-expanded="true" aria-label="Cerrar control de sala" title="Cerrar control de sala"><span aria-hidden="true">⚙</span><span>Control Sala</span></button>
     <div id="syncBody" class="sync-body">
@@ -539,6 +550,8 @@
   </div>
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
+    </div>
+  </details>
       </div>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
       <div class="timer-stage">
@@ -1955,6 +1968,7 @@ module.exports = QRCode;
       }
       modal.style.display = 'flex';
       editButton.setAttribute('aria-expanded', 'true');
+      document.getElementById('roomActionsMenu')?.removeAttribute('open');
     }
 
     function closeModal() {
@@ -2572,8 +2586,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         && !document.getElementById('editToggle').contains(event.target)) closeModal();
     });
     document.addEventListener('click', event => {
+      const menu = document.getElementById('roomActionsMenu');
       const panel = document.getElementById('controlSync');
-      if (document.body.classList.contains('no-room') || panel.classList.contains('collapsed') || panel.contains(event.target)) return;
+      if (document.body.classList.contains('no-room')) return;
+      if (menu.open) {
+        if (menu.contains(event.target)) return;
+        menu.open = false;
+      }
+      if (panel.classList.contains('collapsed') || panel.contains(event.target)) return;
       panel.classList.add('collapsed');
       const button = document.getElementById('syncToggle');
       button.setAttribute('aria-expanded', 'false');
@@ -2586,6 +2606,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (modal.style.display === 'flex') {
         closeModal();
         document.getElementById('editToggle').focus();
+        return;
+      }
+      const menu = document.getElementById('roomActionsMenu');
+      if (menu.open) {
+        menu.open = false;
+        const panel = document.getElementById('controlSync');
+        panel.classList.add('collapsed');
+        const button = document.getElementById('syncToggle');
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', 'Abrir control de sala');
+        button.title = 'Abrir control de sala';
+        menu.querySelector('summary').focus();
         return;
       }
       const panel = document.getElementById('controlSync');
@@ -3319,7 +3351,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Abriendo tu sala…': 'Opening your room…', 'Sin permiso para controlar esta sala.': 'You do not have permission to control this room.',
           'No se pudo conectar al servicio.': 'Could not connect to the service.'
           ,'Frambuesa': 'Raspberry', 'Grafito': 'Graphite', 'Orquídea': 'Orchid', 'Cobre': 'Copper',
-          'Abrir control de sala': 'Open room control', 'Temporizador para staff': 'Staff timer',
+          'Abrir control de sala': 'Open room control', 'Acciones de sala': 'Room actions', 'Temporizador para staff': 'Staff timer',
           'https://ejemplo.com/torneo': 'https://example.com/tournament'
         },
         pt: {
@@ -3432,7 +3464,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Abriendo tu sala…': 'Abrindo sua sala…', 'Sin permiso para controlar esta sala.': 'Você não tem permissão para controlar esta sala.',
           'No se pudo conectar al servicio.': 'Não foi possível conectar ao serviço.'
           ,'Frambuesa': 'Framboesa', 'Grafito': 'Grafite', 'Orquídea': 'Orquídea', 'Cobre': 'Cobre',
-          'Abrir control de sala': 'Abrir controle da sala', 'Temporizador para staff': 'Temporizador da equipe',
+          'Abrir control de sala': 'Abrir controle da sala', 'Acciones de sala': 'Ações da sala', 'Temporizador para staff': 'Temporizador da equipe',
           'https://ejemplo.com/torneo': 'https://exemplo.com/torneio'
         }
       };
