@@ -2014,17 +2014,24 @@ module.exports = QRCode;
     function playEndSound() {
       if (!soundContext || soundContext.state !== 'running') return;
       const now = soundContext.currentTime;
-      [0, 0.24, 0.48].forEach((delay, index) => {
-        const oscillator = soundContext.createOscillator();
-        const gain = soundContext.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.value = index === 2 ? 880 : 660;
-        gain.gain.setValueAtTime(0.0001, now + delay);
-        gain.gain.exponentialRampToValueAtTime(0.28, now + delay + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.2);
-        oscillator.connect(gain).connect(soundContext.destination);
-        oscillator.start(now + delay);
-        oscillator.stop(now + delay + 0.21);
+      const alarmNotes = [880, 660, 880, 660, 880, 1046];
+      const pulseDuration = 0.3;
+      const pulseGap = 0.12;
+      alarmNotes.forEach((frequency, index) => {
+        const startAt = now + index * (pulseDuration + pulseGap);
+        [[frequency, 0.58, 'triangle'], [frequency * 2, 0.18, 'sine']].forEach(([tone, volume, wave]) => {
+          const oscillator = soundContext.createOscillator();
+          const gain = soundContext.createGain();
+          oscillator.type = wave;
+          oscillator.frequency.value = tone;
+          gain.gain.setValueAtTime(0.0001, startAt);
+          gain.gain.linearRampToValueAtTime(volume, startAt + 0.012);
+          gain.gain.setValueAtTime(volume * 0.88, startAt + pulseDuration * 0.72);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startAt + pulseDuration);
+          oscillator.connect(gain).connect(soundContext.destination);
+          oscillator.start(startAt);
+          oscillator.stop(startAt + pulseDuration + 0.01);
+        });
       });
     }
     window.prepareSound = prepareSound;
