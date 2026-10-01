@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Temporizador para TV</title>
+</head>
+<body>
+  <p>Abriendo el acceso al temporizador… <a id="fallback" href="/?entry=tv">Continuar</a></p>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const hasRoom = params.has('s') || params.has('sala');
+    params.delete('entry');
+    if (hasRoom) params.set('view', 'pantalla');
+    else { params.delete('view'); params.set('entry', 'tv'); }
+    const query = params.toString();
+    const target = '/' + (query ? '?' + query : '') + location.hash;
+    document.getElementById('fallback').href = target;
+    location.replace(target);
+  </script>
+</body>
+</html>
