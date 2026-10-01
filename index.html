@@ -2682,6 +2682,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let canControl = false;
     let currentRoomSettings = {};
     let lastSecond = null;
+    let lastAlarmStartedAt = null;
     let stateRef, roomRef, settingsRef, auth, dbModule, authModule;
     const startButton = document.getElementById('toggleButton');
     const resetButton = document.getElementById('resetButton');
@@ -2716,8 +2717,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
         window.renderTimerState(seconds, currentState.running);
       }
-      if (!isPairings && lastSecond !== null && lastSecond > 0 && seconds <= 0)
-        window.playEndSound();
+      if (!isPairings && currentState.running && seconds <= 0 && currentState.startedAt) {
+        const runId = currentState.startedAt;
+        const endedAt = runId + currentState.remainingMs;
+        const lateness = Date.now() + serverOffset - endedAt;
+        if (runId !== lastAlarmStartedAt && lateness >= 0 && lateness <= 10000) {
+          lastAlarmStartedAt = runId;
+          window.playEndSound();
+        }
+      }
       document.getElementById('judgeTimer').style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
       lastSecond = seconds;
     }
