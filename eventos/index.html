@@ -23,10 +23,6 @@
     .eyebrow { color:var(--accent); font-size:12px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
     h1 { margin:10px 0 12px; font-size:clamp(36px,6vw,64px); letter-spacing:-.055em; line-height:1.03; }
     .intro p { max-width:610px; margin:0; color:var(--muted); font-size:clamp(15px,2vw,18px); line-height:1.55; }
-    .agenda-tools { display:flex; justify-content:flex-end; margin:-12px 0 18px; }
-    .agenda-tools button { min-height:42px; padding:0 16px; border:1px solid var(--edge); border-radius:10px; background:var(--surface); color:var(--text); font-size:14px; font-weight:750; }
-    .agenda-tools button:hover:not(:disabled) { border-color:var(--accent); background:var(--raised); }
-    .agenda-tools button:disabled { opacity:.55; cursor:not-allowed; }
     .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
     .filters button { min-height:40px; padding:0 15px; border:1px solid var(--edge); border-radius:100px; background:var(--surface); color:var(--text); font-size:13px; font-weight:750; }
     .filters button[aria-pressed="true"] { border-color:var(--accent); background:var(--focus); color:#182129; }
@@ -79,7 +75,6 @@
     <div class="intro"><span class="eyebrow" data-i18n="eyebrow">JUEGA EN TEMUCO</span><h1 data-i18n="title">Agenda de eventos semanal</h1></div>
     
         <p id="listStatus" class="status" role="status" data-i18n="loading">Cargando agenda…</p>
-    <div class="agenda-tools"><button id="downloadImage" type="button" data-i18n="downloadImage" disabled>Descargar imagen 16:9</button></div>
     <div id="storeList"></div>
     <section id="admin" class="admin" aria-labelledby="adminTitle" hidden>
       <h2 id="adminTitle" data-i18n="adminTitle">Administrar agenda</h2>
@@ -114,9 +109,9 @@
     const storeAddresses = { neruda:'Avenida Pablo Neruda 1980', trizano:'Trizano 430', bluecard:'Lago Riñihue 01890' };
     const storeLogos = { trizano:'assets/logos/top8.svg', neruda:'assets/logos/top8.svg', bluecard:'assets/logos/bluecard.svg' };
     const messages = {
-      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos semanal', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas', downloadImage:'Descargar imagen 16:9', downloadingImage:'Preparando imagen…', downloadError:'No se pudo generar la imagen. Inténtalo nuevamente.' },
-      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Weekly event schedule', all:'All stores', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', value:'Entry fee (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability', downloadImage:'Download 16:9 image', downloadingImage:'Preparing image…', downloadError:'Could not generate the image. Please try again.' },
-      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda semanal de eventos', all:'Todas as lojas', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', value:'Valor da inscrição (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas', downloadImage:'Baixar imagem 16:9', downloadingImage:'Preparando imagem…', downloadError:'Não foi possível gerar a imagem. Tente novamente.' }
+      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos semanal', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
+      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Weekly event schedule', all:'All stores', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', value:'Entry fee (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability' },
+      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda semanal de eventos', all:'Todas as lojas', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', value:'Valor da inscrição (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas' }
     };
     let language = 'es';
     try { const preference = localStorage.getItem('cronoapp-language'); if (messages[preference]) language = preference; } catch (_) {}
@@ -126,8 +121,6 @@
     const locale = { es:'es-CL', en:'en-US', pt:'pt-BR' }[language];
     const list = document.getElementById('storeList');
     const listStatus = document.getElementById('listStatus');
-    const downloadButton = document.getElementById('downloadImage');
-    downloadButton.addEventListener('click', downloadAgendaImage);
     const form = document.getElementById('eventForm');
     const formStatus = document.getElementById('formStatus');
     let events = {};
@@ -150,7 +143,6 @@
     }
     function render() {
       list.replaceChildren();
-      downloadButton.disabled = !Object.values(events).some(event => validEvent(event));
       const now = new Intl.DateTimeFormat('sv-SE', { timeZone:'America/Santiago', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(new Date()).replace(' ', 'T');
       const visibleStores = Object.entries(stores);
       list.style.gridTemplateColumns = `repeat(${visibleStores.length}, minmax(0, 1fr))`;
@@ -207,126 +199,6 @@
           section.append(cards);
         }
         list.append(section);
-      }
-    }
-    async function downloadAgendaImage() {
-      const originalLabel = t('downloadImage');
-      downloadButton.disabled = true;
-      downloadButton.textContent = t('downloadingImage');
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1920; canvas.height = 1080;
-        const ctx = canvas.getContext('2d');
-        const palette = { bg:'#14171b', surface:'#20252b', raised:'#293039', edge:'#46515d', text:'#f0f2f5', muted:'#bfc7d0', accent:'#a4b3c1' };
-        const background = ctx.createLinearGradient(0,0,1920,1080);
-        background.addColorStop(0,'#252c33'); background.addColorStop(.5,palette.bg); background.addColorStop(1,'#111417');
-        ctx.fillStyle = background; ctx.fillRect(0,0,1920,1080);
-        const roundRect = (x,y,w,h,r) => { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); };
-        const drawText = (text,x,y,font,color,align='left') => { ctx.font=font; ctx.fillStyle=color; ctx.textAlign=align; ctx.textBaseline='alphabetic'; ctx.fillText(text,x,y); };
-        const fitText = (text,x,y,maxWidth,font,color) => {
-          ctx.font=font; let value=String(text||'');
-          while (value && ctx.measureText(value).width>maxWidth) value=value.slice(0,-2).trimEnd();
-          if(value!==String(text||'')) value=value.replace(/[.…]*$/,'')+'…';
-          drawText(value,x,y,font,color);
-        };
-        const wrapText = (text,x,y,maxWidth,lineHeight,font,color,maxLines=2) => {
-          ctx.font=font; ctx.fillStyle=color; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-          const words=String(text||'').split(/\s+/); let line='', lines=0;
-          for(let i=0;i<words.length;i++) {
-            const test=line ? line+' '+words[i] : words[i];
-            if(ctx.measureText(test).width>maxWidth && line) {
-              if(lines===maxLines-1) {
-                let last=line+' '+words.slice(i).join(' ');
-                while(last && ctx.measureText(last+'…').width>maxWidth) last=last.slice(0,-2).trimEnd();
-                ctx.fillText(last+'…',x,y+lines*lineHeight); return lines+1;
-              }
-              ctx.fillText(line,x,y+lines*lineHeight); lines++; line=words[i];
-            } else line=test;
-          }
-          if(line && lines<maxLines) { ctx.fillText(line,x,y+lines*lineHeight); lines++; }
-          return lines;
-        };
-        const dayStamp = date => {
-          const [year,month,day]=date.split('-').map(Number);
-          const stamp=new Date(Date.UTC(year,month-1,day,12));
-          return { weekday:new Intl.DateTimeFormat(locale,{weekday:'short',timeZone:'America/Santiago'}).format(stamp), day:String(day), month:new Intl.DateTimeFormat(locale,{month:'short',timeZone:'America/Santiago'}).format(stamp) };
-        };
-        const validEntries=Object.entries(events).filter(([,event])=>validEvent(event));
-        const allDates=validEntries.map(([,event])=>event.date).sort();
-        const dateLabel = date => {
-          const [year,month,day]=date.split('-').map(Number);
-          return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short',timeZone:'America/Santiago'}).format(new Date(Date.UTC(year,month-1,day,12)));
-        };
-        const period=allDates.length ? `${dateLabel(allDates[0])} – ${dateLabel(allDates[allDates.length-1])}` : '';
-        drawText('CRONOAPP · TEMUCO',80,76,'800 18px system-ui, sans-serif',palette.accent);
-        drawText(t('title'),80,145,'800 54px system-ui, sans-serif',palette.text);
-        drawText(period,1840,135,'600 24px system-ui, sans-serif',palette.muted,'right');
-        ctx.strokeStyle=palette.edge;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(80,186);ctx.lineTo(1840,186);ctx.stroke();
-        const storeRows=Object.entries(stores).map(([storeId,name])=>{
-          const grouped=new Map();
-          for(const [id,event] of validEntries.filter(([,event])=>event.store===storeId).sort((a,b)=>(a[1].date+a[1].time).localeCompare(b[1].date+b[1].time))) {
-            if(!grouped.has(event.date)) grouped.set(event.date,[]);
-            grouped.get(event.date).push([id,event]);
-          }
-          return {storeId,name,days:[...grouped.entries()]};
-        });
-        const left=80,gap=24,colWidth=(1760-gap*2)/3,headerY=220,cardTop=300;
-        const rowGap=14,baseCardHeight=138,extraEventHeight=80;
-        const logos=await Promise.all(storeRows.map(row=>new Promise(resolve=>{
-          const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>resolve(null); img.src=storeLogos[row.storeId];
-        })));
-        for(let column=0;column<storeRows.length;column++) {
-          const row=storeRows[column],x=left+column*(colWidth+gap),logo=logos[column];
-          if(logo) { const scale=Math.min(82/logo.width,56/logo.height); const w=logo.width*scale,h=logo.height*scale; ctx.drawImage(logo,x,headerY+5,w,h); }
-          const textX=x+(logo?100:0);
-          fitText(row.name,textX,headerY+31,colWidth-(textX-x),'800 30px system-ui, sans-serif',palette.text);
-          fitText(storeAddresses[row.storeId],textX,headerY+58,colWidth-(textX-x),'500 17px system-ui, sans-serif',palette.muted);
-          ctx.strokeStyle=palette.edge;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,headerY+78);ctx.lineTo(x+colWidth,headerY+78);ctx.stroke();
-          if(!row.days.length) {
-            roundRect(x,cardTop,colWidth,baseCardHeight,20);ctx.fillStyle=palette.surface;ctx.fill();
-            drawText(t('empty'),x+24,cardTop+45,'500 20px system-ui, sans-serif',palette.muted);
-            continue;
-          }
-          let y=cardTop;
-          row.days.forEach(([date,items])=>{
-            const height=baseCardHeight+Math.max(0,items.length-1)*extraEventHeight;
-            roundRect(x,y,colWidth,height,20);ctx.fillStyle=palette.surface;ctx.fill();ctx.strokeStyle=palette.edge;ctx.lineWidth=2;ctx.stroke();
-            const badge=82,bx=x+20,by=y+18;
-            roundRect(bx,by,badge,badge,14);ctx.fillStyle=palette.raised;ctx.fill();
-            const stamp=dayStamp(date);
-            drawText(stamp.weekday.toLocaleUpperCase(language),bx+badge/2,by+19,'800 13px system-ui, sans-serif',palette.muted,'center');
-            drawText(stamp.day,bx+badge/2,by+51,'800 31px system-ui, sans-serif',palette.text,'center');
-            drawText(stamp.month.toLocaleUpperCase(language).replace('.',''),bx+badge/2,by+badge-10,'800 12px system-ui, sans-serif',palette.muted,'center');
-            const tx=bx+badge+18,tw=x+colWidth-24-tx;
-            const rowSpace=extraEventHeight;
-            const contentTop=y+24;
-            items.forEach(([,event],itemIndex)=>{
-              const top=contentTop+itemIndex*rowSpace;
-              if(itemIndex) {ctx.strokeStyle=palette.edge;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx,top-7);ctx.lineTo(x+colWidth-20,top-7);ctx.stroke();}
-              const title=event.kind==='free'?t('free'):event.type;
-              const time=`${event.time}${event.endTime?`–${event.endTime}`:''}`;
-              fitText(title,tx,top+18,tw*.68,'750 20px system-ui, sans-serif',palette.text);
-              drawText(time,x+colWidth-20,top+18,'700 16px system-ui, sans-serif',palette.text,'right');
-              let details=[];
-              if(event.kind==='tournament') details.push(event.format,event.value===0?t('freeEntry'):new Intl.NumberFormat(locale,{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(event.value));
-              if(event.kind==='free'&&event.showTableAvailabilityNote) details.push(t('tableNoticePublic'));
-              if(details.length) wrapText(details.join(' · '),tx,top+42,tw,18,'500 14px system-ui, sans-serif',palette.muted,Math.max(1,Math.floor((rowSpace-44)/18)));
-            });
-            y+=height+rowGap;
-          });
-        }
-        const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('Canvas export failed')),'image/png'));
-        const link=document.createElement('a');
-        link.href=URL.createObjectURL(blob);
-        link.download='cronoapp-agenda-semanal.png';
-        link.click();
-        setTimeout(()=>URL.revokeObjectURL(link.href),1000);
-      } catch(error) {
-        console.error(error);
-        listStatus.textContent=t('downloadError');
-      } finally {
-        downloadButton.disabled=false;
-        downloadButton.textContent=originalLabel;
       }
     }
     function syncKind() {
