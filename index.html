@@ -3248,6 +3248,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             } catch (error) { showError(error); }
           }
           const returnTo = new URLSearchParams(location.search).get('returnTo');
+          let openOwnRoomOnLoad = new URLSearchParams(location.search).get('openOwnRoom') === '1';
           let returnedToFlyer = false;
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
