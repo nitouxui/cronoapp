@@ -315,7 +315,8 @@
         ctx.save();ctx.setLineDash([12,10]);rounded(ctx,px,py,pw,ph,22);ctx.fillStyle='#00000028';ctx.fill();ctx.strokeStyle='#ffffff70';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
         setFont(ctx,'700 24px system-ui,sans-serif','#ffffffcc','center');ctx.fillText('SUBE LA IMAGEN CENTRAL',w/2,py+ph/2+8);ctx.restore();
       }
-      const fontScale=Number(els.fontSize.value)/100;\n      drawModule(ctx,w,h,h*.66+(1-fontScale)*160*(w/1080),accent);
+      const fontScale=Number(els.fontSize.value)/100;
+      drawModule(ctx,w,h,h*.66+(1-fontScale)*160*(w/1080),accent);
       return ctx;
     }
     let fontReady=true,fontLoadVersion=0;
@@ -350,7 +351,8 @@
       render(canvases.square);render(canvases.portrait);
       document.getElementById('mainSizeOut').value=els.mainSize.value+'%';
       document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
-      document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';\n      document.getElementById('fontSizeOut').value=els.fontSize.value+'%';
+      document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';
+      document.getElementById('fontSizeOut').value=els.fontSize.value+'%';
       document.querySelectorAll('[data-download]').forEach(button=>button.disabled=!images.main||!fontReady);
     }
     function loadFile(input,key){
