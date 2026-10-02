@@ -254,7 +254,7 @@
       const type=els.eventType.value.trim()||'TIPO DE EVENTO',title=els.eventTitle.value.trim()||'Título del evento';
       const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor';
       const dateW=182*u(1),titleW=measure(800,43,title),valueW=measure(800,25,value),typeLabel=type.toLocaleUpperCase('es-CL');
-      const typeFontSize=20,timeFontSize=22,timeTextW=measure(800,timeFontSize,time),timePillW=Math.max(126*u(1),timeTextW+60*u(1));
+      const typeFontSize=20,timeFontSize=22,timeTextW=measure(800,timeFontSize,time),timePillW=Math.max(88*u(1),timeTextW+50*u(1));
       const typeW=measure(800,typeFontSize,typeLabel)+timePillW+44*u(1);
       const maxW=w-152*scale,minW=560*scale;
       const boxW=Math.min(maxW,Math.max(minW,dateW+34*u(1)+Math.max(titleW,valueW,typeW)+62*u(1)));
