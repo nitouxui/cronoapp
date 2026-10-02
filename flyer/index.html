@@ -248,8 +248,8 @@
       let weekday='FECHA',day='--',month='POR DEFINIR';
       if(date){
         const [yy,mm,dd]=date.split('-').map(Number),stamp=new Date(Date.UTC(yy,mm-1,dd,12));
-        weekday=new Intl.DateTimeFormat('es-CL',{weekday:'short',timeZone:'America/Santiago'}).format(stamp).replace(/\\.$/,'').toLocaleUpperCase('es-CL');
-        day=String(dd);month=new Intl.DateTimeFormat('es-CL',{month:'short',timeZone:'America/Santiago'}).format(stamp).replace(/\\.$/,'').toLocaleUpperCase('es-CL');
+        weekday=new Intl.DateTimeFormat('es-CL',{weekday:'short',timeZone:'America/Santiago'}).format(stamp).replace(/\.$/,'').toLocaleUpperCase('es-CL');
+        day=String(dd);month=new Intl.DateTimeFormat('es-CL',{month:'short',timeZone:'America/Santiago'}).format(stamp).replace(/\.$/,'').toLocaleUpperCase('es-CL');
       }
       const type=els.eventType.value.trim()||'TIPO DE EVENTO',title=els.eventTitle.value.trim()||'Título del evento';
       const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor';
