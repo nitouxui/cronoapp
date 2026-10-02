@@ -86,7 +86,7 @@
 <body>
   <section id="loginPanel" class="login-panel"><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
   <main class="shell" id="flyerShell" hidden>
-    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail"></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" href="/">Temporizador</a></div></header>
+    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" href="/">Temporizador</a></div></header>
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
@@ -318,12 +318,28 @@
         ctx.fillStyle=accent;ctx.fillRect(cardContentX,y+132*u(1),cardContentW,2*u(1));
         fitLine(ctx,value,cardContentX,y+177*u(1)+extraLine,cardContentW,fontSpec(800,30),accent,'left');
       }else{
-        const dateCardW=150*u(1),minX=x+dateCardW+60*u(1),minW=boxW-dateCardW-100*u(1);
+        const dateLines=[
+          {text:weekday,weight:800,size:24*dateScale},
+          {text:day,weight:900,size:74*dateScale},
+          {text:month,weight:800,size:24*dateScale}
+        ].map(line=>{
+          const font=fontSpec(line.weight,line.size);
+          ctx.font=font;
+          const metrics=ctx.measureText(line.text);
+          return {...line,font,width:metrics.width,ascent:metrics.actualBoundingBoxAscent||px(line.size)*.78,descent:metrics.actualBoundingBoxDescent||px(line.size)*.22};
+        });
+        const dateCardW=Math.max(150*u(1),...dateLines.map(line=>line.width+48*u(1)));
+        const minX=x+dateCardW+60*u(1),minW=boxW-dateCardW-100*u(1);
         roundedBox(ctx,x,y,boxW,boxH,18*u(1),'#101713c9','#ffffff80');
         ctx.strokeStyle=accent;ctx.lineWidth=3*u(1);rounded(ctx,x+20*u(1),y+18*u(1),dateCardW,boxH-36*u(1),14*u(1));ctx.stroke();
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+20*u(1),y+(108-42*dateScale)*u(1),dateCardW-42*u(1));
-        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+20*u(1),y+(108+30*dateScale)*u(1),dateCardW-48*u(1));
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+20*u(1),y+(108+62*dateScale)*u(1),dateCardW-42*u(1));
+        const dateGap=8*u(1),dateTileTop=y+18*u(1),dateTileHeight=boxH-36*u(1);
+        const dateBlockHeight=dateLines.reduce((total,line)=>total+line.ascent+line.descent,0)+dateGap*(dateLines.length-1);
+        let dateLineTop=dateTileTop+(dateTileHeight-dateBlockHeight)/2;
+        for(const line of dateLines){
+          setFont(ctx,line.font,'#ffffff','center');
+          ctx.fillText(line.text,x+20*u(1)+dateCardW/2,dateLineTop+line.ascent);
+          dateLineTop+=line.ascent+line.descent+dateGap;
+        }
         fitLine(ctx,typeLabel,minX,y+46*u(1),Math.max(70*u(1),minW-timeTextW-32*u(1)),fontSpec(800,typeFontSize),accent,'left');
         fitLine(ctx,time,x+boxW-36*u(1),y+49*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+108*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
