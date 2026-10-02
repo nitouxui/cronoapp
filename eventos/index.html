@@ -26,9 +26,11 @@
     .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
     .filters button { min-height:40px; padding:0 15px; border:1px solid var(--edge); border-radius:100px; background:var(--surface); color:var(--text); font-size:13px; font-weight:750; }
     .filters button[aria-pressed="true"] { border-color:var(--accent); background:var(--focus); color:#182129; }
-    .store { margin:0 0 38px; }
-    .store-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--edge); padding-bottom:11px; }
-    .store-logo { width:72px; height:46px; flex:0 0 auto; object-fit:contain; }
+    #storeList { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; gap:18px; }
+    .store { margin:0; min-width:0; }
+    .store-head { display:grid; grid-template-columns:72px minmax(0,1fr); grid-template-areas:'logo name' 'logo address'; align-items:center; column-gap:12px; row-gap:4px; margin-bottom:14px; border-bottom:1px solid var(--edge); padding-bottom:11px; }
+    .store-logo { grid-area:logo; width:72px; height:46px; align-self:center; object-fit:contain; }
+    .store-address { grid-area:address; color:var(--muted); font-size:12px; line-height:1.35; }
     .store h2 { margin:0; font-size:clamp(22px,3vw,28px); letter-spacing:-.03em; }
     .store-count { color:var(--muted); font-size:13px; }
     .events { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); gap:12px; }
@@ -61,14 +63,15 @@
     .primary { border:1px solid var(--focus); background:var(--focus); color:#162029; }
     .secondary { border:1px solid var(--edge); background:var(--raised); color:var(--text); }
     .primary:disabled { opacity:.55; cursor:wait; }
-    @media (max-width:580px) { .admin form { grid-template-columns:1fr; } .full { grid-column:auto; } .back { padding:0 10px; } }
+    @media (max-width:900px) { #storeList { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:580px) { #storeList { grid-template-columns:1fr; } .admin form { grid-template-columns:1fr; } .full { grid-column:auto; } .back { padding:0 10px; } }
   </style>
 </head>
 <body>
   <main class="shell">
     <header><a class="brand" href="/">Cronoapp</a><a class="back" href="/" data-i18n="back">Volver al inicio</a></header>
     <div class="intro"><span class="eyebrow" data-i18n="eyebrow">JUEGA EN TEMUCO</span><h1 data-i18n="title">Agenda de eventos</h1><p data-i18n="description">Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.</p></div>
-    <nav class="filters" aria-label="Filtrar por tienda"><button type="button" data-store="all" aria-pressed="true" data-i18n="all">Todas las tiendas</button><button type="button" data-store="trizano">Top8 Trizano</button><button type="button" data-store="neruda">Top8 Neruda</button><button type="button" data-store="bluecard">Bluecard</button></nav>
+    <nav class="filters" aria-label="Filtrar por tienda"><button type="button" data-store="all" aria-pressed="true" data-i18n="all">Todas las tiendas</button><button type="button" data-store="neruda">Top8 Neruda</button><button type="button" data-store="trizano">Top8 Trizano</button><button type="button" data-store="bluecard">Bluecard</button></nav>
         <p id="listStatus" class="status" role="status" data-i18n="loading">Cargando agenda…</p>
     <div id="storeList"></div>
     <section id="admin" class="admin" aria-labelledby="adminTitle" hidden>
@@ -100,7 +103,8 @@
       appId: '1:482155443294:web:b62c46a3ae16ca551630cf'
     };
     const adminEmail = 'quidel.dsgn@gmail.com';
-    const stores = { trizano: 'Top8 Trizano', neruda: 'Top8 Neruda', bluecard: 'Bluecard' };
+    const stores = { neruda: 'Top8 Neruda', trizano: 'Top8 Trizano', bluecard: 'Bluecard' };
+    const storeAddresses = { neruda:'Avenida Pablo Neruda 1980', trizano:'Trizano 430', bluecard:'Lago Riñihue 01890' };
     const storeLogos = { trizano:'assets/logos/top8.svg', neruda:'assets/logos/top8.svg', bluecard:'assets/logos/bluecard.svg' };
     const messages = {
       es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos', description:'Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
@@ -152,7 +156,7 @@
         const heading = element('div','store-head');
         const logo = element('img','store-logo');
         logo.src = storeLogos[storeId]; logo.alt = storeId === 'bluecard' ? 'Logo Bluecard' : 'Logo Top8 Gaming Center';
-        heading.append(logo, element('h2','',storeName), element('span','store-count',`${entries.length} ${t('count')}`));
+        heading.append(logo, element('h2','',storeName), element('span','store-address',storeAddresses[storeId]));
         section.append(heading);
         if (!entries.length) section.append(element('p','empty',t('empty')));
         else {
