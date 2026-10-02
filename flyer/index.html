@@ -11,6 +11,17 @@
   <style>
     :root { color-scheme:dark; --bg:#14171b; --panel:#20252b; --raised:#293039; --edge:#46515d; --text:#f0f2f5; --muted:#bfc7d0; --accent:#a4b3c1; --focus:#dce7f2; font-family:"DM Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    .login-panel { width:min(440px,calc(100% - 32px)); margin:12vh auto; padding:28px; border:1px solid var(--edge); border-radius:18px; background:var(--panel); text-align:center; }
+    .login-panel h1 { margin:8px 0; font-size:26px; }
+    .login-panel p { color:var(--muted); line-height:1.5; }
+    .login-panel button,.account button,.save-draft { border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-weight:800; cursor:pointer; }
+    .login-panel button { min-height:46px; padding:0 18px; }
+    .account { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
+    .account button { padding:8px 12px; }
+    .save-row { display:flex; justify-content:flex-end; margin:-6px 0 16px; }
+    .save-draft { min-height:40px; padding:0 14px; background:var(--accent); color:#101418; border-color:transparent; }
+    .save-draft:disabled { opacity:.65; cursor:wait; }
     body { margin:0; min-height:100vh; background:radial-gradient(circle at 8% 0%,#2b333b,var(--bg) 42%); color:var(--text); }
     button,input,select { font:inherit; }
     button,select,input[type="color"],input[type="file"],input[type="range"] { cursor:pointer; }
@@ -61,15 +72,15 @@
   </style>
 </head>
 <body>
-  <main class="shell">
-    <header><a class="brand" href="/">Cronoapp</a><a class="back" href="/eventos/">Agenda de eventos</a></header>
+  <section id="loginPanel" class="login-panel"><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
+  <main class="shell" id="flyerShell" hidden>
+    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail"></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" href="/eventos/">Agenda de eventos</a></div></header>
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
-        <h2>Contenido del flyer</h2>
+        <h2>Contenido del flyer</h2><div class="save-row"><button class="save-draft" id="saveDraft" type="button">Guardar diseño</button></div>
         <section class="group">
-          <h3>Evento y tienda</h3>
-          <div class="field"><label for="store">Tienda</label><select id="store"><option value="trizano">Top8 Trizano</option><option value="neruda">Top8 Neruda</option><option value="bluecard">Bluecard</option></select></div>
+          <h3>Evento</h3>
           <div class="field"><label for="eventType">Tipo de evento</label><input id="eventType" type="text" value="Torneo Casual" placeholder="Ej.: League Challenge"></div>
           <div class="field"><label for="eventTitle">Título del evento</label><input id="eventTitle" type="text" value="Torneo Pokémon" placeholder="Nombre del torneo"></div>
           <div class="two-col">
@@ -78,10 +89,10 @@
           </div>
           <div class="two-col">
             <div class="field"><label for="eventValue">Valor</label><input id="eventValue" type="text" value="$3.500" placeholder="Gratis o $3.500"></div>
-            <div class="field"><label for="address">Dirección</label><input id="address" type="text" value="Trizano 430"></div>
+            <div class="field"><label for="address">Dirección</label><input id="address" type="text" placeholder="Dirección del evento"></div>
           </div>
           <div class="field"><label for="logoPosition">Posición del logo</label><select id="logoPosition"><option value="left">Izquierda</option><option value="center" selected>Centrado</option><option value="right">Derecha</option></select></div>
-          <div class="field"><label for="customLogo">Logo de tienda (opcional)</label><input id="customLogo" type="file" accept="image/*"><p class="hint">Se usa el logo guardado de la tienda si no seleccionas otro.</p></div>
+          <div class="field"><label for="customLogo">Logo (opcional)</label><input id="customLogo" type="file" accept="image/*"></div>
         </section>
         <section class="group">
           <h3>Imágenes</h3>
@@ -115,14 +126,9 @@
     </div>
   </main>
   <script>
-    const stores={
-      trizano:{name:'Top8 Trizano',address:'Trizano 430',logo:'../eventos/assets/logos/top8.svg'},
-      neruda:{name:'Top8 Neruda',address:'Avenida Pablo Neruda 1980',logo:'../eventos/assets/logos/top8.svg'},
-      bluecard:{name:'Bluecard',address:'Lago Riñihue 01890',logo:'../eventos/assets/logos/bluecard.svg'}
-    };
     const form=document.getElementById('flyerForm');
     const els={
-      store:document.getElementById('store'),eventType:document.getElementById('eventType'),eventTitle:document.getElementById('eventTitle'),
+      eventType:document.getElementById('eventType'),eventTitle:document.getElementById('eventTitle'),
       eventDate:document.getElementById('eventDate'),eventTime:document.getElementById('eventTime'),eventValue:document.getElementById('eventValue'),
       address:document.getElementById('address'),logoPosition:document.getElementById('logoPosition'),customLogo:document.getElementById('customLogo'),
       mainImage:document.getElementById('mainImage'),mainSize:document.getElementById('mainSize'),backgroundImage:document.getElementById('backgroundImage'),
@@ -130,7 +136,9 @@
       backgroundColor:document.getElementById('backgroundColor'),accentColor:document.getElementById('accentColor'),moduleStyle:document.getElementById('moduleStyle'),flyerFont:document.getElementById('flyerFont'),fontSize:document.getElementById('fontSize')
     };
     const canvases={square:document.getElementById('squarePreview'),portrait:document.getElementById('portraitPreview')};
-    const images={main:null,background:null,customLogo:null,storeLogo:null};
+    const images={main:null,background:null,customLogo:null};
+    const selectedFiles={main:null,background:null,customLogo:null};
+    let currentUser=null;
     const objectUrls={};
     let currentRatio='square';
     const ctxs={square:canvases.square.getContext('2d'),portrait:canvases.portrait.getContext('2d')};
@@ -327,7 +335,7 @@
       drawVectorTexture(ctx,w,h,els.textureStyle.value,Number(els.textureOpacity.value)/100,accent);
       const shade=ctx.createLinearGradient(0,h*.43,0,h);shade.addColorStop(0,'#00000000');shade.addColorStop(1,'#00000070');
       ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
-      const logo=images.customLogo||images.storeLogo;
+      const logo=images.customLogo;
       if(logo){
         const maxW=w*.48,maxH=h*.12,scale=Math.min(maxW/logo.width,maxH/logo.height),lw=logo.width*scale,lh=logo.height*scale;
         const pos=els.logoPosition.value,lx=pos==='left'?72:pos==='right'?w-72-lw:(w-lw)/2;
@@ -380,6 +388,7 @@
     }
     function loadFile(input,key){
       const file=input.files&&input.files[0];if(!file)return;
+      selectedFiles[key]=file;
       if(objectUrls[key])URL.revokeObjectURL(objectUrls[key]);
       const url=URL.createObjectURL(file);objectUrls[key]=url;
       const image=new Image();
@@ -387,25 +396,12 @@
       image.onerror=()=>{document.getElementById('status').textContent='No se pudo cargar esa imagen.';};
       image.src=url;
     }
-    const logoImages={};
-    function loadStoreLogo(){
-      if(images.customLogo)return;
-      const src=stores[els.store.value].logo;
-      if(logoImages[src]){images.storeLogo=logoImages[src];redraw();return;}
-      const img=new Image();img.onload=()=>{logoImages[src]=img;images.storeLogo=img;redraw();};
-      img.onerror=()=>{images.storeLogo=null;redraw();};
-      img.src=src;
-    }
     els.flyerFont.addEventListener('change',loadFlyerFont);
-    els.store.addEventListener('change',()=>{
-      els.address.value=stores[els.store.value].address;
-      images.customLogo=null;els.customLogo.value='';loadStoreLogo();redraw();
-    });
     els.customLogo.addEventListener('change',()=>loadFile(els.customLogo,'customLogo'));
     els.mainImage.addEventListener('change',()=>loadFile(els.mainImage,'main'));
     els.backgroundImage.addEventListener('change',()=>loadFile(els.backgroundImage,'background'));
     document.querySelectorAll('#flyerForm input,#flyerForm select').forEach(control=>{
-      if(control.type==='file'||control.id==='store')return;
+      if(control.type==='file')return;
       control.addEventListener('input',redraw);control.addEventListener('change',redraw);
     });
     document.querySelectorAll('[data-ratio]').forEach(button=>button.addEventListener('click',()=>{
@@ -420,8 +416,65 @@
       link.href=canvas.toDataURL('image/png');link.click();
       document.getElementById('status').textContent='PNG descargado en formato '+(ratio==='square'?'1080 × 1080':'1080 × 1350')+'.';
     }));
-    loadStoreLogo();
     redraw();
+
+    const status=document.getElementById('status');
+    const draftButton=document.getElementById('saveDraft');
+    const dbRequest=indexedDB.open('cronoapp-flyer-drafts',1);
+    dbRequest.onupgradeneeded=()=>dbRequest.result.createObjectStore('drafts',{keyPath:'uid'});
+    const draftDb=new Promise((resolve,reject)=>{dbRequest.onsuccess=()=>resolve(dbRequest.result);dbRequest.onerror=()=>reject(dbRequest.error);});
+    const draftFields=Array.from(document.querySelectorAll('#flyerForm input,#flyerForm select')).filter(el=>el.type!=='file').map(el=>el.id);
+    function draftTransaction(mode,action){return draftDb.then(db=>new Promise((resolve,reject)=>{
+      const tx=db.transaction('drafts',mode),store=tx.objectStore('drafts');let req,result;
+      try{req=action(store);}catch(error){reject(error);return;}
+      if(req){req.onsuccess=()=>{result=req.result;};req.onerror=()=>reject(req.error);}
+      tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);
+    }));}
+    async function saveDraft(){
+      if(!currentUser)return;
+      draftButton.disabled=true;draftButton.textContent='Guardando…';
+      try{
+        const fields={};draftFields.forEach(id=>fields[id]=document.getElementById(id).value);
+        await draftTransaction('readwrite',store=>store.put({uid:currentUser.uid,fields,files:selectedFiles,savedAt:Date.now()}));
+        status.textContent='Diseño guardado en este navegador. Podrás recuperarlo al volver a iniciar sesión aquí.';
+      }catch(error){status.textContent='No se pudo guardar el diseño en este navegador.';}
+      finally{draftButton.disabled=false;draftButton.textContent='Guardar diseño';}
+    }
+    function loadStoredFile(file,key){
+      selectedFiles[key]=file;const url=URL.createObjectURL(file);objectUrls[key]=url;
+      const image=new Image();image.onload=()=>{images[key]=image;redraw();};image.src=url;
+    }
+    async function restoreDraft(user){
+      currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';
+      const draft=await draftTransaction('readonly',store=>store.get(user.uid));
+      if(draft){
+        Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=value;});
+        Object.entries(draft.files||{}).forEach(([key,file])=>{if(file)loadStoredFile(file,key);});
+        status.textContent='Se recuperó tu último diseño guardado.';
+      }else status.textContent='';
+      document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;
+      if(els.flyerFont.value!=='Oswald')loadFlyerFont();else redraw();
+    }
+    draftButton.addEventListener('click',saveDraft);
+    (async()=>{
+      try{
+        const base='https://www.gstatic.com/firebasejs/12.19.0/';
+        const [appModule,authModule]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js')]);
+        const config={apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5Gk8',authDomain:'cronoapp-97aa6.firebaseapp.com',databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com',projectId:'cronoapp-97aa6',storageBucket:'cronoapp-97aa6.firebasestorage.app',messagingSenderId:'482155443294',appId:'1:482155443294:web:b62c46a3ae16ca551630cf',measurementId:'G-ZR98354B0G'};
+        const app=appModule.initializeApp(config),auth=authModule.getAuth(app),provider=new authModule.GoogleAuthProvider();
+        authModule.onAuthStateChanged(auth,user=>{
+          if(user)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
+          else{currentUser=null;document.getElementById('flyerShell').hidden=true;document.getElementById('loginPanel').hidden=false;}
+        });
+        document.getElementById('googleLogin').addEventListener('click',async()=>{
+          const button=document.getElementById('googleLogin'),message=document.getElementById('loginStatus');button.disabled=true;message.textContent='Conectando…';
+          try{await authModule.signInWithPopup(auth,provider);}
+          catch(error){message.textContent='No se pudo iniciar sesión con Google ('+error.code+').';}
+          finally{button.disabled=false;}
+        });
+        document.getElementById('logoutButton').addEventListener('click',()=>authModule.signOut(auth));
+      }catch(error){document.getElementById('loginStatus').textContent='No se pudo conectar con el acceso de Google.';}
+    })();
   </script>
 </body>
 </html>
