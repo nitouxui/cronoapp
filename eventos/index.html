@@ -212,7 +212,7 @@
       const free = document.getElementById('kind').value === 'free';
       document.getElementById('value').required = !free;
       document.getElementById('value').disabled = free;
-      document.querySelectorAll('.tournament-field').forEach(field => { field.hidden = free; field.querySelector('select').disabled = free; });
+      document.querySelectorAll('.tournament-field').forEach(field => { field.hidden = free; field.querySelector('select, input').disabled = free; });
       document.getElementById('endField').hidden = !free;
       document.getElementById('endTime').required = free;
     }
