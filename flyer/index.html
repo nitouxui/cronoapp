@@ -84,9 +84,10 @@
   </style>
 </head>
 <body>
-  <section id="loginPanel" class="login-panel"><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
+  <section id="authLoading" class="login-panel" role="status" aria-live="polite"><span class="eyebrow">CRONOAPP</span><h1>Preparando tu generador</h1><p>Estamos comprobando tu sesión…</p></section>
+  <section id="loginPanel" class="login-panel" hidden><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
   <main class="shell" id="flyerShell" hidden>
-    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" href="/?openOwnRoom=1">Temporizador</a></div></header>
+    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" id="timerLink" href="/?openOwnRoom=1">Temporizador</a></div></header>
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
@@ -497,23 +498,39 @@
         Object.entries(draft.files||{}).forEach(([key,file])=>{if(file)loadStoredFile(file,key);});
         status.textContent='Se recuperó tu último diseño guardado.';
       }else status.textContent='';
-      document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;
+      document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;
       if(els.flyerFont.value!=='Oswald')loadFlyerFont();else redraw();
     }
     draftButton.addEventListener('click',saveDraft);
     (async()=>{
       try{
         const base='https://www.gstatic.com/firebasejs/12.19.0/';
-        const [appModule,authModule]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js')]);
+        const [appModule,authModule,databaseModule]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-database.js')]);
         const config={apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8',authDomain:'cronoapp-97aa6.firebaseapp.com',databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com',projectId:'cronoapp-97aa6',storageBucket:'cronoapp-97aa6.firebasestorage.app',messagingSenderId:'482155443294',appId:'1:482155443294:web:b62c46a3ae16ca551630cf',measurementId:'G-ZR98354B0G'};
-        const app=appModule.initializeApp(config),auth=authModule.getAuth(app);
+        const app=appModule.initializeApp(config),auth=authModule.getAuth(app),db=databaseModule.getDatabase(app);
+        const timerLink=document.getElementById('timerLink');
+        const returnToRoom=new URLSearchParams(location.search).get('returnToRoom');
+        const isValidRoomId=id=>typeof id==='string'&&/^[A-Za-z0-9_-]{8,64}$/.test(id);
+        timerLink.addEventListener('click',async event=>{
+          event.preventDefault();
+          timerLink.textContent='Abriendo tu sala…';
+          try{
+            let roomId=isValidRoomId(returnToRoom)?returnToRoom:null;
+            if(!roomId&&currentUser?.uid){
+              const owned=databaseModule.query(databaseModule.ref(db,'rooms'),databaseModule.orderByChild('ownerUid'),databaseModule.equalTo(currentUser.uid),databaseModule.limitToFirst(1));
+              const found=await databaseModule.get(owned);
+              if(found.exists())roomId=Object.keys(found.val())[0];
+            }
+            location.assign(roomId&&isValidRoomId(roomId)?'/?sala='+encodeURIComponent(roomId):'/?openOwnRoom=1');
+          }catch(error){location.assign('/?openOwnRoom=1');}
+        });
         authModule.onAuthStateChanged(auth,user=>{
-          if(user)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
-          else{currentUser=null;document.getElementById('flyerShell').hidden=true;document.getElementById('loginPanel').hidden=false;}
+          if(user)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
+          else{currentUser=null;document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=true;document.getElementById('loginPanel').hidden=false;}
         });
         document.getElementById('googleLogin').addEventListener('click',()=>{location.assign('/?returnTo='+encodeURIComponent('/flyer/'));});
         document.getElementById('logoutButton').addEventListener('click',()=>authModule.signOut(auth));
-      }catch(error){document.getElementById('loginStatus').textContent='No se pudo conectar con el acceso de Google.';}
+      }catch(error){document.getElementById('authLoading').hidden=true;document.getElementById('loginPanel').hidden=false;document.getElementById('loginStatus').textContent='No se pudo conectar con el acceso de Google.';}
     })();
   </script>
 </body>

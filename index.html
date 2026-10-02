@@ -3106,6 +3106,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           roomId = alias.val();
           if (!roomId || !/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) throw new Error('Código de sala no encontrado.');
         }
+        const flyerMenuLink = document.querySelector('.flyer-menu-link');
+        if (flyerMenuLink && roomId) {
+          const flyerUrl = new URL('/flyer/', location.origin);
+          flyerUrl.searchParams.set('returnToRoom', roomId);
+          flyerMenuLink.href = flyerUrl.href;
+        }
         roomRef = roomId ? dbModule.ref(db, 'rooms/' + roomId) : null;
         stateRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/state') : null;
         settingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
