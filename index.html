@@ -343,6 +343,7 @@
       #leftPanel { min-height: 0; }
       #rightPanel { min-height: 520px; }
     }
+    body.left-panel-hidden #leftPanel { display: none; }
     body:not(.no-room) .room-actions-menu-content > .edit-button:focus-visible,
     body:not(.no-room) .room-actions-menu-content > #syncLogout:focus-visible,
     body:not(.no-room) #syncToggle:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
@@ -395,6 +396,13 @@
     body:not(.no-room) #modal .modal-content input[type="file"]::file-selector-button:hover { border-color: var(--accent); }
     body:not(.no-room) #modal .modal-content .logo-control-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 14px; }
     body:not(.no-room) #modal .modal-content .logo-control-row .editor-button[hidden] { display: none !important; }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; padding: 12px 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); cursor: pointer; }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle input { appearance: none; -webkit-appearance: none; position: relative; flex: 0 0 44px; width: 44px; height: 26px; margin: 0; border: 1px solid var(--edge); border-radius: 99px; background: var(--muted); cursor: pointer; transition: background .15s ease; }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0005; transition: transform .15s ease; }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle input:checked { background: var(--accent); }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle input:checked::after { transform: translateX(18px); }
+    body:not(.no-room) #modal .modal-content .left-panel-toggle input:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
+    body:not(.no-room) #modal .modal-content #leftPanelSettings[hidden] { display: none; }
     body:not(.no-room) #modal .modal-content #removeLogoButton { border-color: var(--danger); color: var(--danger); }
     body:not(.no-room) #modal .modal-content #removeUploadedImageButton { display: flex; margin-top: 8px; border-color: var(--danger); color: var(--danger); }
     body:not(.no-room) #modal .modal-content #removeUploadedImageButton[hidden] { display: none !important; }
@@ -659,6 +667,8 @@
           <button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('logoInput').click()">Subir logo</button>
           <button id="removeLogoButton" class="editor-button editor-button-secondary" type="button" onclick="removeLogo()" hidden>Quitar logo</button>
         </div>
+        <label class="left-panel-toggle" for="leftPanelEnabled"><span>Mostrar panel izquierdo</span><input id="leftPanelEnabled" type="checkbox" role="switch" checked aria-controls="leftPanel leftPanelSettings" onchange="setLeftPanelEnabled(this.checked)"></label>
+        <div id="leftPanelSettings">
         <label for="leftVisualModeSelect">Contenido del panel izquierdo</label>
         <select id="leftVisualModeSelect" class="editor-select" onchange="switchLeftVisualMode()">
           <option value="qr">Generar QR desde un enlace</option>
@@ -680,6 +690,7 @@
           <input id="tdfInput" type="file" accept=".tdf,.xml,text/xml,application/xml">
           <button id="publishPairings" class="editor-button editor-button-secondary" type="button">Publicar pareos y generar QR</button>
           <p id="tdfStatus" role="status" aria-live="polite">Al subir un nuevo TDF, se reemplazan los pareos publicados.</p>
+        </div>
         </div>
         <p id="qrStatus" role="status" aria-live="polite"></p>
       </div>
@@ -2009,12 +2020,19 @@ module.exports = QRCode;
       document.querySelector(`input[name="palette"][value="${savedPalette}"]`).checked = true;
       document.getElementById('timerInput').value = savedMinutes;
       applyTimerFont(savedTimerFont);
+      setLeftPanelEnabled(savedLeftPanelEnabled);
     }
 
     const palettes = new Set(['ember', 'ocean', 'forest', 'violet', 'sunset', 'gold', 'turquoise', 'crimson', 'ice', 'graphite', 'red', 'orchid', 'lime', 'copper', 'ember-light', 'ocean-light', 'forest-light', 'violet-light', 'sunset-light', 'gold-light', 'turquoise-light', 'crimson-light', 'ice-light', 'graphite-light', 'red-light', 'orchid-light', 'lime-light', 'copper-light', 'pop-pink', 'laser-blue', 'acid-lime', 'pop-orange', 'neon-violet', 'volt-green', 'cyber-cyan', 'fluor-yellow']);
     let savedPalette = 'graphite';
     let savedMinutes = 2;
     let savedTimerFont = 'system';
+    let savedLeftPanelEnabled = true;
+    function setLeftPanelEnabled(enabled) {
+      document.getElementById('leftPanelEnabled').checked = enabled;
+      document.getElementById('leftPanelSettings').hidden = !enabled;
+      document.body.classList.toggle('left-panel-hidden', !enabled);
+    }
     const timerFonts = Object.freeze({
       system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       classic: 'Georgia, "Times New Roman", serif'
@@ -2057,13 +2075,14 @@ module.exports = QRCode;
 
     async function saveSettings() {
       const mode = document.getElementById('leftVisualModeSelect').value;
+      const leftPanelEnabled = document.getElementById('leftPanelEnabled').checked;
       if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
-      if (mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
-      if (mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
+      if (leftPanelEnabled && mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
+      if (leftPanelEnabled && mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
         renderLeftVisual();
       }
-      if (mode === 'tdf' && (!pairingsAvailable || !generatePairingsQR())) {
+      if (leftPanelEnabled && mode === 'tdf' && (!pairingsAvailable || !generatePairingsQR())) {
         document.getElementById('qrStatus').textContent = 'Publica un TDF antes de guardar esta opción.';
         return;
       }
@@ -2075,6 +2094,7 @@ module.exports = QRCode;
       const settings = {
         images: {
           logoSrc: document.getElementById('logo').getAttribute('src') || '',
+          leftPanelEnabled,
           leftVisualMode: mode,
           uploadedImageSrc,
           qrUrl: document.getElementById('qrUrl').value.trim()
@@ -2090,6 +2110,7 @@ module.exports = QRCode;
       if (await window.saveRoomSettings(settings)) {
         savedPalette = settings.palette;
         savedTimerFont = settings.timerFont;
+        savedLeftPanelEnabled = leftPanelEnabled;
         if (minutes !== savedMinutes) window.updateTimerTime();
         savedMinutes = minutes;
         closeModal();
@@ -2104,6 +2125,8 @@ module.exports = QRCode;
       savedTimerFont = Object.prototype.hasOwnProperty.call(timerFonts, settings.timerFont) ? settings.timerFont : 'system';
       applyTimerFont(savedTimerFont);
       const images = settings.images;
+      savedLeftPanelEnabled = images?.leftPanelEnabled !== false;
+      setLeftPanelEnabled(savedLeftPanelEnabled);
       if (images) {
         const logo = document.getElementById('logo');
         if (images.logoSrc) {
@@ -3328,7 +3351,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Violeta neón': 'Neon violet', 'Verde voltio': 'Volt green', 'Cian ciber': 'Cyber cyan',
           'Amarillo flúor': 'Fluorescent yellow', 'Paletas disponibles': 'Available palettes',
           'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Logo': 'Logo',
-          'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Contenido del panel izquierdo': 'Left panel content',
+          'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Mostrar panel izquierdo': 'Show left panel', 'Contenido del panel izquierdo': 'Left panel content',
           'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
           'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
           'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'TDF uploads are temporarily disabled while I check their use with Play! Pokémon.',
@@ -3445,7 +3468,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Violeta neón': 'Violeta neon', 'Verde voltio': 'Verde volt', 'Cian ciber': 'Ciano ciber',
           'Amarillo flúor': 'Amarelo fluorescente', 'Paletas disponibles': 'Paletas disponíveis',
           'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Logo': 'Logotipo',
-          'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
+          'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Mostrar panel izquierdo': 'Mostrar painel esquerdo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
           'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
           'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
           'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'O envio de TDF está temporariamente desativado enquanto consulto seu uso com o Play! Pokémon.',
