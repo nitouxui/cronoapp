@@ -73,7 +73,7 @@
   <main class="shell">
     <header><a class="brand" href="/">Cronoapp</a><a class="back" href="/" data-i18n="back">Volver al inicio</a></header>
     <div class="intro"><span class="eyebrow" data-i18n="eyebrow">JUEGA EN TEMUCO</span><h1 data-i18n="title">Agenda de eventos</h1><p data-i18n="description">Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.</p></div>
-    <nav class="filters" aria-label="Filtrar por tienda"><button type="button" data-store="all" aria-pressed="true" data-i18n="all">Todas las tiendas</button><button type="button" data-store="trizano">Top8 Trizano</button><button type="button" data-store="neruda">Top8 Neruda</button><button type="button" data-store="bluecard">Bluecard</button></nav>
+    
         <p id="listStatus" class="status" role="status" data-i18n="loading">Cargando agenda…</p>
     <div id="storeList"></div>
     <section id="admin" class="admin" aria-labelledby="adminTitle" hidden>
@@ -124,7 +124,6 @@
     const form = document.getElementById('eventForm');
     const formStatus = document.getElementById('formStatus');
     let events = {};
-    let activeStore = 'all';
     let editingId = null;
     let isAdmin = false;
     let database, eventsRef, auth;
@@ -145,7 +144,7 @@
     function render() {
       list.replaceChildren();
       const now = new Intl.DateTimeFormat('sv-SE', { timeZone:'America/Santiago', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(new Date()).replace(' ', 'T');
-      const visibleStores = Object.entries(stores).filter(([storeId]) => activeStore === 'all' || activeStore === storeId);
+      const visibleStores = Object.entries(stores);
       list.style.gridTemplateColumns = `repeat(${visibleStores.length}, minmax(0, 1fr))`;
       for (const [storeId, storeName] of visibleStores) {
         const entries = Object.entries(events).filter(([, event]) => validEvent(event) && event.store === storeId)
@@ -202,11 +201,6 @@
         list.append(section);
       }
     }
-    document.querySelectorAll('.filters button[data-store]').forEach(button => button.addEventListener('click', () => {
-      activeStore = button.dataset.store;
-      document.querySelectorAll('.filters button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      render();
-    }));
     function syncKind() {
       const free = document.getElementById('kind').value === 'free';
       document.getElementById('value').required = !free;
