@@ -192,7 +192,7 @@
         ctx.fillStyle=accent;ctx.fillRect(x,y,dateW,boxH);
         const gleam=ctx.createLinearGradient(x,y,x+dateW,y+boxH);gleam.addColorStop(0,'#ffffff24');gleam.addColorStop(1,'#00000018');
         ctx.fillStyle=gleam;ctx.fillRect(x,y,dateW,boxH);ctx.restore();
-        ctx.globalAlpha=.22;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+dateW-20*scale,y+28*scale,38*scale,0,Math.PI*2);ctx.fill();ctx.restore();
+        ctx.restore();
         setFont(ctx,'800 17px system-ui,sans-serif','#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+54*scale);
         setFont(ctx,'900 78px system-ui,sans-serif','#ffffff','center');ctx.fillText(day,x+dateW/2,y+137*scale);
         setFont(ctx,'800 18px system-ui,sans-serif','#ffffff','center');ctx.fillText(month,x+dateW/2,y+183*scale);
