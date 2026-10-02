@@ -460,7 +460,7 @@
       try{
         const base='https://www.gstatic.com/firebasejs/12.19.0/';
         const [appModule,authModule]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js')]);
-        const config={apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5Gk8',authDomain:'cronoapp-97aa6.firebaseapp.com',databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com',projectId:'cronoapp-97aa6',storageBucket:'cronoapp-97aa6.firebasestorage.app',messagingSenderId:'482155443294',appId:'1:482155443294:web:b62c46a3ae16ca551630cf',measurementId:'G-ZR98354B0G'};
+        const config={apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8',authDomain:'cronoapp-97aa6.firebaseapp.com',databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com',projectId:'cronoapp-97aa6',storageBucket:'cronoapp-97aa6.firebasestorage.app',messagingSenderId:'482155443294',appId:'1:482155443294:web:b62c46a3ae16ca551630cf',measurementId:'G-ZR98354B0G'};
         const app=appModule.initializeApp(config),auth=authModule.getAuth(app),provider=new authModule.GoogleAuthProvider();
         authModule.onAuthStateChanged(auth,user=>{
           if(user)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
