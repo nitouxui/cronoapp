@@ -305,12 +305,17 @@
     .short-code-entry { display: none; }
     body.code-entry-mode #roomWelcome { align-items: center; padding: 80px 20px 32px; }
     body.code-entry-mode #roomWelcome .welcome-shell { width: min(100%, 560px); display: block; }
-    body.code-entry-mode .welcome-copy, body.code-entry-mode .landing-control-entry { display: none !important; }
+    body.code-entry-mode .welcome-copy, body.code-entry-mode .landing-control-entry, body.code-entry-mode .landing-flyer-entry { display: none !important; }
     body.code-entry-mode #landingLogin { display: block; }
     body.code-entry-mode .short-code-entry { display: block; }
     .entry-home-link { display: none; margin-top: 16px; color: var(--accent-soft); font-weight: 700; }
     body.code-entry-mode .entry-home-link { display: inline-block; }
     .landing-control-entry { display: grid; align-content: start; gap: 10px; }
+    .landing-flyer-entry { min-width: 0; padding: clamp(20px, 2.6vw, 30px); border: 1px solid var(--edge); border-radius: 18px; background: var(--surface-raised); box-shadow: 0 14px 42px #0005; }
+    .landing-flyer-entry h2 { margin: 9px 0 6px; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
+    .landing-flyer-entry p { margin: 0 0 16px; color: var(--muted); font-size: 14px; line-height: 1.45; }
+    .landing-flyer-button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 800; text-decoration: none; }
+    .landing-flyer-button:hover, .landing-flyer-button:focus-visible { filter: brightness(1.1); }
     .landing-control-entry h2 { margin: 9px 0 0; color: var(--text); font-size: clamp(21px, 2vw, 26px); }
     .landing-control-entry p { margin: 0 0 8px; color: var(--muted); font-size: 14px; line-height: 1.45; }
     .landing-control-entry #controlSync { width: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; }
@@ -506,9 +511,15 @@
       </div>
       <div id="landingLogin" class="landing-login">
         <section class="landing-control-entry" aria-labelledby="landingControlTitle">
-          <span class="short-code-kicker">CONTROL DE SALA</span>
-          <h2 id="landingControlTitle">Administra tu temporizador</h2>
+          <span class="short-code-kicker">SALA TIMER</span>
+          <h2 id="landingControlTitle">Entra a tu sala Timer</h2>
           <p id="landingControlDescription">Inicia sesión con Google para abrir y controlar tu sala.</p>
+        </section>
+        <section class="landing-flyer-entry" aria-labelledby="landingFlyerTitle">
+          <span class="short-code-kicker">GENERADOR DE FLYERS</span>
+          <h2 id="landingFlyerTitle">Diseña el flyer de tu evento</h2>
+          <p>Personaliza la información y descarga tu flyer para compartirlo.</p>
+          <a class="landing-flyer-button" href="/flyer/">Abrir Generador de Flyers <span aria-hidden="true">→</span></a>
         </section>
         <section class="short-code-entry" aria-labelledby="shortCodeTitle">
           <span id="entryKicker" class="short-code-kicker">INGRESO A SALA</span>
