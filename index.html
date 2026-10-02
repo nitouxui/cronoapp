@@ -129,8 +129,12 @@
     .control-bar #resetButton { border-color: #a94a0f; color: #ff994a; background: #301e18; }
     .edit-button { top: 14px; right: 14px; min-width: 0; z-index: 5; }
     /* Menú compacto para las acciones principales de la sala. */
-    body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; }
+    body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 8px; }
     body:not(.no-room) .room-actions-menu { position: relative; }
+    body:not(.no-room) .room-home-link { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 8px 24px #0004; text-decoration: none; }
+    body:not(.no-room) .room-home-link svg { width: 22px; height: 22px; }
+    body:not(.no-room) .room-home-link:hover { border-color: var(--accent); color: var(--accent-soft); }
+    body:not(.no-room) .room-home-link:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
     body:not(.no-room) .room-actions-menu > summary { display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 8px 24px #0004; cursor: pointer; list-style: none; }
     body:not(.no-room) .room-actions-menu > summary::-webkit-details-marker { display: none; }
     body:not(.no-room) .room-actions-menu > summary svg { width: 22px; height: 22px; }
@@ -293,6 +297,13 @@
     .palette-grid input { width: auto; margin: 0; }
     .palette-swatches { display: flex; width: 58px; min-width: 58px; height: 24px; border-radius: 5px; overflow: hidden; background: linear-gradient(90deg, var(--swatch-dark) 0 34%, var(--swatch-accent) 34% 68%, var(--swatch-soft) 68%); }
     body.no-room #roomWelcome { min-height: 100dvh; display: flex; padding: 48px clamp(20px, 5vw, 80px); background: radial-gradient(circle at 15% 80%, var(--glow), var(--surface) 70%); }
+    body.no-room #roomWelcome { position: relative; }
+    .home-account-actions { position: absolute; top: 20px; right: clamp(20px, 5vw, 80px); z-index: 5; display: flex; align-items: center; gap: 8px; }
+    .home-account-actions[hidden] { display: none !important; }
+    .home-account-actions button { min-height: 40px; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+    .home-account-actions #googleLogin { width: auto; background: var(--accent); color: #fff; }
+    .home-account-actions #syncLogout { margin: 0; }
+    .home-account-actions button:hover { border-color: var(--accent); filter: brightness(1.08); }
     body.no-room #roomWelcome .welcome-shell { width: min(100%, 1260px); max-width: 1260px; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(310px, .8fr); gap: clamp(28px, 6vw, 100px); align-items: center; text-align: left; }
     .welcome-eyebrow { color: var(--accent-soft); font-size: 13px; letter-spacing: .22em; font-weight: 800; }
     .welcome-copy h1 { font-size: clamp(36px, 4.5vw, 72px) !important; letter-spacing: -.04em; line-height: 1.05; margin: 20px 0 !important; }
@@ -305,7 +316,7 @@
     .short-code-entry { display: none; }
     body.code-entry-mode #roomWelcome { align-items: center; padding: 80px 20px 32px; }
     body.code-entry-mode #roomWelcome .welcome-shell { width: min(100%, 560px); display: block; }
-    body.code-entry-mode .welcome-copy, body.code-entry-mode .landing-control-entry, body.code-entry-mode .landing-flyer-entry { display: none !important; }
+    body.code-entry-mode .welcome-copy, body.code-entry-mode .landing-control-entry, body.code-entry-mode .landing-flyer-entry, body.code-entry-mode #homeAccountActions { display: none !important; }
     body.code-entry-mode #landingLogin { display: block; }
     body.code-entry-mode .short-code-entry { display: block; }
     .entry-home-link { display: none; margin-top: 16px; color: var(--accent-soft); font-weight: 700; }
@@ -500,13 +511,14 @@
     </div>
   </section>
   <section id="roomWelcome">
+    <div id="homeAccountActions" class="home-account-actions" aria-label="Acceso a la cuenta" hidden></div>
     <div class="welcome-shell">
       <div class="welcome-copy">
         <span class="welcome-eyebrow">TEMPORIZADOR PARA TORNEOS</span>
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
         <div class="welcome-features"><span>Sincronizado en vivo</span><span>Temporizador para staff</span><span>Pareos del torneo</span></div>
-        <a class="agenda-entry" href="/eventos/">Ver agenda de Temuco <span aria-hidden="true">→</span></a>
+        <a id="agendaPublicLink" class="agenda-entry" href="/eventos/">Ver agenda de Temuco <span aria-hidden="true">→</span></a>
         <a id="agendaAdminLink" class="agenda-entry" href="/eventos/?admin=1" hidden>Administrar agenda <span aria-hidden="true">→</span></a>
       </div>
       <div id="landingLogin" class="landing-login">
@@ -551,6 +563,7 @@
     </div>
     <div id="rightPanel" class="panel">
       <div class="top-actions">
+  <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <details id="roomActionsMenu" class="room-actions-menu">
     <summary aria-label="Acciones de sala" title="Acciones de sala">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -2872,9 +2885,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const roomName = document.getElementById('roomName');
     const logoutButton = document.getElementById('syncLogout');
     const createButton = document.getElementById('createRoom');
-    if (!isReadOnly && !hasRoomLink) createButton.after(logoutButton);
     const googleButton = document.getElementById('googleLogin');
-    if (!isReadOnly && !hasRoomLink) googleButton.hidden = false;
+    const homeAccountActions = document.getElementById('homeAccountActions');
+    if (!isReadOnly && !hasRoomLink) {
+      homeAccountActions.append(googleButton, logoutButton);
+      homeAccountActions.hidden = false;
+      googleButton.hidden = false;
+    }
     const staffPairingsLink = document.getElementById('staffPairingsLink');
     const pairingsStaffLink = document.getElementById('pairingsStaffLink');
     const copyLinkFeedback = document.getElementById('copyLinkFeedback');
@@ -3270,7 +3287,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
-            document.getElementById('agendaAdminLink').hidden = !(user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com'));
+            const canManageAgenda = user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com');
+            document.getElementById('agendaPublicLink').hidden = !canManageAgenda;
+            document.getElementById('agendaAdminLink').hidden = !canManageAgenda;
             updateAccess();
             if (user?.emailVerified && openOwnRoomOnLoad) {
               openOwnRoomOnLoad = false;
