@@ -27,18 +27,17 @@
     .filters button { min-height:40px; padding:0 15px; border:1px solid var(--edge); border-radius:100px; background:var(--surface); color:var(--text); font-size:13px; font-weight:750; }
     .filters button[aria-pressed="true"] { border-color:var(--accent); background:var(--focus); color:#182129; }
     #storeList { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; gap:18px; }
-    .store { display:contents; }
-    .events { display:contents; }
-    .store { margin:0; min-width:0; }
+    .store { display:flex; flex-direction:column; margin:0; min-width:0; }
+    .events { display:flex; flex:1; flex-direction:column; gap:12px; }
     .store-head { display:grid; grid-template-columns:72px minmax(0,1fr); grid-template-areas:'logo name' 'logo address'; align-items:center; column-gap:12px; row-gap:4px; margin-bottom:14px; border-bottom:1px solid var(--edge); padding-bottom:11px; }
     .store-logo { grid-area:logo; width:72px; height:46px; align-self:center; object-fit:contain; }
     .store-address { grid-area:address; color:var(--muted); font-size:12px; line-height:1.35; }
     .store h2 { margin:0; font-size:clamp(22px,3vw,28px); letter-spacing:-.03em; }
     .store-count { color:var(--muted); font-size:13px; }
     .events { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); gap:12px; }
-    .event { display:grid; grid-template-columns:62px minmax(0,1fr); gap:14px; padding:30px 18px; border:1px solid var(--edge); border-radius:15px; background:var(--surface); }
+    .event { display:grid; flex:1 1 0; grid-template-columns:62px minmax(0,1fr); gap:14px; padding:30px 18px; border:1px solid var(--edge); border-radius:15px; background:var(--surface); }
     .event.past { opacity:.64; }
-    .date-box { display:flex; flex-direction:column; align-items:center; justify-content:center; align-self:stretch; min-height:64px; padding:8px 0; border-radius:10px; background:var(--raised); text-transform:uppercase; }
+    .date-box { display:flex; width:62px; aspect-ratio:1; flex-direction:column; align-items:center; justify-content:center; align-self:start; min-height:0; padding:0; border-radius:10px; background:var(--raised); text-transform:uppercase; }
     .date-box strong { font-size:25px; line-height:1; }
     .date-box span { margin-top:5px; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.07em; }
     .date-box .weekday { margin:0 0 4px; font-size:10px; }
@@ -66,7 +65,7 @@
     .primary { border:1px solid var(--focus); background:var(--focus); color:#162029; }
     .secondary { border:1px solid var(--edge); background:var(--raised); color:var(--text); }
     .primary:disabled { opacity:.55; cursor:wait; }
-    @media (max-width:900px) { #storeList { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } .store { display:block; } .events { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); } .store-head,.event,.empty { grid-column:auto !important; grid-row:auto !important; } }
+    @media (max-width:900px) { #storeList { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } }
     @media (max-width:580px) { #storeList { grid-template-columns:1fr !important; } .admin form { grid-template-columns:1fr; } .full { grid-column:auto; } .back { padding:0 10px; } }
   </style>
 </head>
@@ -148,22 +147,18 @@
       const now = new Intl.DateTimeFormat('sv-SE', { timeZone:'America/Santiago', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(new Date()).replace(' ', 'T');
       const visibleStores = Object.entries(stores).filter(([storeId]) => activeStore === 'all' || activeStore === storeId);
       list.style.gridTemplateColumns = `repeat(${visibleStores.length}, minmax(0, 1fr))`;
-      for (const [columnIndex, [storeId, storeName]] of visibleStores.entries()) {
+      for (const [storeId, storeName] of visibleStores) {
         const entries = Object.entries(events).filter(([, event]) => validEvent(event) && event.store === storeId)
           .sort((a,b) => (a[1].date + a[1].time).localeCompare(b[1].date + b[1].time));
         const section = element('section','store');
         section.setAttribute('aria-label', storeName);
         const heading = element('div','store-head');
-        heading.style.gridColumn = String(columnIndex + 1);
-        heading.style.gridRow = '1';
         const logo = element('img','store-logo');
         logo.src = storeLogos[storeId]; logo.alt = storeId === 'bluecard' ? 'Logo Bluecard' : 'Logo Top8 Gaming Center';
         heading.append(logo, element('h2','',storeName), element('span','store-address',storeAddresses[storeId]));
         section.append(heading);
         if (!entries.length) {
           const empty = element('p','empty',t('empty'));
-          empty.style.gridColumn = String(columnIndex + 1);
-          empty.style.gridRow = '2';
           section.append(empty);
         } else {
           const grouped = new Map();
@@ -171,12 +166,8 @@
             if (!grouped.has(entry[1].date)) grouped.set(entry[1].date, []);
             grouped.get(entry[1].date).push(entry);
           }
-          let dayIndex = 0;
           for (const [date, dayEntries] of grouped) {
             const card = element('article','event');
-            card.style.gridColumn = String(columnIndex + 1);
-            card.style.gridRow = String(dayIndex + 2);
-            dayIndex++;
             const dateTimes = dayEntries.map(([,event]) => `${event.date}T${event.time}`);
             if (dateTimes.every(value => value < now)) card.classList.add('past');
             const dateBox = element('div','date-box');
