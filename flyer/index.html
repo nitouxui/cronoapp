@@ -309,7 +309,8 @@
       drawModule(ctx,w,h,h*.66,accent);
       return ctx;
     }
-    document.fonts.ready.then(()=>redraw());\n    function redraw(){
+    document.fonts.ready.then(()=>redraw());
+    function redraw(){
       render(canvases.square);render(canvases.portrait);
       document.getElementById('mainSizeOut').value=els.mainSize.value+'%';
       document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
