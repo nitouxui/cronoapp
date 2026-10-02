@@ -367,6 +367,7 @@
         const side=logoPos.split('-')[1],lx=side==='left'?safeMargin:side==='right'?w-safeMargin-lw:(w-lw)/2,ly=logoBottom?h-safeMargin-lh:safeMargin;
         ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,ly,lw,lh);ctx.restore();
       }
+      const fontScale=Number(els.fontSize.value)/100;
       const artTop=h*(story?.22:.16),artHeight=h*(story?.36:hasNote?(logoBottom?.30-.20*(fontScale-1):.35-.25*(fontScale-1)):logoBottom?.36:.47),artWidth=w*.84;
       if(images.main) drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
       else {
@@ -374,7 +375,7 @@
         ctx.save();ctx.setLineDash([12,10]);rounded(ctx,px,py,pw,ph,22);ctx.fillStyle='#00000028';ctx.fill();ctx.strokeStyle='#ffffff70';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
         setFont(ctx,'700 24px system-ui,sans-serif','#ffffffcc','center');ctx.fillText('SUBE LA IMAGEN CENTRAL',w/2,py+ph/2+8);ctx.restore();
       }
-      const fontScale=Number(els.fontSize.value)/100,moduleRatio=h>=1800?(hasNote?.62:.66):logoBottom?(hasNote?.49:.55):hasNote?.52:.66;
+      const moduleRatio=h>=1800?(hasNote?.62:.66):logoBottom?(hasNote?.49:.55):hasNote?.52:.66;
       drawModule(ctx,w,h,h*moduleRatio+(1-fontScale)*160*(w/1080),accent);
       return ctx;
     }
