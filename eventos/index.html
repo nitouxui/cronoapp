@@ -27,7 +27,8 @@
     .filters button { min-height:40px; padding:0 15px; border:1px solid var(--edge); border-radius:100px; background:var(--surface); color:var(--text); font-size:13px; font-weight:750; }
     .filters button[aria-pressed="true"] { border-color:var(--accent); background:var(--focus); color:#182129; }
     .store { margin:0 0 38px; }
-    .store-head { display:flex; align-items:baseline; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--edge); padding-bottom:11px; }
+    .store-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--edge); padding-bottom:11px; }
+    .store-logo { width:72px; height:46px; flex:0 0 auto; object-fit:contain; }
     .store h2 { margin:0; font-size:clamp(22px,3vw,28px); letter-spacing:-.03em; }
     .store-count { color:var(--muted); font-size:13px; }
     .events { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); gap:12px; }
@@ -68,8 +69,7 @@
     <header><a class="brand" href="/">Cronoapp</a><a class="back" href="/" data-i18n="back">Volver al inicio</a></header>
     <div class="intro"><span class="eyebrow" data-i18n="eyebrow">JUEGA EN TEMUCO</span><h1 data-i18n="title">Agenda de eventos</h1><p data-i18n="description">Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.</p></div>
     <nav class="filters" aria-label="Filtrar por tienda"><button type="button" data-store="all" aria-pressed="true" data-i18n="all">Todas las tiendas</button><button type="button" data-store="trizano">Top8 Trizano</button><button type="button" data-store="neruda">Top8 Neruda</button><button type="button" data-store="bluecard">Bluecard</button></nav>
-    <nav class="filters" aria-label="Filtrar por fecha"><button type="button" data-period="all" aria-pressed="true" data-i18n="allDates">Todas las fechas</button><button type="button" data-period="week" aria-pressed="false" data-i18n="thisWeek">Esta semana</button><button type="button" data-period="month" aria-pressed="false" data-i18n="thisMonth">Este mes</button><button type="button" data-period="quarter" aria-pressed="false" data-i18n="thisQuarter">Este trimestre</button></nav>
-    <p id="listStatus" class="status" role="status" data-i18n="loading">Cargando agenda…</p>
+        <p id="listStatus" class="status" role="status" data-i18n="loading">Cargando agenda…</p>
     <div id="storeList"></div>
     <section id="admin" class="admin" aria-labelledby="adminTitle" hidden>
       <h2 id="adminTitle" data-i18n="adminTitle">Administrar agenda</h2>
@@ -101,10 +101,11 @@
     };
     const adminEmail = 'quidel.dsgn@gmail.com';
     const stores = { trizano: 'Top8 Trizano', neruda: 'Top8 Neruda', bluecard: 'Bluecard' };
+    const storeLogos = { trizano:'assets/logos/top8.svg', neruda:'assets/logos/top8.svg', bluecard:'assets/logos/bluecard.svg' };
     const messages = {
-      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos', description:'Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.', all:'Todas las tiendas', allDates:'Todas las fechas', thisWeek:'Esta semana', thisMonth:'Este mes', thisQuarter:'Este trimestre', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
-      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Event schedule', description:'Tournaments and free play at Temuco stores. Choose a store to see its schedule.', all:'All stores', allDates:'All dates', thisWeek:'This week', thisMonth:'This month', thisQuarter:'This quarter', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', value:'Entry fee (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability' },
-      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda de eventos', description:'Torneios e horários de jogo livre nas lojas de Temuco. Escolha uma loja para ver a programação.', all:'Todas as lojas', allDates:'Todas as datas', thisWeek:'Esta semana', thisMonth:'Este mês', thisQuarter:'Este trimestre', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', value:'Valor da inscrição (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas' }
+      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos', description:'Torneos y horarios de juego libre en las tiendas de Temuco. Selecciona una tienda para ver su programación.', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
+      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Event schedule', description:'Tournaments and free play at Temuco stores. Choose a store to see its schedule.', all:'All stores', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', value:'Entry fee (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability' },
+      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda de eventos', description:'Torneios e horários de jogo livre nas lojas de Temuco. Escolha uma loja para ver a programação.', all:'Todas as lojas', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', value:'Valor da inscrição (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas' }
     };
     let language = 'es';
     try { const preference = localStorage.getItem('cronoapp-language'); if (messages[preference]) language = preference; } catch (_) {}
@@ -118,7 +119,6 @@
     const formStatus = document.getElementById('formStatus');
     let events = {};
     let activeStore = 'all';
-    let activePeriod = 'all';
     let editingId = null;
     let isAdmin = false;
     let database, eventsRef, auth;
@@ -140,39 +140,19 @@
       const [year, month, day] = date.split('-').map(Number);
       return new Intl.DateTimeFormat(locale, { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'America/Santiago' }).format(new Date(Date.UTC(year, month - 1, day, 12)));
     }
-    function periodBounds(period) {
-      if (period === 'all') return null;
-      const parts = new Intl.DateTimeFormat('en-CA', { timeZone:'America/Santiago', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date());
-      const today = Object.fromEntries(parts.map(part => [part.type, part.value]));
-      const date = new Date(Date.UTC(Number(today.year), Number(today.month) - 1, Number(today.day)));
-      let start, end;
-      if (period === 'week') {
-        const day = (date.getUTCDay() + 6) % 7;
-        start = new Date(date); start.setUTCDate(date.getUTCDate() - day);
-        end = new Date(start); end.setUTCDate(start.getUTCDate() + 6);
-      } else if (period === 'month') {
-        start = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-        end = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
-      } else {
-        const quarterStart = Math.floor(date.getUTCMonth() / 3) * 3;
-        start = new Date(Date.UTC(date.getUTCFullYear(), quarterStart, 1));
-        end = new Date(Date.UTC(date.getUTCFullYear(), quarterStart + 3, 0));
-      }
-      const iso = value => value.toISOString().slice(0,10);
-      return [iso(start), iso(end)];
-    }
     function render() {
       list.replaceChildren();
-      const bounds = periodBounds(activePeriod);
       const now = new Intl.DateTimeFormat('sv-SE', { timeZone:'America/Santiago', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(new Date()).replace(' ', 'T');
       for (const [storeId, storeName] of Object.entries(stores)) {
         if (activeStore !== 'all' && activeStore !== storeId) continue;
-        const entries = Object.entries(events).filter(([, event]) => validEvent(event) && event.store === storeId && (!bounds || (event.date >= bounds[0] && event.date <= bounds[1])))
+        const entries = Object.entries(events).filter(([, event]) => validEvent(event) && event.store === storeId)
           .sort((a,b) => (a[1].date + a[1].time).localeCompare(b[1].date + b[1].time));
         const section = element('section','store');
         section.setAttribute('aria-label', storeName);
         const heading = element('div','store-head');
-        heading.append(element('h2','',storeName), element('span','store-count',`${entries.length} ${t('count')}`));
+        const logo = element('img','store-logo');
+        logo.src = storeLogos[storeId]; logo.alt = storeId === 'bluecard' ? 'Logo Bluecard' : 'Logo Top8 Gaming Center';
+        heading.append(logo, element('h2','',storeName), element('span','store-count',`${entries.length} ${t('count')}`));
         section.append(heading);
         if (!entries.length) section.append(element('p','empty',t('empty')));
         else {
@@ -215,11 +195,6 @@
         list.append(section);
       }
     }
-    document.querySelectorAll('[data-period]').forEach(button => button.addEventListener('click', () => {
-      activePeriod = button.dataset.period;
-      document.querySelectorAll('[data-period]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      render();
-    }));
     document.querySelectorAll('.filters button[data-store]').forEach(button => button.addEventListener('click', () => {
       activeStore = button.dataset.store;
       document.querySelectorAll('.filters button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
