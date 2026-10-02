@@ -515,7 +515,7 @@
     <div id="homeAccountActions" class="home-account-actions" aria-label="Acceso a la cuenta" hidden></div>
     <div class="welcome-shell">
       <div class="welcome-copy">
-        <span class="welcome-eyebrow">TEMPORIZADOR PARA TORNEOS</span>
+        <span class="welcome-eyebrow">CRONOAPP</span>
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
         <div class="welcome-features"><span>Sincronizado en vivo</span><span>Temporizador para staff</span><span>Pareos del torneo</span></div>
@@ -3374,7 +3374,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const confirmLanguage = document.getElementById('confirmLanguage');
       const translations = {
         en: {
-          'Temporizador': 'Timer', 'TEMPORIZADOR PARA TORNEOS': 'TOURNAMENT TIMER',
+          'Temporizador': 'Timer', 'CRONOAPP': 'CRONOAPP',
           'La ronda avanza.': 'The round moves on.', 'Todos ven el mismo tiempo.': 'Everyone sees the same time.',
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Control the timer from your room, display it on screen, and share a synchronized view with your staff.',
           'Sincronizado en vivo': 'Live sync', 'Pareos del torneo': 'Tournament pairings',
@@ -3492,7 +3492,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'https://ejemplo.com/torneo': 'https://example.com/tournament'
         },
         pt: {
-          'Temporizador': 'Temporizador', 'TEMPORIZADOR PARA TORNEOS': 'TEMPORIZADOR PARA TORNEIOS',
+          'Temporizador': 'Temporizador', 'CRONOAPP': 'CRONOAPP',
           'La ronda avanza.': 'A rodada avança.', 'Todos ven el mismo tiempo.': 'Todos veem o mesmo tempo.',
           'Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.': 'Controle o temporizador da sua sala, exiba-o em uma tela e compartilhe uma visualização sincronizada com a equipe.',
           'Sincronizado en vivo': 'Sincronizado ao vivo', 'Pareos del torneo': 'Emparceiramentos do torneio',
@@ -3681,7 +3681,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       function applyLanguage(language, persist = true) {
         if (!translations[language] && language !== 'es') language = 'es';
         document.documentElement.lang = language;
-        document.title = textMap(language).Temporizador || (language === 'pt' ? 'Temporizador' : language === 'en' ? 'Timer' : 'Temporizador');
+        document.title = 'CronoApp';
         walk(document.body, language);
         selector.value = language;
         editorSelector.value = language;
