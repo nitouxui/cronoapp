@@ -1,12 +1,7 @@
 # Agenda de Temuco
 
-La vista pública estará en `/eventos/`. El formulario de administración estará en `/eventos/?admin=1` y usa Google Sign-In. Guarda los registros en Firebase Realtime Database bajo `agenda/events`.
+- Vista pública: `/eventos/`.
+- Administración: `/eventos/?admin=1` (Google Sign-In, cuenta autorizada `quidel.dsgn@gmail.com`).
+- Actividades por Top8 Trizano, Top8 Neruda y Bluecard; los registros se guardan en Firebase Realtime Database bajo `agenda/events`.
 
-## Antes de publicar
-
-1. La cuenta de Google `quidel.dsgn@gmail.com` fue confirmada por el propietario como administradora.
-2. `database.rules.json` contiene las reglas vigentes compartidas por el propietario para `rooms` y `shortRooms`, más la regla de `agenda`. Antes de publicar, compara las reglas actuales de Firebase Console con ese archivo para detectar cambios posteriores.
-3. Publica `database.rules.json` desde Firebase Console o, con Firebase CLI autenticada, ejecuta `firebase deploy --only database --project cronoapp-97aa6` desde la raíz del repositorio. `firebase.json` configura únicamente las reglas de Realtime Database.
-4. Comprueba con la cuenta administradora que puedes crear, editar y eliminar una actividad. Comprueba con otra cuenta que Firebase rechaza una escritura directa en `agenda/events`, y sin iniciar sesión que la agenda se puede leer.
-
-La comprobación de correo en el navegador controla la interfaz; la seguridad depende de la regla publicada en Firebase.
+Las reglas de Firebase están publicadas en el proyecto `cronoapp-97aa6`. La agenda permite lectura pública y limita la escritura a la cuenta administradora verificada con Google. `/agenda/` redirige a `/eventos/` y conserva los parámetros de consulta.
