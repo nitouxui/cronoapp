@@ -3255,6 +3255,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
             document.getElementById('agendaAdminLink').hidden = !(user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com'));
             updateAccess();
+            if (user?.emailVerified && openOwnRoomOnLoad) {
+              openOwnRoomOnLoad = false;
+              const next = new URL(location.href);
+              next.searchParams.delete('openOwnRoom');
+              history.replaceState(null, '', next.href);
+              openOwnRoom(user);
+              return;
+            }
             if (user?.emailVerified && !hasRoomLink) {
               createButton.hidden = false;
               createButton.disabled = false;
