@@ -53,6 +53,7 @@
     input:not([type="color"]):not([type="range"]):not([type="file"]),select {
       width:100%; min-height:42px; padding:9px 11px; border:1px solid var(--edge); border-radius:9px; background:#171b20; color:var(--text);
     }
+    select { appearance:none; -webkit-appearance:none; padding-right:42px; background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27m1 1 5 5 5-5%27 fill=%27none%27 stroke=%27%23bfc7d0%27 stroke-width=%272%27/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; background-size:12px 8px; }
     input[type="color"] { width:54px; height:40px; padding:3px; border:1px solid var(--edge); border-radius:8px; background:#171b20; }
     input[type="file"] { width:100%; color:var(--muted); font-size:12px; }
     input[type="range"] { width:100%; accent-color:var(--focus); }
@@ -104,7 +105,7 @@
         </details>
         <details class="group">
           <summary>Imágenes</summary>
-          <div class="field"><label for="logoPosition">Posición del logo</label><select id="logoPosition"><option value="left">Izquierda</option><option value="center" selected>Centrado</option><option value="right">Derecha</option></select></div>
+          <div class="field"><label for="logoPosition">Posición del logo</label><select id="logoPosition"><option value="top-right">Arriba a la derecha</option><option value="top-center" selected>Arriba centrado</option><option value="top-left">Arriba a la izquierda</option><option value="bottom-right">Abajo a la derecha</option><option value="bottom-center">Abajo centrado</option><option value="bottom-left">Abajo a la izquierda</option></select></div>
           <div class="field"><label for="customLogo">Logo (opcional)</label><input id="customLogo" type="file" accept="image/*"></div>
           <div class="field"><label for="mainImage">Imagen central</label><input id="mainImage" type="file" accept="image/*"><p class="hint">Se muestra completa, sin recortarla. Puedes ajustar su tamaño.</p></div>
           <div class="field"><label for="mainSize">Tamaño de imagen central</label><div class="range-row"><input id="mainSize" type="range" min="45" max="100" value="100"><output id="mainSizeOut">100%</output></div></div>
@@ -329,9 +330,11 @@
 
       const addressInput=els.address.value.trim(),address=addressInput||'Dirección del evento';
       const addressWidth=measure(700,22,address)+104*scale;
-      const aw=Math.min(w-160*scale,Math.max(270*scale,addressWidth)),ax=(w-aw)/2,ah=58*u(1),ay=h-(note?112:142)*scale;
+      const story=h>=1800,logoBottom=Boolean(images.customLogo)&&els.logoPosition.value.startsWith('bottom-'),safeMargin=(story?260:72)*scale;
+      const aw=Math.min(w-160*scale,Math.max(270*scale,addressWidth)),ax=(w-aw)/2,ah=58*u(1),ay=logoBottom?safeMargin:h-safeMargin-ah;
       if(note){
-        const noteY=Math.min(y+boxH+36*u(1),ay-18*scale);
+        const noteLimit=logoBottom?h-safeMargin-h*(story?.075:.12)-40*scale:ay-18*scale;
+        const noteY=Math.min(y+boxH+74*u(1),noteLimit);
         fitLine(ctx,note,w/2,noteY,w-160*scale,fontSpec(800,34),'#ffffff','center');
       }
       if(address){
@@ -354,21 +357,22 @@
       drawVectorTexture(ctx,w,h,els.textureStyle.value,Number(els.textureOpacity.value)/100,accent);
       const shade=ctx.createLinearGradient(0,h*.43,0,h);shade.addColorStop(0,'#00000000');shade.addColorStop(1,'#00000070');
       ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
+      const story=h>=1800,hasNote=Boolean(els.eventNote.value.trim()),logoPos=els.logoPosition.value,logoBottom=Boolean(images.customLogo)&&logoPos.startsWith('bottom-'),safeMargin=(story?260:72)*(w/1080);
       const logo=images.customLogo;
       if(logo){
-        const maxW=w*.48,maxH=h*.12,scale=Math.min(maxW/logo.width,maxH/logo.height),lw=logo.width*scale,lh=logo.height*scale;
-        const pos=els.logoPosition.value,lx=pos==='left'?72:pos==='right'?w-72-lw:(w-lw)/2;
-        ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,h*.045,lw,lh);ctx.restore();
+        const maxW=w*.48,maxH=h*(story?.075:.12),logoScale=Math.min(maxW/logo.width,maxH/logo.height),lw=logo.width*logoScale,lh=logo.height*logoScale;
+        const side=logoPos.split('-')[1],lx=side==='left'?safeMargin:side==='right'?w-safeMargin-lw:(w-lw)/2,ly=logoBottom?h-safeMargin-lh:safeMargin;
+        ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,ly,lw,lh);ctx.restore();
       }
-      const artTop=h*.16,artHeight=h*.47,artWidth=w*.84;
+      const artTop=h*(story?.22:.16),artHeight=h*(story?.36:logoBottom?(hasNote?.31:.36):(hasNote?.39:.47)),artWidth=w*.84;
       if(images.main) drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
       else {
         const px=w*.2,py=artTop+artHeight*.35,pw=w*.6,ph=Math.min(110,h*.09);
         ctx.save();ctx.setLineDash([12,10]);rounded(ctx,px,py,pw,ph,22);ctx.fillStyle='#00000028';ctx.fill();ctx.strokeStyle='#ffffff70';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
         setFont(ctx,'700 24px system-ui,sans-serif','#ffffffcc','center');ctx.fillText('SUBE LA IMAGEN CENTRAL',w/2,py+ph/2+8);ctx.restore();
       }
-      const fontScale=Number(els.fontSize.value)/100;
-      drawModule(ctx,w,h,h*.66+(1-fontScale)*160*(w/1080),accent);
+      const fontScale=Number(els.fontSize.value)/100,moduleRatio=h>=1800?(hasNote?.62:.66):logoBottom?(hasNote?.49:.55):hasNote?.61:.66;
+      drawModule(ctx,w,h,h*moduleRatio+(1-fontScale)*160*(w/1080),accent);
       return ctx;
     }
     let fontReady=true,fontLoadVersion=0;
@@ -469,7 +473,7 @@
       currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';
       const draft=await draftTransaction('readonly',store=>store.get(user.uid));
       if(draft){
-        Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=value;});
+        Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=document.getElementById(id);if(el){if(id==='logoPosition')value=({left:'top-left',center:'top-center',right:'top-right'})[value]||value;el.value=value;}});
         Object.entries(draft.files||{}).forEach(([key,file])=>{if(file)loadStoredFile(file,key);});
         status.textContent='Se recuperó tu último diseño guardado.';
       }else status.textContent='';
