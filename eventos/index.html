@@ -299,9 +299,11 @@
             drawText(stamp.day,bx+badge/2,by+51,'800 31px system-ui, sans-serif',palette.text,'center');
             drawText(stamp.month.toLocaleUpperCase(language).replace('.',''),bx+badge/2,by+badge-10,'800 12px system-ui, sans-serif',palette.muted,'center');
             const tx=bx+badge+18,tw=x+colWidth-24-tx;
-            const rowSpace=Math.max(36,(height-28)/items.length);
+            const rowSpace=Math.min(96,Math.max(68,(height-28)/items.length));
+            const contentHeight=rowSpace*items.length;
+            const contentTop=y+(height-contentHeight)/2;
             items.forEach(([,event],itemIndex)=>{
-              const top=y+14+itemIndex*rowSpace;
+              const top=contentTop+itemIndex*rowSpace;
               if(itemIndex) {ctx.strokeStyle=palette.edge;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx,top-7);ctx.lineTo(x+colWidth-20,top-7);ctx.stroke();}
               const title=event.kind==='free'?t('free'):event.type;
               const time=`${event.time}${event.endTime?`–${event.endTime}`:''}`;
