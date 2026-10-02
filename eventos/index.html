@@ -253,7 +253,7 @@
       if (!isAdmin || !validEvent(events[id])) return;
       const event = events[id];
       editingId = id;
-      for (const key of ['store','kind','date','time','endTime','value']) document.getElementById(key).value = event[key] || '';
+      for (const key of ['store','kind','date','time','endTime','value']) document.getElementById(key).value = event[key] ?? '';
       syncStoreType();
       document.getElementById('eventType').value = event.type || 'Torneo Casual';
       document.getElementById('format').value = event.format || 'Rondas Suizas Bo1';
