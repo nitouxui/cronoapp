@@ -52,13 +52,13 @@
       "events": {
         "$eventId": {
           ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
-          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') : newData.hasChildren(['type', 'format']) && !newData.hasChild('endTime'))",
+          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') : newData.hasChildren(['type', 'format']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
           "store": { ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')" },
           "kind": { ".validate": "newData.isString() && (newData.val() === 'tournament' || newData.val() === 'free')" },
           "date": { ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)" },
           "time": { ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)" },
           "endTime": { ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)" },
-          "type": { ".validate": "newData.isString() && (newData.val() === 'Torneo Casual' || newData.val() === 'League Challenge' || newData.val() === 'League Cup')" },
+          "type": { ".validate": "newData.isString() && (newData.val() === 'Torneo Casual' || newData.val() === 'League Challenge' || newData.val() === 'League Cup' || newData.val() === 'Abacaxi Showdown')" },
           "format": { ".validate": "newData.isString() && (newData.val() === 'Rondas Suizas Bo1' || newData.val() === 'Rondas Suizas Bo3')" },
           "$other": { ".validate": false }
         }
