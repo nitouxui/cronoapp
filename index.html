@@ -162,8 +162,9 @@
     body:not(.no-room) #saveDurationButton:disabled { opacity: .55; cursor: not-allowed; }
     body:not(.no-room) #roomDurationStatus { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
     body:not(.no-room) #roomDurationControl[hidden] { display: none !important; }
-    body:not(.no-room) .room-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 16px 0 0; }
+    body:not(.no-room) .room-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 7px; margin: 16px 0 0; }
     body:not(.no-room) .share-view-button { display: flex; align-items: center; justify-content: space-between; gap: 5px; width: 100%; min-width: 0; margin: 0; padding: 10px 9px; border: 1px solid var(--edge); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+    body:not(.no-room) .share-view-button[hidden] { display: none; }
     body:not(.no-room) .share-view-button span { min-width: 0; }
     body:not(.no-room) .share-view-button svg { width: 16px; height: 16px; flex: 0 0 16px; opacity: .78; }
     body:not(.no-room) .tv-code-card { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; padding: 8px 9px; border: 1px solid var(--accent); border-radius: 11px; background: var(--accent-dark); color: var(--text); text-align: center; }
@@ -552,7 +553,7 @@
     <button id="createRoom" type="button" hidden>Ir al control de mi sala</button>
     <div class="room-actions" aria-label="Enlaces de sala">
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-      <button id="copyPairingsLink" class="share-view-button" type="button"><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
+      <button id="copyPairingsLink" class="share-view-button" type="button" hidden><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
     </div>
     <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
 
@@ -2886,7 +2887,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
       [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
     ].forEach(([button, view, label]) => {
-      button.hidden = !hasRoomLink;
+      button.hidden = !hasRoomLink || (view === 'pareos' && !window.TDF_UPLOAD_ENABLED);
       button.addEventListener('click', () => copyRoomView(view, label));
     });
     staffPairingsLink.hidden = true;
