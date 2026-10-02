@@ -531,7 +531,8 @@
           <span class="short-code-kicker">GENERADOR DE FLYERS</span>
           <h2 id="landingFlyerTitle">Diseña el flyer de tu evento</h2>
           <p>Personaliza la información y descarga tu flyer para compartirlo.</p>
-          <a class="landing-flyer-button" href="/flyer/">Abrir Generador de Flyers <span aria-hidden="true">→</span></a>
+          <p id="landingFlyerSessionMessage" role="status" aria-live="polite">Comprobando tu sesión…</p>
+          <a id="landingFlyerLink" class="landing-flyer-button" href="/flyer/" hidden>Abrir Generador de Flyers <span aria-hidden="true">→</span></a>
         </section>
         <section class="short-code-entry" aria-labelledby="shortCodeTitle">
           <span id="entryKicker" class="short-code-kicker">INGRESO A SALA</span>
@@ -3287,6 +3288,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
+            const flyerSessionMessage = document.getElementById('landingFlyerSessionMessage');
+            const flyerAccessLink = document.getElementById('landingFlyerLink');
+            flyerSessionMessage.hidden = !!user;
+            flyerSessionMessage.textContent = user ? '' : 'Inicia sesión desde el botón superior para acceder al generador de flyers.';
+            flyerAccessLink.hidden = !user;
             const canManageAgenda = user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com');
             document.getElementById('agendaPublicLink').hidden = !canManageAgenda;
             document.getElementById('agendaAdminLink').hidden = !canManageAgenda;
