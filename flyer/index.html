@@ -213,7 +213,7 @@
     }
     function drawTitle(ctx,text,x,y,maxWidth,font,color,lineHeight){
       ctx.font=font;ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='alphabetic';
-      const words=text.trim().split(/\\s+/),lines=[];let line='';
+      const words=text.trim().split(/\s+/),lines=[];let line='';
       for(const word of words){
         const test=line?line+' '+word:word;
         if(ctx.measureText(test).width<=maxWidth||!line){line=test;continue;}
