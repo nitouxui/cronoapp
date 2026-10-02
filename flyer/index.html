@@ -83,10 +83,12 @@
           <h3>Evento</h3>
           <div class="field"><label for="eventType">Tipo de evento</label><input id="eventType" type="text" value="Torneo Casual" placeholder="Ej.: League Challenge"></div>
           <div class="field"><label for="eventTitle">Título del evento</label><input id="eventTitle" type="text" value="Torneo Pokémon" placeholder="Nombre del torneo"></div>
+          <div class="field"><label for="eventNote">Texto adicional (opcional)</label><input id="eventNote" type="text" maxlength="90" placeholder="Ej.: Inscripciones abiertas"></div>
           <div class="two-col">
             <div class="field"><label for="eventDate">Fecha</label><input id="eventDate" type="date"></div>
             <div class="field"><label for="eventTime">Hora</label><input id="eventTime" type="time" value="15:00"></div>
           </div>
+          <div class="field"><label for="dateSize">Tamaño de la fecha</label><div class="range-row"><input id="dateSize" type="range" min="80" max="130" value="100"><output id="dateSizeOut">100%</output></div></div>
           <div class="two-col">
             <div class="field"><label for="eventValue">Valor</label><input id="eventValue" type="text" value="$3.500" placeholder="Gratis o $3.500"></div>
             <div class="field"><label for="address">Dirección</label><input id="address" type="text" placeholder="Dirección del evento"></div>
@@ -128,8 +130,8 @@
   <script>
     const form=document.getElementById('flyerForm');
     const els={
-      eventType:document.getElementById('eventType'),eventTitle:document.getElementById('eventTitle'),
-      eventDate:document.getElementById('eventDate'),eventTime:document.getElementById('eventTime'),eventValue:document.getElementById('eventValue'),
+      eventType:document.getElementById('eventType'),eventTitle:document.getElementById('eventTitle'),eventNote:document.getElementById('eventNote'),
+      eventDate:document.getElementById('eventDate'),eventTime:document.getElementById('eventTime'),dateSize:document.getElementById('dateSize'),eventValue:document.getElementById('eventValue'),
       address:document.getElementById('address'),logoPosition:document.getElementById('logoPosition'),customLogo:document.getElementById('customLogo'),
       mainImage:document.getElementById('mainImage'),mainSize:document.getElementById('mainSize'),backgroundImage:document.getElementById('backgroundImage'),
       backgroundOpacity:document.getElementById('backgroundOpacity'),textureStyle:document.getElementById('textureStyle'),textureOpacity:document.getElementById('textureOpacity'),
@@ -240,7 +242,7 @@
       return lines.length;
     }
     function drawModule(ctx,w,h,y,accent){
-      const style=els.moduleStyle.value,scale=w/1080,font=els.flyerFont.value,fontScale=Number(els.fontSize.value)/100;
+      const style=els.moduleStyle.value,scale=w/1080,font=els.flyerFont.value,fontScale=Number(els.fontSize.value)/100,dateScale=Number(els.dateSize.value)/100;
       const u=n=>n*scale*fontScale,px=n=>Math.max(10,Math.round(n*fontScale));
       const fontSpec=(weight,size)=>weight+' '+px(size)+'px "'+font+'",sans-serif';
       const measure=(weight,size,text)=>{ctx.font=fontSpec(weight,size);return ctx.measureText(text).width;};
@@ -252,8 +254,8 @@
         day=String(dd);month=new Intl.DateTimeFormat('es-CL',{month:'short',timeZone:'America/Santiago'}).format(stamp).replace(/\.$/,'').toLocaleUpperCase('es-CL');
       }
       const type=els.eventType.value.trim()||'TIPO DE EVENTO',title=els.eventTitle.value.trim()||'Título del evento';
-      const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor';
-      const dateW=182*u(1),titleW=measure(800,43,title),valueW=measure(800,25,value),typeLabel=type.toLocaleUpperCase('es-CL');
+      const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor',note=els.eventNote.value.trim();
+      const dateW=182*u(1),titleW=measure(800,43,title),valueW=measure(800,30,value),typeLabel=type.toLocaleUpperCase('es-CL');
       const typeFontSize=26,timeFontSize=24,timeTextW=measure(800,timeFontSize,time),typeTextW=measure(800,typeFontSize,typeLabel),timePillW=Math.max(88*u(1),timeTextW+50*u(1));
       const typeW=measure(800,typeFontSize,typeLabel)+timePillW+44*u(1);
       const maxW=w-152*scale,minW=560*scale;
@@ -274,9 +276,9 @@
         ctx.fillStyle=accent;ctx.fillRect(x,y,dateW,boxH);
         const gleam=ctx.createLinearGradient(x,y,x+dateW,y+boxH);gleam.addColorStop(0,'#ffffff24');gleam.addColorStop(1,'#00000018');
         ctx.fillStyle=gleam;ctx.fillRect(x,y,dateW,boxH);ctx.restore();
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+66*u(1));
-        setFont(ctx,fontSpec(900,82),'#ffffff','center');ctx.fillText(day,x+dateW/2,y+138*u(1));
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(month,x+dateW/2,y+170*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+(108-42*dateScale)*u(1));
+        setFont(ctx,fontSpec(900,82*dateScale),'#ffffff','center');ctx.fillText(day,x+dateW/2,y+(108+30*dateScale)*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateW/2,y+(108+62*dateScale)*u(1));
         ctx.fillStyle=accent;ctx.fillRect(ix,y+30*u(1),4*u(1),25*u(1));
         const titleEndX=titleX+Math.min(titleW,titleMaxW);
         const pillRightX=titleEndX;
@@ -287,39 +289,43 @@
         fitLine(ctx,time,pillRightX-8*u(1),y+53*u(1),Math.max(35*u(1),timePillW-43*u(1)),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+112*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
         ctx.globalAlpha=.2;ctx.fillStyle='#ffffff';ctx.fillRect(ix+15*u(1),y+132*u(1),iw-20*u(1),1.5*u(1));ctx.globalAlpha=1;
-        fitLine(ctx,value,ix+15*u(1),y+177*u(1)+extraLine,iw-17*u(1),fontSpec(800,25),accent,'left');
+        fitLine(ctx,value,ix+15*u(1),y+177*u(1)+extraLine,iw-17*u(1),fontSpec(800,30),'#ffffff','left');
       }else if(style==='card'){
         ctx.shadowColor='#0009';ctx.shadowBlur=24*u(1);ctx.shadowOffsetY=10*u(1);
         roundedBox(ctx,x,y,boxW,boxH,radius,'#111820ed','#ffffff70');
         ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
         const dateTileW=126*u(1);
         roundedBox(ctx,x+16*u(1),y+16*u(1),dateTileW,boxH-32*u(1),20*u(1),accent,null);
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(weekday,x+16*u(1)+dateTileW/2,y+66*u(1));
-        setFont(ctx,fontSpec(900,75),'#ffffff','center');ctx.fillText(day,x+16*u(1)+dateTileW/2,y+137*u(1));
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(month,x+16*u(1)+dateTileW/2,y+168*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+16*u(1)+dateTileW/2,y+(108-42*dateScale)*u(1));
+        setFont(ctx,fontSpec(900,75*dateScale),'#ffffff','center');ctx.fillText(day,x+16*u(1)+dateTileW/2,y+(108+30*dateScale)*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+16*u(1)+dateTileW/2,y+(108+62*dateScale)*u(1));
         fitLine(ctx,typeLabel,ix,y+49*u(1),Math.max(70*u(1),iw-timeTextW-34*u(1)),fontSpec(800,typeFontSize),'#dce6df','left');
         fitLine(ctx,time,x+boxW-25*u(1),y+50*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+112*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
         ctx.fillStyle=accent;ctx.fillRect(ix,y+132*u(1),iw,2*u(1));
-        fitLine(ctx,value,ix,y+177*u(1)+extraLine,iw,fontSpec(800,25),'#ffffff','left');
+        fitLine(ctx,value,ix,y+177*u(1)+extraLine,iw,fontSpec(800,30),'#ffffff','left');
       }else{
         const dateCardW=150*u(1),minX=x+dateCardW+35*u(1),minW=boxW-dateCardW-55*u(1);
         roundedBox(ctx,x,y,boxW,boxH,18*u(1),'#101713c9','#ffffff80');
         ctx.strokeStyle=accent;ctx.lineWidth=3*u(1);rounded(ctx,x+12*u(1),y+12*u(1),dateCardW,boxH-24*u(1),14*u(1));ctx.stroke();
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+12*u(1),y+66*u(1));
-        setFont(ctx,fontSpec(900,74),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*u(1),y+137*u(1));
-        setFont(ctx,fontSpec(800,24),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*u(1),y+168*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+12*u(1),y+(108-42*dateScale)*u(1));
+        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*u(1),y+(108+30*dateScale)*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*u(1),y+(108+62*dateScale)*u(1));
         fitLine(ctx,typeLabel,minX,y+46*u(1),Math.max(70*u(1),minW-timeTextW-32*u(1)),fontSpec(800,typeFontSize),accent,'left');
         fitLine(ctx,time,x+boxW-22*u(1),y+49*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+108*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
-        fitLine(ctx,value,minX,y+171*u(1)+extraLine,minW,fontSpec(800,24),'#ffffff','left');
+        fitLine(ctx,value,minX,y+171*u(1)+extraLine,minW,fontSpec(800,29),'#ffffff','left');
       }
       ctx.restore();
 
-      const address=els.address.value.trim();
+      const addressInput=els.address.value.trim(),address=addressInput||'Dirección del evento';
+      const addressWidth=measure(700,22,address)+104*scale;
+      const aw=Math.min(w-160*scale,Math.max(270*scale,addressWidth)),ax=(w-aw)/2,ah=58*u(1),ay=h-(note?80:108)*scale;
+      if(note){
+        const noteY=Math.min(y+boxH+36*u(1),ay-18*scale);
+        fitLine(ctx,note,w/2,noteY,w-160*scale,fontSpec(700,22),accent,'center');
+      }
       if(address){
-        const addressWidth=measure(700,24,address)+104*scale;
-        const aw=Math.min(w-160*scale,Math.max(270*scale,addressWidth)),ax=(w-aw)/2,ah=58*u(1),ay=h-108*scale;
         ctx.save();ctx.shadowColor='#0008';ctx.shadowBlur=15*u(1);ctx.shadowOffsetY=6*u(1);
         roundedBox(ctx,ax,ay,aw,ah,19*u(1),'#111713e8','#ffffff48');
         ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
@@ -327,7 +333,7 @@
         ctx.beginPath();ctx.arc(px,py,14*u(1),0,Math.PI*2);ctx.fillStyle=accent+'35';ctx.fill();
         ctx.beginPath();ctx.arc(px,py-2*u(1),6*u(1),0,Math.PI*2);ctx.strokeStyle=accent;ctx.lineWidth=2*u(1);ctx.stroke();
         ctx.beginPath();ctx.moveTo(px-4*u(1),py+3*u(1));ctx.lineTo(px,py+9*u(1));ctx.lineTo(px+4*u(1),py+3*u(1));ctx.stroke();
-        fitLine(ctx,address,ax+62*u(1),ay+37*u(1),aw-85*u(1),fontSpec(700,24),'#ffffff','left');
+        fitLine(ctx,address,ax+62*u(1),ay+37*u(1),aw-85*u(1),fontSpec(700,22),addressInput?'#ffffff':'#ffffffa6','left');
         ctx.restore();
       }
     }
@@ -388,6 +394,7 @@
       document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
       document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';
       document.getElementById('fontSizeOut').value=els.fontSize.value+'%';
+      document.getElementById('dateSizeOut').value=els.dateSize.value+'%';
       document.querySelectorAll('[data-download]').forEach(button=>button.disabled=!images.main||!fontReady);
     }
     function loadFile(input,key){
