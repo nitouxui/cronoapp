@@ -1,0 +1,68 @@
+{
+  "rules": {
+    "rooms": {
+      ".read": "auth != null && auth.token.email_verified === true && query.orderByChild === 'ownerUid' && query.equalTo === auth.uid && query.limitToFirst === 1",
+      ".indexOn": [
+        "ownerUid"
+      ],
+      "$room": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && ((!data.exists() && $room === auth.uid && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['ownerUid', 'state']) && newData.child('state').hasChildren(['running', 'remainingMs', 'startedAt'])",
+        "ownerUid": {
+          ".validate": "newData.isString()"
+        },
+        "state": {
+          "running": {
+            ".validate": "newData.isBoolean()"
+          },
+          "remainingMs": {
+            ".validate": "newData.isNumber() && newData.val() <= 86400000"
+          },
+          "startedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "settings": {
+          ".validate": "newData.isString() && newData.val().length <= 6000000"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "pairings": {
+          ".validate": "newData.isString() && newData.val().length <= 1000000"
+        },
+        "shortCode": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-HJ-NP-Z2-9]{6}$/) && (!data.exists() || data.val() === newData.val()) && root.child('shortRooms').child(newData.val()).val() === $room"
+        }
+      }
+    },
+    "shortRooms": {
+      "$code": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && !data.exists() && newData.isString() && root.child('rooms').child(newData.val()).child('ownerUid').val() === auth.uid",
+        ".validate": "newData.isString() && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/)"
+      }
+    },
+    "agenda": {
+      ".read": true,
+      "events": {
+        "$eventId": {
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
+          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') : newData.hasChildren(['type', 'format']) && !newData.hasChild('endTime'))",
+          "store": { ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')" },
+          "kind": { ".validate": "newData.isString() && (newData.val() === 'tournament' || newData.val() === 'free')" },
+          "date": { ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)" },
+          "time": { ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)" },
+          "endTime": { ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)" },
+          "type": { ".validate": "newData.isString() && (newData.val() === 'Torneo Casual' || newData.val() === 'League Challenge' || newData.val() === 'League Cup')" },
+          "format": { ".validate": "newData.isString() && (newData.val() === 'Rondas Suizas Bo1' || newData.val() === 'Rondas Suizas Bo3')" },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}
