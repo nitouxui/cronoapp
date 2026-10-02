@@ -3244,8 +3244,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               location.assign(next.href);
             } catch (error) { showError(error); }
           }
+          const returnTo = new URLSearchParams(location.search).get('returnTo');
+          let returnedToFlyer = false;
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
+            if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
             document.getElementById('agendaAdminLink').hidden = !(user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com'));
             updateAccess();
             if (user?.emailVerified && !hasRoomLink) {
