@@ -166,6 +166,7 @@
             if (!grouped.has(entry[1].date)) grouped.set(entry[1].date, []);
             grouped.get(entry[1].date).push(entry);
           }
+          const cards = element('div','events');
           for (const [date, dayEntries] of grouped) {
             const card = element('article','event');
             const dateTimes = dayEntries.map(([,event]) => `${event.date}T${event.time}`);
@@ -194,8 +195,9 @@
               body.append(item);
             }
             card.append(dateBox, body);
-            section.append(card);
+            cards.append(card);
           }
+          section.append(cards);
         }
         list.append(section);
       }
