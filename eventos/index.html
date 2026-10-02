@@ -75,7 +75,7 @@
       <form id="eventForm" hidden>
         <div class="field"><label for="store" data-i18n="store">Tienda</label><select id="store" required><option value="trizano">Top8 Trizano</option><option value="neruda">Top8 Neruda</option><option value="bluecard">Bluecard</option></select></div>
         <div class="field"><label for="kind" data-i18n="kind">Actividad</label><select id="kind" required><option value="tournament" data-i18n="tournament">Torneo</option><option value="free" data-i18n="free">Juego libre</option></select></div>
-        <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option></select></div>
+        <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option><option value="Abacaxi Showdown" data-neruda-only hidden disabled>Abacaxi Showdown</option></select></div>
         <div class="field tournament-field"><label for="format" data-i18n="format">Formato</label><select id="format"><option>Rondas Suizas Bo1</option><option>Rondas Suizas Bo3</option></select></div>
         <div class="field"><label for="date" data-i18n="date">Fecha</label><input id="date" type="date" required></div>
         <div class="field"><label for="time" data-i18n="time">Hora de inicio</label><input id="time" type="time" required></div>
@@ -120,7 +120,7 @@
       return event && Object.hasOwn(stores, event.store) && ['tournament','free'].includes(event.kind)
         && /^\d{4}-\d{2}-\d{2}$/.test(event.date || '') && /^\d{2}:\d{2}$/.test(event.time || '')
         && (!event.endTime || /^\d{2}:\d{2}$/.test(event.endTime))
-        && (event.kind === 'free' || (['Torneo Casual','League Challenge','League Cup'].includes(event.type) && ['Rondas Suizas Bo1','Rondas Suizas Bo3'].includes(event.format)));
+        && (event.kind === 'free' || ((['Torneo Casual','League Challenge','League Cup'].includes(event.type) || (event.type === 'Abacaxi Showdown' && event.store === 'neruda')) && ['Rondas Suizas Bo1','Rondas Suizas Bo3'].includes(event.format)));
     }
     function element(tag, className, value) {
       const node = document.createElement(tag);
@@ -185,8 +185,15 @@
       document.getElementById('endTime').required = free;
     }
     document.getElementById('kind').addEventListener('change', syncKind);
+    function syncStoreType() {
+      const option = document.querySelector('[data-neruda-only]');
+      const allowed = document.getElementById('store').value === 'neruda';
+      option.hidden = !allowed; option.disabled = !allowed;
+      if (!allowed && document.getElementById('eventType').value === option.value) document.getElementById('eventType').value = 'Torneo Casual';
+    }
+    document.getElementById('store').addEventListener('change', syncStoreType);
     function resetForm() {
-      editingId = null; form.reset(); syncKind();
+      editingId = null; form.reset(); syncKind(); syncStoreType();
       document.getElementById('submitEvent').textContent = t('publish');
       document.getElementById('cancelEdit').hidden = true;
     }
@@ -196,6 +203,7 @@
       const event = events[id];
       editingId = id;
       for (const key of ['store','kind','date','time','endTime']) document.getElementById(key).value = event[key] || '';
+      syncStoreType();
       document.getElementById('eventType').value = event.type || 'Torneo Casual';
       document.getElementById('format').value = event.format || 'Rondas Suizas Bo1';
       syncKind();
