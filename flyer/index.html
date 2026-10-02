@@ -281,7 +281,7 @@
         setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateW/2,y+(108+62*dateScale)*u(1));
         ctx.fillStyle=accent;ctx.fillRect(ix,y+30*u(1),4*u(1),25*u(1));
         const titleEndX=titleX+Math.min(titleW,titleMaxW);
-        const pillRightX=titleEndX;
+        const pillRightX=Math.max(titleEndX,ix+15*u(1)+typeTextW+12*u(1)+timePillW);
         const pillX=pillRightX-timePillW;
         fitLine(ctx,typeLabel,ix+15*u(1),y+55*u(1),Math.max(70*u(1),pillX-ix-27*u(1)),fontSpec(800,typeFontSize),'#d5e3d9','left');
         roundedBox(ctx,pillX,y+22*u(1),timePillW,46*u(1),23*u(1),'#ffffff12','#ffffff42');
