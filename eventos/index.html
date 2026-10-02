@@ -270,9 +270,8 @@
           }
           return {storeId,name,days:[...grouped.entries()]};
         });
-        const left=80,gap=24,colWidth=(1760-gap*2)/3,headerY=220,cardTop=300,cardBottom=1010;
-        const maxDays=Math.max(1,...storeRows.map(row=>row.days.length));
-        const rowGap=14,cardHeight=Math.max(86,(cardBottom-cardTop-rowGap*(maxDays-1))/maxDays);
+        const left=80,gap=24,colWidth=(1760-gap*2)/3,headerY=220,cardTop=300;
+        const rowGap=14,baseCardHeight=138,extraEventHeight=80;
         const logos=await Promise.all(storeRows.map(row=>new Promise(resolve=>{
           const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>resolve(null); img.src=storeLogos[row.storeId];
         })));
@@ -284,24 +283,23 @@
           fitText(storeAddresses[row.storeId],textX,headerY+58,colWidth-(textX-x),'500 17px system-ui, sans-serif',palette.muted);
           ctx.strokeStyle=palette.edge;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,headerY+78);ctx.lineTo(x+colWidth,headerY+78);ctx.stroke();
           if(!row.days.length) {
-            roundRect(x,cardTop,colWidth,cardBottom-cardTop,20);ctx.fillStyle=palette.surface;ctx.fill();
+            roundRect(x,cardTop,colWidth,baseCardHeight,20);ctx.fillStyle=palette.surface;ctx.fill();
             drawText(t('empty'),x+24,cardTop+45,'500 20px system-ui, sans-serif',palette.muted);
             continue;
           }
-          const height=(cardBottom-cardTop-rowGap*(row.days.length-1))/row.days.length;
-          row.days.forEach(([date,items],index)=>{
-            const y=cardTop+index*(height+rowGap);
+          let y=cardTop;
+          row.days.forEach(([date,items])=>{
+            const height=baseCardHeight+Math.max(0,items.length-1)*extraEventHeight;
             roundRect(x,y,colWidth,height,20);ctx.fillStyle=palette.surface;ctx.fill();ctx.strokeStyle=palette.edge;ctx.lineWidth=2;ctx.stroke();
-            const badge=Math.min(82,height-28),bx=x+20,by=y+Math.max(14,(height-badge)/2);
+            const badge=82,bx=x+20,by=y+18;
             roundRect(bx,by,badge,badge,14);ctx.fillStyle=palette.raised;ctx.fill();
             const stamp=dayStamp(date);
             drawText(stamp.weekday.toLocaleUpperCase(language),bx+badge/2,by+19,'800 13px system-ui, sans-serif',palette.muted,'center');
             drawText(stamp.day,bx+badge/2,by+51,'800 31px system-ui, sans-serif',palette.text,'center');
             drawText(stamp.month.toLocaleUpperCase(language).replace('.',''),bx+badge/2,by+badge-10,'800 12px system-ui, sans-serif',palette.muted,'center');
             const tx=bx+badge+18,tw=x+colWidth-24-tx;
-            const rowSpace=Math.min(96,Math.max(68,(height-28)/items.length));
-            const contentHeight=rowSpace*items.length;
-            const contentTop=y+(height-contentHeight)/2;
+            const rowSpace=extraEventHeight;
+            const contentTop=y+24;
             items.forEach(([,event],itemIndex)=>{
               const top=contentTop+itemIndex*rowSpace;
               if(itemIndex) {ctx.strokeStyle=palette.edge;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx,top-7);ctx.lineTo(x+colWidth-20,top-7);ctx.stroke();}
@@ -314,6 +312,7 @@
               if(event.kind==='free'&&event.showTableAvailabilityNote) details.push(t('tableNoticePublic'));
               if(details.length) wrapText(details.join(' · '),tx,top+42,tw,18,'500 14px system-ui, sans-serif',palette.muted,Math.max(1,Math.floor((rowSpace-44)/18)));
             });
+            y+=height+rowGap;
           });
         }
         const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('Canvas export failed')),'image/png'));
