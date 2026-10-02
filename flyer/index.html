@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme:dark; --bg:#14171b; --panel:#20252b; --raised:#293039; --edge:#46515d; --text:#f0f2f5; --muted:#bfc7d0; --accent:#a4b3c1; --focus:#dce7f2; font-family:"DM Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    :root { color-scheme:dark; --bg:#14171b; --panel:#20252b; --raised:#293039; --edge:#46515d; --text:#f0f2f5; --muted:#bfc7d0; --accent:#a4b3c1; --focus:#dce7f2; font-family:\x27 + font + \x27,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; background:radial-gradient(circle at 8% 0%,#2b333b,var(--bg) 42%); color:var(--text); }
     button,input,select { font:inherit; }
@@ -99,6 +99,7 @@
         <section class="group">
           <h3>Estilo</h3>
           <div class="field"><label for="moduleStyle">Módulo de fecha y evento</label><select id="moduleStyle"><option value="split">Bloque dividido</option><option value="card">Tarjeta oscura</option><option value="minimal">Minimalista</option></select></div>
+          <div class="field"><label for="flyerFont">Tipografía del flyer</label><select id="flyerFont"><option value=\x27 + font + \x27 selected>Barlow Condensed · deportiva</option><option value="Bebas Neue">Bebas Neue · impacto</option><option value="Oswald">Oswald · condensada</option><option value="Montserrat">Montserrat · geométrica</option><option value="Space Grotesk">Space Grotesk · moderna</option><option value=\x27 + font + \x27>DM Sans · neutra</option><option value="Archivo Black">Archivo Black · pesada</option></select><p class="hint">Se aplica a los textos del diseño y a los PNG.</p></div>
         </section>
       </form>
       <section class="preview-panel" aria-labelledby="previewTitle">
@@ -125,7 +126,7 @@
       address:document.getElementById('address'),logoPosition:document.getElementById('logoPosition'),customLogo:document.getElementById('customLogo'),
       mainImage:document.getElementById('mainImage'),mainSize:document.getElementById('mainSize'),backgroundImage:document.getElementById('backgroundImage'),
       backgroundOpacity:document.getElementById('backgroundOpacity'),textureStyle:document.getElementById('textureStyle'),textureOpacity:document.getElementById('textureOpacity'),
-      backgroundColor:document.getElementById('backgroundColor'),accentColor:document.getElementById('accentColor'),moduleStyle:document.getElementById('moduleStyle')
+      backgroundColor:document.getElementById('backgroundColor'),accentColor:document.getElementById('accentColor'),moduleStyle:document.getElementById('moduleStyle'),flyerFont:document.getElementById('flyerFont')
     };
     const canvases={square:document.getElementById('squarePreview'),portrait:document.getElementById('portraitPreview')};
     const images={main:null,background:null,customLogo:null,storeLogo:null};
@@ -222,7 +223,7 @@
       }
       const type=els.eventType.value.trim()||'TIPO DE EVENTO',title=els.eventTitle.value.trim()||'Título del evento';
       const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor';
-      const dateW=182*scale,ix=x+dateW+34*scale,iw=boxW-dateW-62*scale,radius=28*scale;
+      const dateW=182*scale,ix=x+dateW+34*scale,iw=boxW-dateW-62*scale,radius=28*scale,font=els.flyerFont.value;
       ctx.save();
       if(style==='split'){
         ctx.shadowColor='#0009';ctx.shadowBlur=24*scale;ctx.shadowOffsetY=10*scale;
@@ -232,41 +233,41 @@
         ctx.fillStyle=accent;ctx.fillRect(x,y,dateW,boxH);
         const gleam=ctx.createLinearGradient(x,y,x+dateW,y+boxH);gleam.addColorStop(0,'#ffffff24');gleam.addColorStop(1,'#00000018');
         ctx.fillStyle=gleam;ctx.fillRect(x,y,dateW,boxH);ctx.restore();
-        setFont(ctx,'800 15px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+48*scale);
-        setFont(ctx,'900 82px "Barlow Condensed",sans-serif','#ffffff','center');ctx.fillText(day,x+dateW/2,y+123*scale);
-        setFont(ctx,'800 17px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(month,x+dateW/2,y+171*scale);
+        setFont(ctx,'800 15px '+font+',sans-serif','#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+48*scale);
+        setFont(ctx,'900 82px '+font+',sans-serif','#ffffff','center');ctx.fillText(day,x+dateW/2,y+123*scale);
+        setFont(ctx,'800 17px '+font+',sans-serif','#ffffff','center');ctx.fillText(month,x+dateW/2,y+171*scale);
         ctx.fillStyle=accent;ctx.fillRect(ix,y+30*scale,4*scale,25*scale);
-        fitLine(ctx,type.toLocaleUpperCase('es-CL'),ix+15*scale,y+49*scale,iw-150*scale,'800 15px "DM Sans",sans-serif','#d5e3d9','left');
+        fitLine(ctx,type.toLocaleUpperCase('es-CL'),ix+15*scale,y+49*scale,iw-150*scale,'800 15px '+font+',sans-serif','#d5e3d9','left');
         roundedBox(ctx,x+boxW-137*scale,y+24*scale,110*scale,36*scale,18*scale,'#ffffff12','#ffffff42');
         ctx.beginPath();ctx.arc(x+boxW-119*scale,y+42*scale,4*scale,0,Math.PI*2);ctx.fillStyle=accent;ctx.fill();
-        fitLine(ctx,time,x+boxW-34*scale,y+48*scale,72*scale,'700 15px "DM Sans",sans-serif','#ffffff','right');
-        fitLine(ctx,title,ix+15*scale,y+112*scale,iw-17*scale,'800 43px "Barlow Condensed",sans-serif','#ffffff','left');
+        fitLine(ctx,time,x+boxW-34*scale,y+48*scale,72*scale,'700 15px '+font+',sans-serif','#ffffff','right');
+        fitLine(ctx,title,ix+15*scale,y+112*scale,iw-17*scale,'800 43px '+font+',sans-serif','#ffffff','left');
         ctx.globalAlpha=.2;ctx.fillStyle='#ffffff';ctx.fillRect(ix+15*scale,y+132*scale,iw-20*scale,1.5*scale);ctx.globalAlpha=1;
-        fitLine(ctx,value,ix+15*scale,y+177*scale,iw-17*scale,'800 25px "DM Sans",sans-serif',accent,'left');
+        fitLine(ctx,value,ix+15*scale,y+177*scale,iw-17*scale,'800 25px '+font+',sans-serif',accent,'left');
       }else if(style==='card'){
         ctx.shadowColor='#0009';ctx.shadowBlur=24*scale;ctx.shadowOffsetY=10*scale;
         roundedBox(ctx,x,y,boxW,boxH,radius,'#111820ed','#ffffff70');
         ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
         roundedBox(ctx,x+16*scale,y+16*scale,126*scale,boxH-32*scale,20*scale,accent,null);
-        setFont(ctx,'800 15px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+79*scale,y+51*scale);
-        setFont(ctx,'900 67px "Barlow Condensed",sans-serif','#ffffff','center');ctx.fillText(day,x+79*scale,y+120*scale);
-        setFont(ctx,'800 15px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(month,x+79*scale,y+164*scale);
-        fitLine(ctx,type.toLocaleUpperCase('es-CL'),ix,y+49*scale,iw-132*scale,'800 15px "DM Sans",sans-serif','#dce6df','left');
-        fitLine(ctx,time,x+boxW-25*scale,y+49*scale,iw,'700 15px "DM Sans",sans-serif','#ffffff','right');
-        fitLine(ctx,title,ix,y+112*scale,iw,'800 43px "Barlow Condensed",sans-serif','#ffffff','left');
+        setFont(ctx,'800 15px '+font+',sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+79*scale,y+51*scale);
+        setFont(ctx,'900 67px '+font+',sans-serif','#ffffff','center');ctx.fillText(day,x+79*scale,y+120*scale);
+        setFont(ctx,'800 15px '+font+',sans-serif','#ffffff','center');ctx.fillText(month,x+79*scale,y+164*scale);
+        fitLine(ctx,type.toLocaleUpperCase('es-CL'),ix,y+49*scale,iw-132*scale,'800 15px '+font+',sans-serif','#dce6df','left');
+        fitLine(ctx,time,x+boxW-25*scale,y+49*scale,iw,'700 15px '+font+',sans-serif','#ffffff','right');
+        fitLine(ctx,title,ix,y+112*scale,iw,'800 43px '+font+',sans-serif','#ffffff','left');
         ctx.fillStyle=accent;ctx.fillRect(ix,y+132*scale,iw,2*scale);
-        fitLine(ctx,value,ix,y+177*scale,iw,'800 25px "DM Sans",sans-serif','#ffffff','left');
+        fitLine(ctx,value,ix,y+177*scale,iw,'800 25px '+font+',sans-serif','#ffffff','left');
       }else{
         const dateCardW=150*scale,minX=x+dateCardW+35*scale,minW=boxW-dateCardW-55*scale;
         roundedBox(ctx,x,y,boxW,boxH,18*scale,'#101713c9','#ffffff80');
         ctx.strokeStyle=accent;ctx.lineWidth=3*scale;rounded(ctx,x+12*scale,y+12*scale,dateCardW,boxH-24*scale,14*scale);ctx.stroke();
-        setFont(ctx,'800 14px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+dateCardW/2+12*scale,y+49*scale);
-        setFont(ctx,'900 66px "Barlow Condensed",sans-serif','#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*scale,y+119*scale);
-        setFont(ctx,'800 14px "DM Sans",sans-serif','#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*scale,y+163*scale);
-        fitLine(ctx,type.toLocaleUpperCase('es-CL'),minX,y+46*scale,minW-123*scale,'800 14px "DM Sans",sans-serif',accent,'left');
-        fitLine(ctx,time,x+boxW-22*scale,y+46*scale,minW,'700 14px "DM Sans",sans-serif','#ffffff','right');
-        fitLine(ctx,title,minX,y+108*scale,minW,'800 43px "Barlow Condensed",sans-serif','#ffffff','left');
-        fitLine(ctx,value,minX,y+171*scale,minW,'800 24px "DM Sans",sans-serif','#ffffff','left');
+        setFont(ctx,'800 14px '+font+',sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+dateCardW/2+12*scale,y+49*scale);
+        setFont(ctx,'900 66px '+font+',sans-serif','#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*scale,y+119*scale);
+        setFont(ctx,'800 14px '+font+',sans-serif','#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*scale,y+163*scale);
+        fitLine(ctx,type.toLocaleUpperCase('es-CL'),minX,y+46*scale,minW-123*scale,'800 14px '+font+',sans-serif',accent,'left');
+        fitLine(ctx,time,x+boxW-22*scale,y+46*scale,minW,'700 14px \x27 + font + \x27,sans-serif','#ffffff','right');
+        fitLine(ctx,title,minX,y+108*scale,minW,'800 43px '+font+',sans-serif','#ffffff','left');
+        fitLine(ctx,value,minX,y+171*scale,minW,'800 24px '+font+',sans-serif','#ffffff','left');
       }
       ctx.restore();
 
@@ -281,7 +282,7 @@
         ctx.beginPath();ctx.arc(px,py,14*scale,0,Math.PI*2);ctx.fillStyle=accent+'35';ctx.fill();
         ctx.beginPath();ctx.arc(px,py-2*scale,6*scale,0,Math.PI*2);ctx.strokeStyle=accent;ctx.lineWidth=2*scale;ctx.stroke();
         ctx.beginPath();ctx.moveTo(px-4*scale,py+3*scale);ctx.lineTo(px,py+9*scale);ctx.lineTo(px+4*scale,py+3*scale);ctx.stroke();
-        fitLine(ctx,address,ax+62*scale,ay+37*scale,aw-85*scale,'700 24px "Barlow Condensed",sans-serif','#ffffff','left');
+        fitLine(ctx,address,ax+62*scale,ay+37*scale,aw-85*scale,'700 24px '+font+',sans-serif','#ffffff','left');
         ctx.restore();
       }
     }
@@ -309,13 +310,40 @@
       drawModule(ctx,w,h,h*.66,accent);
       return ctx;
     }
+    let fontReady=true,fontLoadVersion=0;
+    let activeFontLoad=Promise.resolve();
+    function loadFlyerFont(){
+      const name=els.flyerFont.value,version=++fontLoadVersion;
+      fontReady=false;redraw();
+      let link=document.getElementById('flyerFontStylesheet');
+      if(!link){link=document.createElement('link');link.id='flyerFontStylesheet';link.rel='stylesheet';document.head.appendChild(link);}
+      const family=name.replace(/ /g,'+');
+      const weights={
+        'Barlow Condensed':'400;500;600;700;800;900',
+        'Bebas Neue':'400',
+        'Oswald':'400;500;600;700',
+        'Montserrat':'400;500;600;700;800;900',
+        'Space Grotesk':'400;500;600;700',
+        'DM Sans':'400;500;600;700;800',
+        'Archivo Black':'400'
+      };
+      const suffix=weights[name]==='400'?'':':wght@'+weights[name];
+      const url='https://fonts.googleapis.com/css2?family='+family+suffix+'&display=swap';
+      activeFontLoad=new Promise(resolve=>{
+        link.onload=()=>resolve();link.onerror=()=>resolve();link.href=url;
+      }).then(()=>document.fonts.load('800 43px "'+name+'"').catch(()=>[]))
+        .then(()=>document.fonts.ready).then(()=>{
+          if(version===fontLoadVersion){fontReady=true;redraw();}
+        });
+      return activeFontLoad;
+    }
     document.fonts.ready.then(()=>redraw());
     function redraw(){
       render(canvases.square);render(canvases.portrait);
       document.getElementById('mainSizeOut').value=els.mainSize.value+'%';
       document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
       document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';
-      document.querySelectorAll('[data-download]').forEach(button=>button.disabled=!images.main);
+      document.querySelectorAll('[data-download]').forEach(button=>button.disabled=!images.main||!fontReady);
     }
     function loadFile(input,key){
       const file=input.files&&input.files[0];if(!file)return;
@@ -335,6 +363,7 @@
       img.onerror=()=>{images.storeLogo=null;redraw();};
       img.src=src;
     }
+    els.flyerFont.addEventListener('change',loadFlyerFont);
     els.store.addEventListener('change',()=>{
       els.address.value=stores[els.store.value].address;
       images.customLogo=null;els.customLogo.value='';loadStoreLogo();redraw();
