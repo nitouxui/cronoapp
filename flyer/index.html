@@ -75,10 +75,12 @@
     .downloads { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
     .downloads button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:0; min-height:58px; padding:6px 4px; border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-size:13px; font-weight:800; line-height:1.2; }
     .downloads button span { color:var(--muted); font-size:11px; font-weight:650; white-space:nowrap; }
+    .downloads button { white-space:nowrap; }
+    .controls-head .save-draft { align-self:flex-end; }
     .downloads button:hover { border-color:var(--focus); background:#343d47; }
     .status { min-height:18px; margin:10px 0 0; color:var(--muted); font-size:12px; }
     @media(max-width:900px) { .workspace { grid-template-columns:minmax(270px,380px) minmax(0,1fr); gap:14px; } .controls,.preview-panel { padding:16px; } .canvas-wrap { min-height:300px; padding:10px; } .preview-head { align-items:flex-start; flex-direction:column; } .downloads { gap:6px; } .downloads button { font-size:12px; } .downloads button span { font-size:10px; } }
-    @media(max-width:680px) { .workspace { grid-template-columns:1fr; } .preview-panel { position:static; grid-row:1; } .controls { grid-row:2; } canvas { max-height:none; max-width:min(100%,480px); } .canvas-wrap { min-height:0; } .preview-head { flex-direction:row; align-items:center; } .downloads { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; } .downloads button { min-height:56px; font-size:11px; } .downloads button span { font-size:9px; } .controls-head { align-items:flex-start; flex-direction:column; } .controls-head .save-draft { align-self:flex-start; } .intro { margin:28px 0 18px; } }
+    @media(max-width:680px) { .workspace { grid-template-columns:1fr; } .preview-panel { position:static; grid-row:1; } .controls { grid-row:2; } canvas { max-height:none; max-width:min(100%,480px); } .canvas-wrap { min-height:0; } .preview-head { flex-direction:row; align-items:center; } .downloads { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; } .downloads button { min-height:56px; font-size:11px; } .downloads button span { font-size:9px; } .controls-head { align-items:flex-end; flex-direction:column; } .controls-head .save-draft { align-self:flex-end; } .intro { margin:28px 0 18px; } }
   </style>
 </head>
 <body>
@@ -272,8 +274,8 @@
       const maxW=w-152*scale,minW=560*scale;
       const boxW=Math.min(maxW,Math.max(minW,dateW+34*u(1)+Math.max(titleW,valueW,typeW)+62*u(1)));
       const x=(w-boxW)/2,cardDateTileW=112*u(1),cardContentX=x+24*u(1)+cardDateTileW+22*u(1),cardContentW=boxW-(cardContentX-x)-36*u(1),ix=x+dateW+34*u(1),iw=boxW-dateW-62*u(1),radius=28*u(1);
-      const titleX=style==='minimal'?x+185*u(1):style==='split'?ix+15*u(1):style==='card'?cardContentX:ix;
-      const titleMaxW=style==='minimal'?boxW-240*u(1):style==='split'?iw-17*u(1):style==='card'?cardContentW:iw;
+      const titleX=style==='minimal'?x+205*u(1):style==='split'?ix+15*u(1):style==='card'?cardContentX:ix;
+      const titleMaxW=style==='minimal'?boxW-280*u(1):style==='split'?iw-17*u(1):style==='card'?cardContentW:iw;
       const titleLines=Math.min(2,Math.max(1,Math.ceil(titleW/Math.max(1,titleMaxW))));
       const extraLine=(titleLines-1)*48*u(1);
       y-=extraLine*.55;
@@ -316,14 +318,14 @@
         ctx.fillStyle=accent;ctx.fillRect(cardContentX,y+132*u(1),cardContentW,2*u(1));
         fitLine(ctx,value,cardContentX,y+177*u(1)+extraLine,cardContentW,fontSpec(800,30),accent,'left');
       }else{
-        const dateCardW=150*u(1),minX=x+dateCardW+42*u(1),minW=boxW-dateCardW-74*u(1);
+        const dateCardW=150*u(1),minX=x+dateCardW+60*u(1),minW=boxW-dateCardW-100*u(1);
         roundedBox(ctx,x,y,boxW,boxH,18*u(1),'#101713c9','#ffffff80');
-        ctx.strokeStyle=accent;ctx.lineWidth=3*u(1);rounded(ctx,x+12*u(1),y+12*u(1),dateCardW,boxH-24*u(1),14*u(1));ctx.stroke();
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+12*u(1),y+(108-42*dateScale)*u(1),dateCardW-42*u(1));
-        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*u(1),y+(108+30*dateScale)*u(1),dateCardW-48*u(1));
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*u(1),y+(108+62*dateScale)*u(1),dateCardW-42*u(1));
+        ctx.strokeStyle=accent;ctx.lineWidth=3*u(1);rounded(ctx,x+20*u(1),y+18*u(1),dateCardW,boxH-36*u(1),14*u(1));ctx.stroke();
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+20*u(1),y+(108-42*dateScale)*u(1),dateCardW-42*u(1));
+        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+20*u(1),y+(108+30*dateScale)*u(1),dateCardW-48*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+20*u(1),y+(108+62*dateScale)*u(1),dateCardW-42*u(1));
         fitLine(ctx,typeLabel,minX,y+46*u(1),Math.max(70*u(1),minW-timeTextW-32*u(1)),fontSpec(800,typeFontSize),accent,'left');
-        fitLine(ctx,time,x+boxW-22*u(1),y+49*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
+        fitLine(ctx,time,x+boxW-36*u(1),y+49*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+108*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
         fitLine(ctx,value,minX,y+171*u(1)+extraLine,minW,fontSpec(800,29),accent,'left');
       }
