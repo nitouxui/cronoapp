@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16191d">
+  <title>Generador de flyers · Cronoapp</title>
+  <style>
+    :root { color-scheme:dark; --bg:#14171b; --panel:#20252b; --raised:#293039; --edge:#46515d; --text:#f0f2f5; --muted:#bfc7d0; --accent:#a4b3c1; --focus:#dce7f2; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 8% 0%,#2b333b,var(--bg) 42%); color:var(--text); }
+    button,input,select { font:inherit; }
+    button,select,input[type="color"],input[type="file"],input[type="range"] { cursor:pointer; }
+    [hidden] { display:none!important; }
+    .shell { max-width:1500px; margin:0 auto; padding:24px clamp(18px,3vw,44px) 64px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { color:var(--text); text-decoration:none; font-size:18px; font-weight:900; letter-spacing:-.035em; }
+    .back { display:inline-flex; align-items:center; min-height:42px; padding:0 14px; border:1px solid var(--edge); border-radius:10px; color:var(--muted); text-decoration:none; font-size:14px; font-weight:700; }
+    .intro { margin:34px 0 26px; }
+    .eyebrow { color:var(--accent); font-size:12px; font-weight:900; letter-spacing:.16em; }
+    h1 { margin:8px 0 6px; font-size:clamp(32px,4vw,48px); letter-spacing:-.05em; line-height:1.05; }
+    .intro p { margin:0; color:var(--muted); }
+    .workspace { display:grid; grid-template-columns:minmax(300px,430px) minmax(0,1fr); align-items:start; gap:24px; }
+    .controls,.preview-panel { border:1px solid var(--edge); border-radius:18px; background:rgba(32,37,43,.9); }
+    .controls { padding:22px; }
+    .controls h2,.preview-panel h2 { margin:0; font-size:19px; }
+    .group { margin-top:20px; padding-top:18px; border-top:1px solid var(--edge); }
+    .group h3 { margin:0 0 14px; color:var(--accent); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+    .field { margin-top:13px; }
+    .field:first-child { margin-top:0; }
+    label,.label { display:block; margin-bottom:6px; font-size:13px; font-weight:750; }
+    input:not([type="color"]):not([type="range"]):not([type="file"]),select {
+      width:100%; min-height:42px; padding:9px 11px; border:1px solid var(--edge); border-radius:9px; background:#171b20; color:var(--text);
+    }
+    input[type="color"] { width:54px; height:40px; padding:3px; border:1px solid var(--edge); border-radius:8px; background:#171b20; }
+    input[type="file"] { width:100%; color:var(--muted); font-size:12px; }
+    input[type="range"] { width:100%; accent-color:var(--focus); }
+    .color-row { display:flex; align-items:center; gap:10px; }
+    output { color:var(--muted); font-size:12px; min-width:42px; }
+    .range-row { display:flex; align-items:center; gap:10px; }
+    .hint { margin:5px 0 0; color:var(--muted); font-size:11px; line-height:1.45; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .preview-panel { position:sticky; top:16px; padding:22px; }
+    .preview-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:14px; }
+    .ratio-switch { display:flex; gap:7px; padding:4px; border:1px solid var(--edge); border-radius:10px; background:#171b20; }
+    .ratio-switch button { min-height:34px; padding:0 10px; border:0; border-radius:7px; background:transparent; color:var(--muted); font-size:12px; font-weight:750; }
+    .ratio-switch button[aria-pressed="true"] { background:var(--focus); color:#182129; }
+    .canvas-wrap { display:flex; justify-content:center; align-items:flex-start; min-height:400px; padding:18px; border:1px solid var(--edge); border-radius:14px; background-color:#171b20; background-image:linear-gradient(45deg,#20252b 25%,transparent 25%),linear-gradient(-45deg,#20252b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#20252b 75%),linear-gradient(-45deg,transparent 75%,#20252b 75%); background-size:22px 22px; background-position:0 0,0 11px,11px -11px,-11px 0; }
+    canvas { display:block; width:auto; height:auto; max-width:100%; max-height:calc(100vh - 220px); object-fit:contain; box-shadow:0 14px 40px #0008; }
+    #squarePreview { aspect-ratio:1; }
+    #portraitPreview { aspect-ratio:4 / 5; }
+    .downloads { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+    .downloads button { min-height:46px; border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-size:13px; font-weight:800; }
+    .downloads button:hover { border-color:var(--focus); background:#343d47; }
+    .status { min-height:18px; margin:10px 0 0; color:var(--muted); font-size:12px; }
+    @media(max-width:900px) { .workspace { grid-template-columns:minmax(270px,380px) minmax(0,1fr); gap:14px; } .controls,.preview-panel { padding:16px; } .canvas-wrap { min-height:300px; padding:10px; } .preview-head { align-items:flex-start; flex-direction:column; } }
+    @media(max-width:680px) { .workspace { grid-template-columns:1fr; } .preview-panel { position:static; grid-row:1; } .controls { grid-row:2; } canvas { max-height:none; max-width:min(100%,480px); } .canvas-wrap { min-height:0; } .preview-head { flex-direction:row; align-items:center; } .downloads { grid-template-columns:1fr; } .intro { margin:28px 0 18px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header><a class="brand" href="/">Cronoapp</a><a class="back" href="/eventos/">Agenda de eventos</a></header>
+    <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
+    <div class="workspace">
+      <form class="controls" id="flyerForm">
+        <h2>Contenido del flyer</h2>
+        <section class="group">
+          <h3>Evento y tienda</h3>
+          <div class="field"><label for="store">Tienda</label><select id="store"><option value="trizano">Top8 Trizano</option><option value="neruda">Top8 Neruda</option><option value="bluecard">Bluecard</option></select></div>
+          <div class="field"><label for="eventType">Tipo de evento</label><input id="eventType" type="text" value="Torneo Casual" placeholder="Ej.: League Challenge"></div>
+          <div class="field"><label for="eventTitle">Título del evento</label><input id="eventTitle" type="text" value="Torneo Pokémon" placeholder="Nombre del torneo"></div>
+          <div class="two-col">
+            <div class="field"><label for="eventDate">Fecha</label><input id="eventDate" type="date"></div>
+            <div class="field"><label for="eventTime">Hora</label><input id="eventTime" type="time" value="15:00"></div>
+          </div>
+          <div class="two-col">
+            <div class="field"><label for="eventValue">Valor</label><input id="eventValue" type="text" value="$3.500" placeholder="Gratis o $3.500"></div>
+            <div class="field"><label for="address">Dirección</label><input id="address" type="text" value="Trizano 430"></div>
+          </div>
+          <div class="field"><label for="logoPosition">Posición del logo</label><select id="logoPosition"><option value="left">Izquierda</option><option value="center" selected>Centrado</option><option value="right">Derecha</option></select></div>
+          <div class="field"><label for="customLogo">Logo de tienda (opcional)</label><input id="customLogo" type="file" accept="image/*"><p class="hint">Se usa el logo guardado de la tienda si no seleccionas otro.</p></div>
+        </section>
+        <section class="group">
+          <h3>Imágenes</h3>
+          <div class="field"><label for="mainImage">Imagen central</label><input id="mainImage" type="file" accept="image/*"><p class="hint">Se muestra completa, sin recortarla. Puedes ajustar su tamaño.</p></div>
+          <div class="field"><label for="mainSize">Tamaño de imagen central</label><div class="range-row"><input id="mainSize" type="range" min="45" max="115" value="100"><output id="mainSizeOut">100%</output></div></div>
+          <div class="field"><label for="backgroundImage">Imagen de fondo</label><input id="backgroundImage" type="file" accept="image/*"></div>
+          <div class="field"><label for="backgroundOpacity">Opacidad del fondo</label><div class="range-row"><input id="backgroundOpacity" type="range" min="0" max="100" value="45"><output id="backgroundOpacityOut">45%</output></div></div>
+          <div class="field"><label for="textureImage">Textura sobre el fondo</label><input id="textureImage" type="file" accept="image/*"><p class="hint">La textura queda debajo del logo y el contenido.</p></div>
+          <div class="field"><label for="textureOpacity">Opacidad de textura</label><div class="range-row"><input id="textureOpacity" type="range" min="0" max="100" value="35"><output id="textureOpacityOut">35%</output></div></div>
+          <div class="two-col">
+            <div class="field"><label for="backgroundColor">Color de fondo</label><div class="color-row"><input id="backgroundColor" type="color" value="#14251b"><span class="hint">Base del diseño</span></div></div>
+            <div class="field"><label for="accentColor">Color de acento</label><div class="color-row"><input id="accentColor" type="color" value="#08a52b"><span class="hint">Fecha y destacados</span></div></div>
+          </div>
+        </section>
+        <section class="group">
+          <h3>Estilo</h3>
+          <div class="field"><label for="moduleStyle">Módulo de fecha y evento</label><select id="moduleStyle"><option value="split">Bloque dividido</option><option value="card">Tarjeta oscura</option><option value="minimal">Minimalista</option></select></div>
+        </section>
+      </form>
+      <section class="preview-panel" aria-labelledby="previewTitle">
+        <div class="preview-head"><h2 id="previewTitle">Vista previa</h2><div class="ratio-switch" role="group" aria-label="Formato de vista previa"><button type="button" data-ratio="square" aria-pressed="true">Cuadrado 1:1</button><button type="button" data-ratio="portrait" aria-pressed="false">Vertical 4:5</button></div></div>
+        <div class="canvas-wrap">
+          <canvas id="squarePreview" width="1080" height="1080" role="img" aria-label="Vista previa cuadrada del flyer"></canvas>
+          <canvas id="portraitPreview" width="1080" height="1350" role="img" aria-label="Vista previa vertical del flyer" hidden></canvas>
+        </div>
+        <div class="downloads"><button type="button" data-download="square">Descargar PNG 1080 × 1080</button><button type="button" data-download="portrait">Descargar PNG 1080 × 1350</button></div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+  <script>
+    const stores={
+      trizano:{name:'Top8 Trizano',address:'Trizano 430',logo:'../eventos/assets/logos/top8.svg'},
+      neruda:{name:'Top8 Neruda',address:'Avenida Pablo Neruda 1980',logo:'../eventos/assets/logos/top8.svg'},
+      bluecard:{name:'Bluecard',address:'Lago Riñihue 01890',logo:'../eventos/assets/logos/bluecard.svg'}
+    };
+    const form=document.getElementById('flyerForm');
+    const els={
+      store:document.getElementById('store'),eventType:document.getElementById('eventType'),eventTitle:document.getElementById('eventTitle'),
+      eventDate:document.getElementById('eventDate'),eventTime:document.getElementById('eventTime'),eventValue:document.getElementById('eventValue'),
+      address:document.getElementById('address'),logoPosition:document.getElementById('logoPosition'),customLogo:document.getElementById('customLogo'),
+      mainImage:document.getElementById('mainImage'),mainSize:document.getElementById('mainSize'),backgroundImage:document.getElementById('backgroundImage'),
+      backgroundOpacity:document.getElementById('backgroundOpacity'),textureImage:document.getElementById('textureImage'),textureOpacity:document.getElementById('textureOpacity'),
+      backgroundColor:document.getElementById('backgroundColor'),accentColor:document.getElementById('accentColor'),moduleStyle:document.getElementById('moduleStyle')
+    };
+    const canvases={square:document.getElementById('squarePreview'),portrait:document.getElementById('portraitPreview')};
+    const images={main:null,background:null,texture:null,customLogo:null,storeLogo:null};
+    const objectUrls={};
+    let currentRatio='square';
+    const ctxs={square:canvases.square.getContext('2d'),portrait:canvases.portrait.getContext('2d')};
+    const rounded=(ctx,x,y,w,h,r)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);};
+    function drawCover(ctx,img,x,y,w,h,alpha){
+      if(!img)return;
+      const scale=Math.max(w/img.width,h/img.height),dw=img.width*scale,dh=img.height*scale;
+      ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh);ctx.restore();
+    }
+    function drawContain(ctx,img,x,y,w,h,size){
+      if(!img)return;
+      const scale=Math.min(w/img.width,h/img.height)*size,dw=img.width*scale,dh=img.height*scale;
+      ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh);
+    }
+    function setFont(ctx,font,color,align){
+      ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align||'left';ctx.textBaseline='alphabetic';
+    }
+    function fitLine(ctx,text,x,y,maxWidth,font,color,align){
+      let s=String(text||'');setFont(ctx,font,color,align);
+      while(s&&ctx.measureText(s).width>maxWidth)s=s.slice(0,-1);
+      if(s!==String(text||''))s=s.replace(/[.…]*$/,'')+'…';
+      ctx.fillText(s,x,y);
+    }
+    function wrap(ctx,text,x,y,maxWidth,lineHeight,font,color,maxLines){
+      const words=String(text||'').split(/\s+/);let line='',lines=0;setFont(ctx,font,color,'left');
+      for(let i=0;i<words.length;i++){
+        const test=line?line+' '+words[i]:words[i];
+        if(ctx.measureText(test).width>maxWidth&&line){
+          if(lines===maxLines-1){
+            let tail=line+' '+words.slice(i).join(' ');
+            while(tail&&ctx.measureText(tail+'…').width>maxWidth)tail=tail.slice(0,-1);
+            ctx.fillText(tail+'…',x,y+lines*lineHeight);return;
+          }
+          ctx.fillText(line,x,y+lines*lineHeight);lines++;line=words[i];
+        }else line=test;
+      }
+      if(line&&lines<maxLines)ctx.fillText(line,x,y+lines*lineHeight);
+    }
+    function roundedBox(ctx,x,y,w,h,r,fill,stroke){
+      rounded(ctx,x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
+      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+    }
+    function drawModule(ctx,w,h,y,accent){
+      const style=els.moduleStyle.value,margin=74,boxW=w-148,boxH=Math.round(h*.205),x=margin;
+      const date=els.eventDate.value;
+      let weekday='DÍA',day='--',month='MES';
+      if(date){
+        const [yy,mm,dd]=date.split('-').map(Number),stamp=new Date(Date.UTC(yy,mm-1,dd,12));
+        weekday=new Intl.DateTimeFormat('es-CL',{weekday:'long',timeZone:'America/Santiago'}).format(stamp).toLocaleUpperCase('es-CL');
+        day=String(dd);
+        month=new Intl.DateTimeFormat('es-CL',{month:'short',timeZone:'America/Santiago'}).format(stamp).replace('.','').toLocaleUpperCase('es-CL');
+      }
+      const type=els.eventType.value.trim()||'Tipo de evento',title=els.eventTitle.value.trim()||'Título del evento';
+      const time=els.eventTime.value||'Hora',value=els.eventValue.value.trim()||'Valor';
+      if(style==='split'){
+        const dateW=Math.round(boxW*.29);
+        roundedBox(ctx,x,y,boxW,boxH,28,'#f7f8f8',null);
+        ctx.save();ctx.beginPath();ctx.roundRect(x,y,dateW,boxH,[28,10,10,28]);ctx.clip();
+        ctx.fillStyle=accent;ctx.fillRect(x,y,dateW,boxH);ctx.restore();
+        setFont(ctx,'800 22px system-ui,sans-serif','#ffffff','center');ctx.fillText(weekday,x+dateW/2,y+60);
+        setFont(ctx,'900 74px system-ui,sans-serif','#ffffff','center');ctx.fillText(day,x+dateW/2,y+139);
+        setFont(ctx,'800 25px system-ui,sans-serif','#ffffff','center');ctx.fillText(month,x+dateW/2,y+180);
+        const ix=x+dateW+38,iw=boxW-dateW-70;
+        fitLine(ctx,time,x+boxW-30,y+47,iw,'800 25px system-ui,sans-serif','#26322b','right');
+        fitLine(ctx,type,ix,y+82,iw-10,'800 22px system-ui,sans-serif','#25302a','left');
+        fitLine(ctx,title,ix,y+126,iw,'900 34px system-ui,sans-serif','#15351f','left');
+        fitLine(ctx,value,ix,y+177,iw,'900 29px system-ui,sans-serif',accent,'left');
+      }else if(style==='card'){
+        roundedBox(ctx,x,y,boxW,boxH,28,'#19211fdd','#ffffff40');
+        roundedBox(ctx,x+20,y+20,116,boxH-40,20,accent,null);
+        setFont(ctx,'800 17px system-ui,sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+78,y+55);
+        setFont(ctx,'900 55px system-ui,sans-serif','#ffffff','center');ctx.fillText(day,x+78,y+116);
+        setFont(ctx,'800 18px system-ui,sans-serif','#ffffff','center');ctx.fillText(month,x+78,y+148);
+        const ix=x+166,iw=boxW-202;
+        fitLine(ctx,type,ix,y+62,iw-150,'800 22px system-ui,sans-serif','#d8e3db','left');
+        fitLine(ctx,time,x+boxW-28,y+62,iw,'800 22px system-ui,sans-serif','#ffffff','right');
+        fitLine(ctx,title,ix,y+119,iw,'900 36px system-ui,sans-serif','#ffffff','left');
+        fitLine(ctx,value,ix,y+174,iw,'800 27px system-ui,sans-serif','#cce8d2','left');
+      }else{
+        const dateW=160,ix=x+dateW+28,iw=boxW-dateW-32;
+        roundedBox(ctx,x,y,boxW,boxH,18,'#111820aa','#ffffff50');
+        roundedBox(ctx,x+15,y+18,dateW-30,boxH-36,14,accent,null);
+        setFont(ctx,'800 16px system-ui,sans-serif','#ffffff','center');ctx.fillText(weekday.slice(0,3),x+dateW/2,y+52);
+        setFont(ctx,'900 53px system-ui,sans-serif','#ffffff','center');ctx.fillText(day,x+dateW/2,y+111);
+        setFont(ctx,'800 17px system-ui,sans-serif','#ffffff','center');ctx.fillText(month,x+dateW/2,y+143);
+        fitLine(ctx,type,ix,y+51,iw-130,'700 19px system-ui,sans-serif','#dbe0e5','left');
+        fitLine(ctx,time,x+boxW-22,y+51,iw,'800 20px system-ui,sans-serif','#ffffff','right');
+        fitLine(ctx,title,ix,y+103,iw,'900 32px system-ui,sans-serif','#ffffff','left');
+        fitLine(ctx,value,ix,y+153,iw,'800 25px system-ui,sans-serif',accent,'left');
+      }
+      const address=els.address.value.trim();
+      if(address){
+        const ay=h-84,aw=w-190,ax=(w-aw)/2;
+        roundedBox(ctx,ax,ay,aw,52,18,accent,null);
+        fitLine(ctx,address.toLocaleUpperCase('es-CL'),w/2,ay+34,aw-36,'800 20px system-ui,sans-serif','#ffffff','center');
+      }
+    }
+    function render(canvas){
+      const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+      const base=els.backgroundColor.value,accent=els.accentColor.value;
+      ctx.clearRect(0,0,w,h);ctx.fillStyle=base;ctx.fillRect(0,0,w,h);
+      drawCover(ctx,images.background,0,0,w,h,Number(els.backgroundOpacity.value)/100);
+      drawCover(ctx,images.texture,0,0,w,h,Number(els.textureOpacity.value)/100);
+      const shade=ctx.createLinearGradient(0,h*.43,0,h);shade.addColorStop(0,'#00000000');shade.addColorStop(1,'#00000070');
+      ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
+      const logo=images.customLogo||images.storeLogo;
+      if(logo){
+        const maxW=w*.48,maxH=h*.12,scale=Math.min(maxW/logo.width,maxH/logo.height),lw=logo.width*scale,lh=logo.height*scale;
+        const pos=els.logoPosition.value,lx=pos==='left'?72:pos==='right'?w-72-lw:(w-lw)/2;
+        ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,h*.045,lw,lh);ctx.restore();
+      }
+      const artTop=h*.16,artHeight=h*.47,artWidth=w*.84;
+      drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
+      drawModule(ctx,w,h,h*.66,accent);
+      return ctx;
+    }
+    function redraw(){
+      render(canvases.square);render(canvases.portrait);
+      document.getElementById('mainSizeOut').value=els.mainSize.value+'%';
+      document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
+      document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';
+    }
+    function loadFile(input,key){
+      const file=input.files&&input.files[0];if(!file)return;
+      if(objectUrls[key])URL.revokeObjectURL(objectUrls[key]);
+      const url=URL.createObjectURL(file);objectUrls[key]=url;
+      const image=new Image();
+      image.onload=()=>{images[key]=image;redraw();};
+      image.onerror=()=>{document.getElementById('status').textContent='No se pudo cargar esa imagen.';};
+      image.src=url;
+    }
+    const logoImages={};
+    function loadStoreLogo(){
+      if(images.customLogo)return;
+      const src=stores[els.store.value].logo;
+      if(logoImages[src]){images.storeLogo=logoImages[src];redraw();return;}
+      const img=new Image();img.onload=()=>{logoImages[src]=img;images.storeLogo=img;redraw();};
+      img.onerror=()=>{images.storeLogo=null;redraw();};
+      img.src=src;
+    }
+    els.store.addEventListener('change',()=>{
+      els.address.value=stores[els.store.value].address;
+      images.customLogo=null;els.customLogo.value='';loadStoreLogo();redraw();
+    });
+    els.customLogo.addEventListener('change',()=>loadFile(els.customLogo,'customLogo'));
+    els.mainImage.addEventListener('change',()=>loadFile(els.mainImage,'main'));
+    els.backgroundImage.addEventListener('change',()=>loadFile(els.backgroundImage,'background'));
+    els.textureImage.addEventListener('change',()=>loadFile(els.textureImage,'texture'));
+    document.querySelectorAll('#flyerForm input,#flyerForm select').forEach(control=>{
+      if(control.type==='file'||control.id==='store')return;
+      control.addEventListener('input',redraw);control.addEventListener('change',redraw);
+    });
+    document.querySelectorAll('[data-ratio]').forEach(button=>button.addEventListener('click',()=>{
+      currentRatio=button.dataset.ratio;
+      canvases.square.hidden=currentRatio!=='square';canvases.portrait.hidden=currentRatio!=='portrait';
+      document.querySelectorAll('[data-ratio]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+    }));
+    document.querySelectorAll('[data-download]').forEach(button=>button.addEventListener('click',()=>{
+      const ratio=button.dataset.download,canvas=canvases[ratio],link=document.createElement('a');
+      const slug=(els.eventTitle.value||'flyer').trim().toLowerCase().replace(/[^a-z0-9áéíóúñ]+/gi,'-').replace(/^-|-$/g,'');
+      link.download='cronoapp-'+(slug||'flyer')+'-'+(ratio==='square'?'1080x1080':'1080x1350')+'.png';
+      link.href=canvas.toDataURL('image/png');link.click();
+      document.getElementById('status').textContent='PNG descargado en formato '+(ratio==='square'?'1080 × 1080':'1080 × 1350')+'.';
+    }));
+    loadStoreLogo();
+    redraw();
+  </script>
+</body>
+</html>
