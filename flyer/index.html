@@ -18,6 +18,10 @@
     .login-panel button,.account button,.save-draft { border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-weight:800; cursor:pointer; }
     .login-panel button { min-height:46px; padding:0 18px; }
     .account { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
+    .home-icon-link { display:grid; place-items:center; width:40px; height:40px; flex:0 0 auto; border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); }
+    .home-icon-link svg { width:20px; height:20px; }
+    .home-icon-link:hover { border-color:var(--focus); color:var(--focus); }
+    .home-icon-link:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
     .account button { padding:8px 12px; }
     .controls-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
     .save-draft { flex:0 0 auto; min-height:40px; padding:0 14px; background:var(--accent); color:#101418; border-color:transparent; }
@@ -87,7 +91,7 @@
   <section id="authLoading" class="login-panel" role="status" aria-live="polite"><span class="eyebrow">CRONOAPP</span><h1>Preparando tu generador</h1><p>Estamos comprobando tu sesión…</p></section>
   <section id="loginPanel" class="login-panel" hidden><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
   <main class="shell" id="flyerShell" hidden>
-    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" id="timerLink" href="/?openOwnRoom=1">Temporizador</a></div></header>
+    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><a class="home-icon-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a><button id="logoutButton" type="button">Cerrar sesión</button><a class="back" id="timerLink" href="/?openOwnRoom=1">Temporizador</a></div></header>
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
