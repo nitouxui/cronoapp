@@ -83,7 +83,7 @@
         <section class="group">
           <h3>Imágenes</h3>
           <div class="field"><label for="mainImage">Imagen central</label><input id="mainImage" type="file" accept="image/*"><p class="hint">Se muestra completa, sin recortarla. Puedes ajustar su tamaño.</p></div>
-          <div class="field"><label for="mainSize">Tamaño de imagen central</label><div class="range-row"><input id="mainSize" type="range" min="45" max="115" value="100"><output id="mainSizeOut">100%</output></div></div>
+          <div class="field"><label for="mainSize">Tamaño de imagen central</label><div class="range-row"><input id="mainSize" type="range" min="45" max="100" value="100"><output id="mainSizeOut">100%</output></div></div>
           <div class="field"><label for="backgroundImage">Imagen de fondo</label><input id="backgroundImage" type="file" accept="image/*"></div>
           <div class="field"><label for="backgroundOpacity">Opacidad del fondo</label><div class="range-row"><input id="backgroundOpacity" type="range" min="0" max="100" value="45"><output id="backgroundOpacityOut">45%</output></div></div>
           <div class="field"><label for="textureImage">Textura sobre el fondo</label><input id="textureImage" type="file" accept="image/*"><p class="hint">La textura queda debajo del logo y el contenido.</p></div>
@@ -238,7 +238,12 @@
         ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,h*.045,lw,lh);ctx.restore();
       }
       const artTop=h*.16,artHeight=h*.47,artWidth=w*.84;
-      drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
+      if(images.main) drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
+      else {
+        const px=w*.2,py=artTop+artHeight*.35,pw=w*.6,ph=Math.min(110,h*.09);
+        ctx.save();ctx.setLineDash([12,10]);rounded(ctx,px,py,pw,ph,22);ctx.fillStyle='#00000028';ctx.fill();ctx.strokeStyle='#ffffff70';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
+        setFont(ctx,'700 24px system-ui,sans-serif','#ffffffcc','center');ctx.fillText('SUBE LA IMAGEN CENTRAL',w/2,py+ph/2+8);ctx.restore();
+      }
       drawModule(ctx,w,h,h*.66,accent);
       return ctx;
     }
@@ -247,6 +252,7 @@
       document.getElementById('mainSizeOut').value=els.mainSize.value+'%';
       document.getElementById('backgroundOpacityOut').value=els.backgroundOpacity.value+'%';
       document.getElementById('textureOpacityOut').value=els.textureOpacity.value+'%';
+      document.querySelectorAll('[data-download]').forEach(button=>button.disabled=!images.main);
     }
     function loadFile(input,key){
       const file=input.files&&input.files[0];if(!file)return;
