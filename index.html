@@ -662,9 +662,8 @@
         <select id="leftVisualModeSelect" class="editor-select" onchange="switchLeftVisualMode()">
           <option value="qr">Generar QR desde un enlace</option>
           <option value="upload">Subir una imagen</option>
-          <option value="tdf">Subir TDF y generar QR de pareos</option>
+          <option value="tdf" hidden disabled>Subir TDF y generar QR de pareos</option>
         </select>
-        <p id="tdfDisabledNotice" class="settings-hint">La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.</p>
         <div id="qrControls">
           <label for="qrUrl">Enlace de destino del QR:</label>
           <input type="url" id="qrUrl" placeholder="https://ejemplo.com/torneo" inputmode="url" autocomplete="url">
@@ -1974,10 +1973,13 @@ module.exports = QRCode;
     const tdfModeOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
     const tdfFileInput = document.getElementById('tdfInput');
     const tdfPublishButton = document.getElementById('publishPairings');
-    if (tdfModeOption) tdfModeOption.disabled = !window.TDF_UPLOAD_ENABLED;
+    if (tdfModeOption) {
+      tdfModeOption.disabled = !window.TDF_UPLOAD_ENABLED;
+      tdfModeOption.hidden = !window.TDF_UPLOAD_ENABLED;
+      if (!window.TDF_UPLOAD_ENABLED) tdfModeOption.remove();
+    }
     if (tdfFileInput) tdfFileInput.disabled = !window.TDF_UPLOAD_ENABLED;
     if (tdfPublishButton) tdfPublishButton.disabled = !window.TDF_UPLOAD_ENABLED;
-    document.getElementById('tdfDisabledNotice').hidden = window.TDF_UPLOAD_ENABLED;
 
     function openModal() {
       const modal = document.getElementById('modal');
