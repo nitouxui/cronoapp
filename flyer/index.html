@@ -19,8 +19,8 @@
     .login-panel button { min-height:46px; padding:0 18px; }
     .account { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
     .account button { padding:8px 12px; }
-    .save-row { display:flex; justify-content:flex-end; margin:-6px 0 16px; }
-    .save-draft { min-height:40px; padding:0 14px; background:var(--accent); color:#101418; border-color:transparent; }
+    .controls-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    .save-draft { flex:0 0 auto; min-height:40px; padding:0 14px; background:var(--accent); color:#101418; border-color:transparent; }
     .save-draft:disabled { opacity:.65; cursor:wait; }
     body { margin:0; min-height:100vh; background:radial-gradient(circle at 8% 0%,#2b333b,var(--bg) 42%); color:var(--text); }
     button,input,select { font:inherit; }
@@ -72,12 +72,13 @@
     #squarePreview { aspect-ratio:1; }
     #portraitPreview { aspect-ratio:4 / 5; }
     #storyPreview { aspect-ratio:9 / 16; }
-    .downloads { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
-    .downloads button { min-height:46px; border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-size:13px; font-weight:800; }
+    .downloads { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .downloads button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:0; min-height:58px; padding:6px 4px; border:1px solid var(--edge); border-radius:10px; background:var(--raised); color:var(--text); font-size:13px; font-weight:800; line-height:1.2; }
+    .downloads button span { color:var(--muted); font-size:11px; font-weight:650; white-space:nowrap; }
     .downloads button:hover { border-color:var(--focus); background:#343d47; }
     .status { min-height:18px; margin:10px 0 0; color:var(--muted); font-size:12px; }
-    @media(max-width:900px) { .workspace { grid-template-columns:minmax(270px,380px) minmax(0,1fr); gap:14px; } .controls,.preview-panel { padding:16px; } .canvas-wrap { min-height:300px; padding:10px; } .preview-head { align-items:flex-start; flex-direction:column; } }
-    @media(max-width:680px) { .workspace { grid-template-columns:1fr; } .preview-panel { position:static; grid-row:1; } .controls { grid-row:2; } canvas { max-height:none; max-width:min(100%,480px); } .canvas-wrap { min-height:0; } .preview-head { flex-direction:row; align-items:center; } .downloads { grid-template-columns:1fr; } .intro { margin:28px 0 18px; } }
+    @media(max-width:900px) { .workspace { grid-template-columns:minmax(270px,380px) minmax(0,1fr); gap:14px; } .controls,.preview-panel { padding:16px; } .canvas-wrap { min-height:300px; padding:10px; } .preview-head { align-items:flex-start; flex-direction:column; } .downloads { gap:6px; } .downloads button { font-size:12px; } .downloads button span { font-size:10px; } }
+    @media(max-width:680px) { .workspace { grid-template-columns:1fr; } .preview-panel { position:static; grid-row:1; } .controls { grid-row:2; } canvas { max-height:none; max-width:min(100%,480px); } .canvas-wrap { min-height:0; } .preview-head { flex-direction:row; align-items:center; } .downloads { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; } .downloads button { min-height:56px; font-size:11px; } .downloads button span { font-size:9px; } .controls-head { align-items:flex-start; flex-direction:column; } .controls-head .save-draft { align-self:flex-start; } .intro { margin:28px 0 18px; } }
   </style>
 </head>
 <body>
@@ -87,7 +88,7 @@
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
-        <h2>Contenido del flyer</h2><div class="save-row"><button class="save-draft" id="saveDraft" type="button">Guardar diseño</button></div>
+        <div class="controls-head"><h2>Contenido del flyer</h2><button class="save-draft" id="saveDraft" type="button">Guardar diseño</button></div>
         <details class="group" open>
           <summary>Evento</summary>
           <div class="field"><label for="eventType">Tipo de evento</label><input id="eventType" type="text" value="Torneo Casual" placeholder="Ej.: League Challenge"></div>
@@ -132,7 +133,7 @@
           <canvas id="portraitPreview" width="1080" height="1350" role="img" aria-label="Vista previa vertical del flyer" hidden></canvas>
           <canvas id="storyPreview" width="1080" height="1920" role="img" aria-label="Vista previa para stories" hidden></canvas>
         </div>
-        <div class="downloads"><button type="button" data-download="square">Descargar PNG 1080 × 1080</button><button type="button" data-download="portrait">Descargar PNG 1080 × 1350</button><button type="button" data-download="story">Descargar PNG 1080 × 1920</button></div>
+        <div class="downloads"><button type="button" data-download="square" aria-label="Descargar PNG 1080 por 1080"><strong>Cuadrado</strong><span>1080 × 1080</span></button><button type="button" data-download="portrait" aria-label="Descargar PNG 1080 por 1350"><strong>Vertical</strong><span>1080 × 1350</span></button><button type="button" data-download="story" aria-label="Descargar PNG 1080 por 1920"><strong>Stories</strong><span>1080 × 1920</span></button></div>
         <p id="status" class="status" role="status" aria-live="polite"></p>
       </section>
     </div>
@@ -270,7 +271,7 @@
       const typeW=measure(800,typeFontSize,typeLabel)+timePillW+44*u(1);
       const maxW=w-152*scale,minW=560*scale;
       const boxW=Math.min(maxW,Math.max(minW,dateW+34*u(1)+Math.max(titleW,valueW,typeW)+62*u(1)));
-      const x=(w-boxW)/2,cardDateTileW=112*u(1),cardContentX=x+24*u(1)+cardDateTileW+22*u(1),cardContentW=boxW-(cardContentX-x)-26*u(1),ix=x+dateW+34*u(1),iw=boxW-dateW-62*u(1),radius=28*u(1);
+      const x=(w-boxW)/2,cardDateTileW=112*u(1),cardContentX=x+24*u(1)+cardDateTileW+22*u(1),cardContentW=boxW-(cardContentX-x)-36*u(1),ix=x+dateW+34*u(1),iw=boxW-dateW-62*u(1),radius=28*u(1);
       const titleX=style==='minimal'?x+185*u(1):style==='split'?ix+15*u(1):style==='card'?cardContentX:ix;
       const titleMaxW=style==='minimal'?boxW-240*u(1):style==='split'?iw-17*u(1):style==='card'?cardContentW:iw;
       const titleLines=Math.min(2,Math.max(1,Math.ceil(titleW/Math.max(1,titleMaxW))));
@@ -306,21 +307,21 @@
         ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
         const dateTileW=cardDateTileW;
         roundedBox(ctx,x+24*u(1),y+16*u(1),dateTileW,boxH-32*u(1),20*u(1),accent,null);
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+24*u(1)+dateTileW/2,y+(108-42*dateScale)*u(1));
-        setFont(ctx,fontSpec(900,75*dateScale),'#ffffff','center');ctx.fillText(day,x+24*u(1)+dateTileW/2,y+(108+30*dateScale)*u(1));
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+24*u(1)+dateTileW/2,y+(108+62*dateScale)*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+24*u(1)+dateTileW/2,y+(108-42*dateScale)*u(1),dateTileW-30*u(1));
+        setFont(ctx,fontSpec(900,75*dateScale),'#ffffff','center');ctx.fillText(day,x+24*u(1)+dateTileW/2,y+(108+30*dateScale)*u(1),dateTileW-30*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+24*u(1)+dateTileW/2,y+(108+62*dateScale)*u(1),dateTileW-30*u(1));
         fitLine(ctx,typeLabel,cardContentX,y+49*u(1),Math.max(70*u(1),cardContentW-timeTextW-24*u(1)),fontSpec(800,typeFontSize),'#dce6df','left');
         fitLine(ctx,time,x+boxW-25*u(1),y+50*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+112*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
         ctx.fillStyle=accent;ctx.fillRect(cardContentX,y+132*u(1),cardContentW,2*u(1));
         fitLine(ctx,value,cardContentX,y+177*u(1)+extraLine,cardContentW,fontSpec(800,30),accent,'left');
       }else{
-        const dateCardW=150*u(1),minX=x+dateCardW+35*u(1),minW=boxW-dateCardW-55*u(1);
+        const dateCardW=150*u(1),minX=x+dateCardW+42*u(1),minW=boxW-dateCardW-74*u(1);
         roundedBox(ctx,x,y,boxW,boxH,18*u(1),'#101713c9','#ffffff80');
         ctx.strokeStyle=accent;ctx.lineWidth=3*u(1);rounded(ctx,x+12*u(1),y+12*u(1),dateCardW,boxH-24*u(1),14*u(1));ctx.stroke();
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+12*u(1),y+(108-42*dateScale)*u(1));
-        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*u(1),y+(108+30*dateScale)*u(1));
-        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*u(1),y+(108+62*dateScale)*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(weekday,x+dateCardW/2+12*u(1),y+(108-42*dateScale)*u(1),dateCardW-42*u(1));
+        setFont(ctx,fontSpec(900,74*dateScale),'#ffffff','center');ctx.fillText(day,x+dateCardW/2+12*u(1),y+(108+30*dateScale)*u(1),dateCardW-48*u(1));
+        setFont(ctx,fontSpec(800,24*dateScale),'#ffffff','center');ctx.fillText(month,x+dateCardW/2+12*u(1),y+(108+62*dateScale)*u(1),dateCardW-42*u(1));
         fitLine(ctx,typeLabel,minX,y+46*u(1),Math.max(70*u(1),minW-timeTextW-32*u(1)),fontSpec(800,typeFontSize),accent,'left');
         fitLine(ctx,time,x+boxW-22*u(1),y+49*u(1),timeTextW+4*u(1),fontSpec(800,timeFontSize),'#ffffff','right');
         drawTitle(ctx,title,titleX,y+108*u(1),titleMaxW,fontSpec(800,43),'#ffffff',45*u(1));
@@ -333,7 +334,7 @@
       const story=h>=1800,logoBottom=Boolean(images.customLogo)&&els.logoPosition.value.startsWith('bottom-'),safeMargin=(story?260:72)*scale;
       const aw=Math.min(w-160*scale,Math.max(270*scale,addressWidth)),ax=(w-aw)/2,ah=58*u(1),ay=logoBottom?safeMargin:h-safeMargin-ah;
       if(note){
-        const noteLimit=logoBottom?h-safeMargin-h*(story?.075:.12)-40*scale:ay-18*scale;
+        const noteLimit=logoBottom?h-safeMargin-h*(story?.075:.12)-40*scale:ay-(px(34)*.85+30*scale);
         const noteY=Math.min(y+boxH+74*u(1),noteLimit);
         fitLine(ctx,note,w/2,noteY,w-160*scale,fontSpec(800,34),'#ffffff','center');
       }
@@ -364,14 +365,14 @@
         const side=logoPos.split('-')[1],lx=side==='left'?safeMargin:side==='right'?w-safeMargin-lw:(w-lw)/2,ly=logoBottom?h-safeMargin-lh:safeMargin;
         ctx.save();ctx.shadowColor='#000a';ctx.shadowBlur=18;ctx.drawImage(logo,lx,ly,lw,lh);ctx.restore();
       }
-      const artTop=h*(story?.22:.16),artHeight=h*(story?.36:logoBottom?(hasNote?.31:.36):(hasNote?.39:.47)),artWidth=w*.84;
+      const artTop=h*(story?.22:.16),artHeight=h*(story?.36:hasNote?(logoBottom?.30-.20*(fontScale-1):.35-.25*(fontScale-1)):logoBottom?.36:.47),artWidth=w*.84;
       if(images.main) drawContain(ctx,images.main,(w-artWidth)/2,artTop,artWidth,artHeight,Number(els.mainSize.value)/100);
       else {
         const px=w*.2,py=artTop+artHeight*.35,pw=w*.6,ph=Math.min(110,h*.09);
         ctx.save();ctx.setLineDash([12,10]);rounded(ctx,px,py,pw,ph,22);ctx.fillStyle='#00000028';ctx.fill();ctx.strokeStyle='#ffffff70';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
         setFont(ctx,'700 24px system-ui,sans-serif','#ffffffcc','center');ctx.fillText('SUBE LA IMAGEN CENTRAL',w/2,py+ph/2+8);ctx.restore();
       }
-      const fontScale=Number(els.fontSize.value)/100,moduleRatio=h>=1800?(hasNote?.62:.66):logoBottom?(hasNote?.49:.55):hasNote?.61:.66;
+      const fontScale=Number(els.fontSize.value)/100,moduleRatio=h>=1800?(hasNote?.62:.66):logoBottom?(hasNote?.49:.55):hasNote?.52:.66;
       drawModule(ctx,w,h,h*moduleRatio+(1-fontScale)*160*(w/1080),accent);
       return ctx;
     }
