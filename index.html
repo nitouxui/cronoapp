@@ -2193,9 +2193,11 @@ module.exports = QRCode;
       }
       if (privatePairingsHandle && !privatePairingsTimer) {
         const permission = await privatePairingsHandle.queryPermission({ mode: 'read' }).catch(() => 'denied');
-        if (permission === 'granted' && await syncPrivatePairingsFile(privatePairingsContext)) {
-          privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
-          document.getElementById('htmlPairingsStatus').textContent = 'Vigilando ' + privatePairingsHandle.name + '; revisión cada 5 segundos.';
+        if (permission === 'granted') {
+          if (await syncPrivatePairingsFile(privatePairingsContext)) {
+            privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
+            document.getElementById('htmlPairingsStatus').textContent = 'Vigilando ' + privatePairingsHandle.name + '; revisión cada 5 segundos.';
+          }
         } else {
           document.getElementById('htmlPairingsStatus').textContent = 'Archivo guardado: ' + privatePairingsHandle.name + '. Pulsa Reanudar para continuar.';
         }
