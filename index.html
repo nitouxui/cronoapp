@@ -557,6 +557,7 @@
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
     <p id="pairingsCurrentRound"></p>
     <p id="pairingsStatus" role="status">Conectando…</p>
+    <button id="privatePairingsLogin" class="editor-button editor-button-primary" type="button" hidden>Iniciar sesión con Google para ver esta prueba</button>
     <div class="pairings-filters"><label for="pairingsRound">Ronda<select id="pairingsRound"></select></label><label for="pairingsDivision">Categoría del jugador<select id="pairingsDivision"><option value="all">Todas</option><option value="JR">Junior (JR)</option><option value="SR">Senior (SR)</option><option value="MA">Máster (MA)</option></select></label></div>
     <div id="pairingsList"></div>
   </div></section>
@@ -709,6 +710,7 @@
           <option value="qr">Generar QR desde un enlace</option>
           <option value="upload">Subir una imagen</option>
           <option value="tdf" hidden disabled>Subir TDF y generar QR de pareos</option>
+          <option value="html-pairings" hidden>Sincronizar pareos desde HTML (prueba privada)</option>
         </select>
         <div id="qrControls">
           <label for="qrUrl">Enlace de destino del QR:</label>
@@ -725,6 +727,12 @@
           <input id="tdfInput" type="file" accept=".tdf,.xml,text/xml,application/xml">
           <button id="publishPairings" class="editor-button editor-button-secondary" type="button">Publicar pareos y generar QR</button>
           <p id="tdfStatus" role="status" aria-live="polite">Al subir un nuevo TDF, se reemplazan los pareos publicados.</p>
+        </div>
+        <div id="htmlPairingsControls" hidden>
+          <p>Prueba privada: el HTML se lee en este computador y se sincroniza solo con tu cuenta. El QR también requiere tu sesión de Google.</p>
+          <button id="selectPairingsHtml" class="editor-button editor-button-secondary" type="button">Seleccionar HTML y comenzar sincronización</button>
+          <button id="stopPairingsHtml" class="editor-button editor-button-secondary" type="button" hidden>Detener sincronización</button>
+          <p id="htmlPairingsStatus" role="status" aria-live="polite">Disponible solo para la cuenta administradora.</p>
         </div>
         </div>
         <p id="qrStatus" role="status" aria-live="polite"></p>
@@ -2027,6 +2035,152 @@ module.exports = QRCode;
     }
     if (tdfFileInput) tdfFileInput.disabled = !window.TDF_UPLOAD_ENABLED;
     if (tdfPublishButton) tdfPublishButton.disabled = !window.TDF_UPLOAD_ENABLED;
+    const htmlPairingsModeOption = document.querySelector('#leftVisualModeSelect option[value="html-pairings"]');
+    const htmlPairingsControls = document.getElementById('htmlPairingsControls');
+    const PILOT_EMAIL = 'quidel.dsgn@gmail.com';
+    const isPilotUser = user => !!user?.emailVerified
+      && user.email?.toLowerCase() === PILOT_EMAIL
+      && user.providerData?.some(provider => provider.providerId === 'google.com');
+    window.isPilotUser = isPilotUser;
+    function setHtmlPairingsAccess(user) {
+      const allowed = isPilotUser(user);
+      if (htmlPairingsModeOption) htmlPairingsModeOption.hidden = !allowed;
+      if (!allowed && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
+        document.getElementById('leftVisualModeSelect').value = 'qr';
+      if (allowed && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
+        switchLeftVisualMode();
+      return allowed;
+    }
+    window.setHtmlPairingsAccess = setHtmlPairingsAccess;
+    let privatePairingsHandle = null;
+    let privatePairingsTimer = 0;
+    let lastPrivatePairingsPayload = '';
+    function openHandleStore() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('cronoapp-private-pairings', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('handles');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+    async function storePairingsHandle(handle) {
+      const db = await openHandleStore();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('handles', 'readwrite');
+        tx.objectStore('handles').put(handle, 'selected-html');
+        tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+    async function loadPairingsHandle() {
+      const db = await openHandleStore();
+      const handle = await new Promise((resolve, reject) => {
+        const request = db.transaction('handles').objectStore('handles').get('selected-html');
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return handle;
+    }
+    function stopPrivatePairingsSync(message = 'Sincronización detenida.') {
+      clearInterval(privatePairingsTimer); privatePairingsTimer = 0;
+      document.getElementById('stopPairingsHtml').hidden = true;
+      document.getElementById('htmlPairingsStatus').textContent = message;
+    }
+    async function syncPrivatePairingsFile(context, askPermission = false) {
+      const status = document.getElementById('htmlPairingsStatus');
+      if (!privatePairingsHandle || !context?.allowed || !context?.canControl) return;
+      try {
+        let permission = await privatePairingsHandle.queryPermission({ mode: 'read' });
+        if (permission !== 'granted' && askPermission)
+          permission = await privatePairingsHandle.requestPermission({ mode: 'read' });
+        if (permission !== 'granted') {
+          status.textContent = 'El navegador necesita permiso para volver a leer el archivo. Pulsa Seleccionar HTML para reanudar.';
+          return;
+        }
+        const file = await privatePairingsHandle.getFile();
+        const pairings = window.parsePairingsHtml(await file.text());
+        const payload = JSON.stringify(pairings);
+        if (payload.length > 900000) throw new Error('Los pareos superan el límite permitido.');
+        if (payload !== lastPrivatePairingsPayload) {
+          const ref = context.dbModule.ref(context.db, 'privatePairings/' + context.user.uid + '/' + context.roomId);
+          await context.dbModule.set(ref, payload);
+          lastPrivatePairingsPayload = payload;
+          window.pairingsPublished();
+          status.textContent = 'Sincronizado: ronda ' + pairings.categories[0].rounds.at(-1).number + '. Revisión cada 5 segundos.';
+        } else {
+          status.textContent = 'Vigilando ' + file.name + '; sin cambios. Revisión cada 5 segundos.';
+        }
+      } catch (error) {
+        status.textContent = error?.message || 'No se pudo leer el HTML. Selecciónalo otra vez.';
+      }
+    }
+    let privatePairingsContext = null;
+    let privatePairingsReadStop = null;
+    let privatePairingsReadKey = '';
+    async function beginPrivatePairingsSync(context, chooseNew = false) {
+      if (!context?.allowed || !context?.canControl) {
+        document.getElementById('htmlPairingsStatus').textContent = 'Inicia sesión con la cuenta administradora y abre tu propia sala.';
+        return;
+      }
+      if (!window.showOpenFilePicker) {
+        document.getElementById('htmlPairingsStatus').textContent = 'La sincronización automática requiere Chrome o Edge en computador.';
+        return;
+      }
+      try {
+        if (chooseNew || !privatePairingsHandle) {
+          [privatePairingsHandle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: 'Reporte de pareos HTML', accept: { 'text/html': ['.html', '.htm'] } }] });
+          await storePairingsHandle(privatePairingsHandle);
+          lastPrivatePairingsPayload = '';
+        }
+        privatePairingsContext = context;
+        await syncPrivatePairingsFile(context, true);
+        clearInterval(privatePairingsTimer);
+        privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
+        document.getElementById('stopPairingsHtml').hidden = false;
+      } catch (error) {
+        if (error?.name !== 'AbortError') document.getElementById('htmlPairingsStatus').textContent = error?.message || 'No se pudo abrir el archivo.';
+      }
+    }
+    window.configurePairingsPilot = async context => {
+      const user = context?.user;
+      const allowed = isPilotUser(user);
+      setHtmlPairingsAccess(user);
+      if (!allowed || !context?.canControl || !context?.roomId) {
+        if (privatePairingsTimer) stopPrivatePairingsSync('Inicia sesión con la cuenta administradora para continuar.');
+        privatePairingsContext = null;
+        if (privatePairingsReadStop) { privatePairingsReadStop(); privatePairingsReadStop = null; privatePairingsReadKey = ''; }
+        return;
+      }
+      privatePairingsContext = { ...context, allowed, canControl: true };
+      const readKey = user.uid + ':' + context.roomId;
+      if (privatePairingsReadKey !== readKey) {
+        if (privatePairingsReadStop) privatePairingsReadStop();
+        const ref = context.dbModule.ref(context.db, 'privatePairings/' + user.uid + '/' + context.roomId);
+        privatePairingsReadStop = context.dbModule.onValue(ref, snap => {
+          try {
+            if (snap.exists()) {
+              window.setPairings(JSON.parse(snap.val()));
+              window.pairingsPublished();
+            } else window.pairingsCleared();
+          } catch (_) {}
+        });
+        privatePairingsReadKey = readKey;
+      }
+      if (!privatePairingsHandle) {
+        try { privatePairingsHandle = await loadPairingsHandle(); } catch (_) {}
+      }
+      if (privatePairingsHandle && !privatePairingsTimer) {
+        const permission = await privatePairingsHandle.queryPermission({ mode: 'read' }).catch(() => 'denied');
+        if (permission === 'granted') {
+          await syncPrivatePairingsFile(privatePairingsContext);
+          privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
+          document.getElementById('stopPairingsHtml').hidden = false;
+        }
+      }
+    };
+    document.getElementById('selectPairingsHtml').addEventListener('click', () => beginPrivatePairingsSync(privatePairingsContext, true));
+    document.getElementById('stopPairingsHtml').addEventListener('click', () => stopPrivatePairingsSync());
 
     function openModal() {
       const modal = document.getElementById('modal');
@@ -2112,13 +2266,14 @@ module.exports = QRCode;
       const mode = document.getElementById('leftVisualModeSelect').value;
       const leftPanelEnabled = document.getElementById('leftPanelEnabled').checked;
       if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
+      if (mode === 'html-pairings' && !window.isPilotUser(window.cronoCurrentUser)) return;
       if (leftPanelEnabled && mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
       if (leftPanelEnabled && mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
         renderLeftVisual();
       }
-      if (leftPanelEnabled && mode === 'tdf' && (!pairingsAvailable || !generatePairingsQR())) {
-        document.getElementById('qrStatus').textContent = 'Publica un TDF antes de guardar esta opción.';
+      if (leftPanelEnabled && ['tdf', 'html-pairings'].includes(mode) && (!pairingsAvailable || !generatePairingsQR())) {
+        document.getElementById('qrStatus').textContent = 'Publica pareos antes de guardar esta opción.';
         return;
       }
       const minutes = Number(document.getElementById('timerInput').value);
@@ -2182,7 +2337,7 @@ module.exports = QRCode;
         document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
         else qrImageSrc = '';
-        if (mode === 'tdf') generatePairingsQR();
+        if (mode === 'tdf' || mode === 'html-pairings') generatePairingsQR();
         switchLeftVisualMode();
       }
       const minutes = Number(settings.minutes ?? settings.text?.minutes);
@@ -2387,10 +2542,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
-      const src = mode === 'qr' ? qrImageSrc : mode === 'tdf' && window.TDF_UPLOAD_ENABLED ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
+      const src = mode === 'qr' ? qrImageSrc : ['tdf', 'html-pairings'].includes(mode) ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
       if (src) {
         image.src = src;
-        image.alt = mode === 'qr' ? 'Código QR del enlace del torneo' : mode === 'tdf' ? 'Código QR para ver los pareos' : 'Imagen del torneo';
+        image.alt = mode === 'qr' ? 'Código QR del enlace del torneo' : ['tdf', 'html-pairings'].includes(mode) ? 'Código QR privado para ver los pareos' : 'Imagen del torneo';
         image.style.display = 'block';
       } else {
         image.removeAttribute('src');
@@ -2408,6 +2563,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       document.getElementById('qrControls').hidden = mode !== 'qr';
       document.getElementById('imageControls').hidden = mode !== 'upload';
       document.getElementById('tdfControls').hidden = mode !== 'tdf';
+      htmlPairingsControls.hidden = mode !== 'html-pairings' || !window.isPilotUser(window.cronoCurrentUser);
+      const copyPairingsButton = document.getElementById('copyPairingsLink');
+      const roomQuery = new URLSearchParams(location.search);
+      if (copyPairingsButton) copyPairingsButton.hidden = !(roomQuery.has('sala') || roomQuery.has('s')) || (mode !== 'html-pairings' && !window.TDF_UPLOAD_ENABLED);
       document.getElementById('qrStatus').textContent = '';
       renderLeftVisual();
     }
@@ -2439,6 +2598,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const target = new URL(location.href);
       if (window.currentShortCode) { target.searchParams.delete('sala'); target.searchParams.set('s', window.currentShortCode); }
       target.searchParams.set('view', 'pareos');
+      if (document.getElementById('leftVisualModeSelect').value === 'html-pairings') target.searchParams.set('privado', '1');
+      else target.searchParams.delete('privado');
       return Boolean(pairingsQrSrc = qrDataUrl(target.href));
     }
 
@@ -2582,6 +2743,43 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       return { version: 4, season, title: label(directChild(directChild(xml.documentElement, 'data'), 'name')) || 'Torneo', categories };
     }
     window.parseTdf = parseTdf;
+    window.parsePairingsHtml = function(source) {
+      if (typeof source !== 'string' || source.length > 5_000_000) throw new Error('El HTML está vacío o supera los 5 MB.');
+      const doc = new DOMParser().parseFromString(source, 'text/html');
+      const roundHeading = [...doc.querySelectorAll('h1,h2,h3,h4')].map(node => node.textContent.trim())
+        .find(text => /(?:pairings|pareos|emparejamientos)\s*[-–:]?\s*(?:round|ronda)\s*\d+/i.test(text)
+          || /(?:round|ronda)\s*\d+/i.test(text));
+      const roundMatch = /(?:round|ronda)\s*(\d+)/i.exec(roundHeading || doc.title);
+      const roundNumber = Number(roundMatch?.[1]);
+      if (!Number.isInteger(roundNumber) || roundNumber < 1) throw new Error('No se pudo identificar la ronda en el HTML.');
+      const reportName = [...doc.querySelectorAll('body > b, body > strong')].map(node => node.textContent.trim()).find(Boolean);
+      const title = (reportName || doc.title.replace(/^pairings\s*[-–:]?\s*/i, '').replace(/\s+-\s+\d{1,2}\/\d{1,2}\/\d{4}.*/, '') || 'Pareos').slice(0, 120);
+      const clean = value => (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+      function player(value) {
+        const match = /^(.*?)\s*\((\d+)\/(\d+)\/(\d+)\s*\((\d+)\)\s*-\s*(JR|SR|MA)\)\s*$/i.exec(clean(value));
+        if (!match) return { name: clean(value), division: '', record: null };
+        const wins = Number(match[2]), losses = Number(match[3]), ties = Number(match[4]);
+        return { name: clean(match[1]), division: match[6].toUpperCase(),
+          record: { wins, losses, ties, points: Number(match[5]) } };
+      }
+      const found = new Map();
+      for (const table of doc.querySelectorAll('table')) for (const row of table.querySelectorAll('tr')) {
+        const cells = [...row.querySelectorAll(':scope > td')];
+        if (cells.length < 4 || !/^\d+$/.test(clean(cells[0].textContent))) continue;
+        const tableNumber = Number(clean(cells[0].textContent));
+        const first = player(cells[1].textContent);
+        const second = player(cells[3].textContent);
+        if (!first.name || !second.name) continue;
+        const key = [tableNumber, ...[first.name, second.name].sort((a,b) => a.localeCompare(b))].join('|').toLocaleLowerCase();
+        if (found.has(key)) continue;
+        found.set(key, { table: tableNumber, first: first.name, second: second.name,
+          firstDivision: first.division, secondDivision: second.division,
+          firstRecord: first.record, secondRecord: second.record });
+      }
+      const matches = [...found.values()].sort((a,b) => a.table - b.table);
+      if (!matches.length) throw new Error('No se encontraron pareos en las tablas del HTML.');
+      return { version: 4, title, categories: [{ name: 'Todas', rounds: [{ number: roundNumber, matches }] }] };
+    };
     let pairingsData = null;
     function renderPairings() {
       const roundChoice = document.getElementById('pairingsRound').value;
@@ -2625,7 +2823,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           card.append(playerElement(match.first, match.firstDivision, match.firstRecord));
           const table = document.createElement('span');
           table.className = 'pairing-table';
-          table.textContent = match.table ? `Mesa ${match.table}` : 'BYE';
+          table.textContent = match.second === 'BYE' ? 'BYE' : match.table ? `Mesa ${match.table}` : 'BYE';
           card.append(table, playerElement(match.second === 'BYE' ? '' : match.second, match.secondDivision, match.secondRecord));
           list.append(card);
         }
@@ -2790,6 +2988,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomId = rawRoom;
     const isJudge = ['staff', 'juez'].includes(params.get('view')); // Legacy links remain valid.
     const isPairings = params.get('view') === 'pareos';
+    const isPrivatePairings = isPairings && params.get('privado') === '1';
     const isProjection = params.get('view') === 'pantalla' || (Boolean(rawCode) && !params.get('view'));
     const isReadOnly = isJudge || isPairings || isProjection;
     if (isJudge) document.body.classList.add('viewer-mode');
@@ -2913,6 +3112,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         url.searchParams.set('sala', roomId);
       }
       url.searchParams.set('view', view);
+      if (view === 'pareos' && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
+        url.searchParams.set('privado', '1');
+      else url.searchParams.delete('privado');
       return url.href;
     }
     if (isPairings && hasRoomLink) {
@@ -2949,7 +3151,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
       [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
     ].forEach(([button, view, label]) => {
-      button.hidden = !hasRoomLink || (view === 'pareos' && !window.TDF_UPLOAD_ENABLED);
+      button.hidden = !hasRoomLink || (view === 'pareos' && !window.TDF_UPLOAD_ENABLED && document.getElementById('leftVisualModeSelect').value !== 'html-pairings');
       button.addEventListener('click', () => copyRoomView(view, label));
     });
     staffPairingsLink.hidden = true;
@@ -3115,12 +3317,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
         const [{ initializeApp }, database, authentication] = await Promise.all([
           import(base + 'firebase-app.js'), import(base + 'firebase-database.js'),
-          isReadOnly ? Promise.resolve(null) : import(base + 'firebase-auth.js')
+          isReadOnly && !isPrivatePairings ? Promise.resolve(null) : import(base + 'firebase-auth.js')
         ]);
         dbModule = database;
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
+        if (isPrivatePairings) auth = authModule.getAuth(app);
         if (rawCode) {
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
           roomId = alias.val();
@@ -3135,7 +3338,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         roomRef = roomId ? dbModule.ref(db, 'rooms/' + roomId) : null;
         stateRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/state') : null;
         settingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
-        const pairingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
+        const pairingsRef = roomId && !isPrivatePairings ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         let shortCodePromise = null;
         function showShortCode(code) {
           window.currentShortCode = code;
@@ -3203,6 +3406,48 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             finally { button.disabled = false; }
           });
         }
+        if (isPrivatePairings) {
+          const login = document.getElementById('privatePairingsLogin');
+          login.hidden = false;
+          login.addEventListener('click', async () => {
+            try {
+              if (auth.currentUser) await authModule.signOut(auth);
+              await authModule.signInWithPopup(auth, new authModule.GoogleAuthProvider());
+            } catch (error) {
+              document.getElementById('pairingsStatus').textContent = 'No se pudo iniciar sesión (' + error.code + ').';
+            }
+          });
+          let stopPrivateRead = null;
+          authModule.onAuthStateChanged(auth, user => {
+            if (stopPrivateRead) { stopPrivateRead(); stopPrivateRead = null; }
+            if (!user) {
+              login.hidden = false;
+              login.textContent = 'Iniciar sesión con Google para ver esta prueba';
+              document.getElementById('pairingsStatus').textContent = 'Esta prueba es privada. Inicia sesión con la cuenta administradora para continuar.';
+              document.getElementById('pairingsList').replaceChildren();
+              return;
+            }
+            if (!window.isPilotUser(user)) {
+              login.hidden = false;
+              login.textContent = 'Cambiar cuenta de Google';
+              document.getElementById('pairingsStatus').textContent = 'Esta vista de prueba solo está disponible para la cuenta autorizada.';
+              document.getElementById('pairingsList').replaceChildren();
+              return;
+            }
+            login.hidden = true;
+            const privateRef = dbModule.ref(db, 'privatePairings/' + user.uid + '/' + roomId);
+            stopPrivateRead = dbModule.onValue(privateRef, snap => {
+              try {
+                if (!snap.exists()) {
+                  window.setPairings(null);
+                  document.getElementById('pairingsStatus').textContent = 'Aún no se ha sincronizado un reporte HTML.';
+                  return;
+                }
+                window.setPairings(JSON.parse(snap.val()));
+              } catch (_) { document.getElementById('pairingsStatus').textContent = 'No se pudieron leer los pareos privados.'; }
+            }, () => { document.getElementById('pairingsStatus').textContent = 'No se pudo acceder a los pareos privados.'; });
+          });
+        }
         if (settingsRef) {
           if (!isReadOnly) window.saveRoomSettings = async settings => {
             if (!canControl) {
@@ -3243,6 +3488,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           roomOwner = snap.val()?.ownerUid || null;
           if (!roomOwner && isJudge) judgeStatus.textContent = 'Sala no encontrada.';
           updateAccess();
+          window.configurePairingsPilot?.({ user: currentUser, dbModule, db, roomId, canControl });
           if (canControl) ensureShortCode(snap.val()?.shortCode);
         }, () => { if (isJudge) judgeStatus.textContent = 'No se pudo acceder a la sala.'; });
         if (stateRef) dbModule.onValue(stateRef, snap => {
@@ -3289,6 +3535,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           let returnedToFlyer = false;
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
+            window.cronoCurrentUser = user;
+            window.setHtmlPairingsAccess(user);
+            window.configurePairingsPilot?.({ user, dbModule, db, roomId, canControl });
             if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
             const flyerSessionMessage = document.getElementById('landingFlyerSessionMessage');
             const flyerAccessLink = document.getElementById('landingFlyerLink');
