@@ -731,7 +731,9 @@
         <div id="htmlPairingsControls" hidden>
           <p>Prueba privada: el HTML se lee en este computador y se sincroniza solo con tu cuenta. El QR también requiere tu sesión de Google.</p>
           <p>En Mac, cuando se abra el selector, pulsa ⇧⌘G, pega la ruta de la carpeta donde está el HTML y selecciónalo.</p>
-          <button id="selectPairingsHtml" class="editor-button editor-button-secondary" type="button">Seleccionar HTML y comenzar sincronización</button>
+          <button id="selectPairingsHtml" class="editor-button editor-button-secondary" type="button">Elegir HTML para sincronizar</button>
+          <button id="resumePairingsHtml" class="editor-button editor-button-secondary" type="button" hidden>Reanudar sincronización</button>
+          <button id="changePairingsHtml" class="editor-button editor-button-secondary" type="button" hidden>Cambiar archivo HTML</button>
           <button id="stopPairingsHtml" class="editor-button editor-button-secondary" type="button" hidden>Detener sincronización</button>
           <p id="htmlPairingsStatus" role="status" aria-live="polite">Disponible solo para la cuenta administradora.</p>
         </div>
@@ -2083,21 +2085,31 @@ module.exports = QRCode;
       db.close();
       return handle;
     }
+    function updatePrivatePairingsActions() {
+      const hasHandle = Boolean(privatePairingsHandle);
+      const isSyncing = Boolean(privatePairingsTimer);
+      document.getElementById('selectPairingsHtml').hidden = hasHandle;
+      document.getElementById('resumePairingsHtml').hidden = !hasHandle || isSyncing;
+      document.getElementById('changePairingsHtml').hidden = !hasHandle;
+      document.getElementById('stopPairingsHtml').hidden = !isSyncing;
+      if (hasHandle)
+        document.getElementById('resumePairingsHtml').textContent = 'Reanudar con ' + privatePairingsHandle.name;
+    }
     function stopPrivatePairingsSync(message = 'Sincronización detenida.') {
       clearInterval(privatePairingsTimer); privatePairingsTimer = 0;
-      document.getElementById('stopPairingsHtml').hidden = true;
+      updatePrivatePairingsActions();
       document.getElementById('htmlPairingsStatus').textContent = message;
     }
     async function syncPrivatePairingsFile(context, askPermission = false) {
       const status = document.getElementById('htmlPairingsStatus');
-      if (!privatePairingsHandle || !context?.allowed || !context?.canControl) return;
+      if (!privatePairingsHandle || !context?.allowed || !context?.canControl) return false;
       try {
         let permission = await privatePairingsHandle.queryPermission({ mode: 'read' });
         if (permission !== 'granted' && askPermission)
           permission = await privatePairingsHandle.requestPermission({ mode: 'read' });
         if (permission !== 'granted') {
-          status.textContent = 'El navegador necesita permiso para volver a leer el archivo. Pulsa Seleccionar HTML para reanudar.';
-          return;
+          status.textContent = 'El navegador necesita permiso para volver a leer el archivo. Pulsa «Reanudar con archivo guardado».';
+          return false;
         }
         const file = await privatePairingsHandle.getFile();
         const pairings = window.parsePairingsHtml(await file.text());
@@ -2112,8 +2124,10 @@ module.exports = QRCode;
         } else {
           status.textContent = 'Vigilando ' + file.name + '; sin cambios. Revisión cada 5 segundos.';
         }
+        return true;
       } catch (error) {
         status.textContent = error?.message || 'No se pudo leer el HTML. Selecciónalo otra vez.';
+        return false;
       }
     }
     let privatePairingsContext = null;
@@ -2130,16 +2144,22 @@ module.exports = QRCode;
       }
       try {
         if (chooseNew || !privatePairingsHandle) {
-          [privatePairingsHandle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: 'Reporte de pareos HTML', accept: { 'text/html': ['.html', '.htm'] } }] });
+          const [selectedHandle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: 'Reporte de pareos HTML', accept: { 'text/html': ['.html', '.htm'] } }] });
+          clearInterval(privatePairingsTimer); privatePairingsTimer = 0;
+          privatePairingsHandle = selectedHandle;
           await storePairingsHandle(privatePairingsHandle);
           lastPrivatePairingsPayload = '';
         }
         privatePairingsContext = context;
-        await syncPrivatePairingsFile(context, true);
+        if (!await syncPrivatePairingsFile(context, true)) {
+          updatePrivatePairingsActions();
+          return;
+        }
         clearInterval(privatePairingsTimer);
         privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
-        document.getElementById('stopPairingsHtml').hidden = false;
+        updatePrivatePairingsActions();
       } catch (error) {
+        updatePrivatePairingsActions();
         if (error?.name !== 'AbortError') document.getElementById('htmlPairingsStatus').textContent = error?.message || 'No se pudo abrir el archivo.';
       }
     }
@@ -2174,13 +2194,19 @@ module.exports = QRCode;
       if (privatePairingsHandle && !privatePairingsTimer) {
         const permission = await privatePairingsHandle.queryPermission({ mode: 'read' }).catch(() => 'denied');
         if (permission === 'granted') {
-          await syncPrivatePairingsFile(privatePairingsContext);
-          privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
-          document.getElementById('stopPairingsHtml').hidden = false;
+          if (await syncPrivatePairingsFile(privatePairingsContext)) {
+            privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
+            document.getElementById('htmlPairingsStatus').textContent = 'Vigilando ' + privatePairingsHandle.name + '; revisión cada 5 segundos.';
+          }
+        } else {
+          document.getElementById('htmlPairingsStatus').textContent = 'Archivo guardado: ' + privatePairingsHandle.name + '. Pulsa Reanudar para continuar.';
         }
       }
+      updatePrivatePairingsActions();
     };
     document.getElementById('selectPairingsHtml').addEventListener('click', () => beginPrivatePairingsSync(privatePairingsContext, true));
+    document.getElementById('resumePairingsHtml').addEventListener('click', () => beginPrivatePairingsSync(privatePairingsContext));
+    document.getElementById('changePairingsHtml').addEventListener('click', () => beginPrivatePairingsSync(privatePairingsContext, true));
     document.getElementById('stopPairingsHtml').addEventListener('click', () => stopPrivatePairingsSync());
 
     function openModal() {
