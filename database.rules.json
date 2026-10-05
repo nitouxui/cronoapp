@@ -47,6 +47,15 @@
         ".validate": "newData.isString() && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/)"
       }
     },
+    "privatePairings": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
+        "$room": {
+          ".write": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
+          ".validate": "newData.isString() && newData.val().length <= 1000000"
+        }
+      }
+    },
     "agenda": {
       ".read": true,
       "events": {
