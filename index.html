@@ -117,9 +117,8 @@
     .panel { min-height: calc(100dvh - 112px); }
     #leftPanel { flex: 0 0 48%; padding: clamp(26px, 4vw, 78px); gap: 20px; background: radial-gradient(circle at 20% 80%, #3c2117, #18191d 65%); border-right: 1px solid #4c3023; text-align: center; }
     #leftImage { width: auto; max-width: min(100%, 62vh); max-height: min(62vh, 650px); background: #fff; padding: clamp(10px, 1.5vw, 22px); border-radius: 12px; box-shadow: 0 16px 45px #0005; margin: 0 auto; }
-    #rightPanel { position: relative; isolation: isolate; overflow: hidden; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, #202127, #111216 75%); }
-    #timerBackgroundLayer { position: absolute; inset: 0; z-index: 0; background-position: center; background-size: cover; background-repeat: no-repeat; pointer-events: none; }
-    #rightPanel > :not(#timerBackgroundLayer) { position: relative; z-index: 1; }
+    #rightPanel { position: relative; isolation: isolate; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, #202127, #111216 75%); }
+    #timerBackgroundLayer { position: absolute; inset: 0; z-index: -1; background-position: center; background-size: cover; background-repeat: no-repeat; pointer-events: none; }
     .timer-stage { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; flex: 1; }
     #logo { max-width: 150px !important; max-height: 82px; object-fit: contain; margin-bottom: 8px; }
     #timer { font-size: clamp(100px, 13vw, var(--timer-size, 290px)); font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.055em; white-space: nowrap; }
