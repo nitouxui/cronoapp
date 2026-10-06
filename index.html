@@ -117,7 +117,9 @@
     .panel { min-height: calc(100dvh - 112px); }
     #leftPanel { flex: 0 0 48%; padding: clamp(26px, 4vw, 78px); gap: 20px; background: radial-gradient(circle at 20% 80%, #3c2117, #18191d 65%); border-right: 1px solid #4c3023; text-align: center; }
     #leftImage { width: auto; max-width: min(100%, 62vh); max-height: min(62vh, 650px); background: #fff; padding: clamp(10px, 1.5vw, 22px); border-radius: 12px; box-shadow: 0 16px 45px #0005; margin: 0 auto; }
-    #rightPanel { padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, #202127, #111216 75%); }
+    #rightPanel { position: relative; isolation: isolate; overflow: hidden; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, #202127, #111216 75%); }
+    #timerBackgroundLayer { position: absolute; inset: 0; z-index: 0; background-position: center; background-size: cover; background-repeat: no-repeat; pointer-events: none; }
+    #rightPanel > :not(#timerBackgroundLayer) { position: relative; z-index: 1; }
     .timer-stage { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; flex: 1; }
     #logo { max-width: 150px !important; max-height: 82px; object-fit: contain; margin-bottom: 8px; }
     #timer { font-size: clamp(100px, 13vw, var(--timer-size, 290px)); font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.055em; white-space: nowrap; }
@@ -566,6 +568,7 @@
       <img id="leftImage" src="" alt="Contenido visual del torneo" style="display:none;">
     </div>
     <div id="rightPanel" class="panel">
+      <div id="timerBackgroundLayer" aria-hidden="true"></div>
       <div class="top-actions">
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <details id="roomActionsMenu" class="room-actions-menu">
@@ -703,6 +706,11 @@
           <button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('logoInput').click()">Subir logo</button>
           <button id="removeLogoButton" class="editor-button editor-button-secondary" type="button" onclick="removeLogo()" hidden>Quitar logo</button>
         </div>
+        <label for="timerBackgroundInput">Imagen de fondo del temporizador (máximo 2 MB)</label>
+        <div class="logo-control-row"><button class="editor-button editor-button-secondary" type="button" onclick="document.getElementById('timerBackgroundInput').click()">Subir fondo</button><button id="removeTimerBackgroundButton" class="editor-button editor-button-secondary" type="button" onclick="removeTimerBackground()" hidden>Quitar fondo</button></div>
+        <input id="timerBackgroundInput" type="file" accept="image/*" style="display:none">
+        <label for="timerBackgroundOpacity">Opacidad del fondo <output id="timerBackgroundOpacityValue">35%</output></label>
+        <input id="timerBackgroundOpacity" type="range" min="0" max="100" value="35" step="1" aria-label="Opacidad de la imagen de fondo">
         <label class="left-panel-toggle" for="leftPanelEnabled"><span>Mostrar panel izquierdo</span><input id="leftPanelEnabled" type="checkbox" role="switch" checked aria-controls="leftPanel leftPanelSettings" onchange="setLeftPanelEnabled(this.checked)"></label>
         <div id="leftPanelSettings">
         <label for="leftVisualModeSelect">Contenido del panel izquierdo</label>
@@ -2211,6 +2219,9 @@ module.exports = QRCode;
       document.getElementById('timerInput').value = savedMinutes;
       applyTimerFont(savedTimerFont);
       setLeftPanelEnabled(savedLeftPanelEnabled);
+      timerBackgroundSrc = savedTimerBackgroundSrc;
+      timerBackgroundOpacity = savedTimerBackgroundOpacity;
+      applyTimerBackground();
     }
 
     const palettes = new Set(['ember', 'ocean', 'forest', 'violet', 'sunset', 'gold', 'turquoise', 'crimson', 'ice', 'graphite', 'red', 'orchid', 'lime', 'copper', 'ember-light', 'ocean-light', 'forest-light', 'violet-light', 'sunset-light', 'gold-light', 'turquoise-light', 'crimson-light', 'ice-light', 'graphite-light', 'red-light', 'orchid-light', 'lime-light', 'copper-light', 'pop-pink', 'laser-blue', 'acid-lime', 'pop-orange', 'neon-violet', 'volt-green', 'cyber-cyan', 'fluor-yellow']);
@@ -2218,6 +2229,10 @@ module.exports = QRCode;
     let savedMinutes = 2;
     let savedTimerFont = 'system';
     let savedLeftPanelEnabled = true;
+    let timerBackgroundSrc = '';
+    let savedTimerBackgroundSrc = '';
+    let timerBackgroundOpacity = 35;
+    let savedTimerBackgroundOpacity = 35;
     function setLeftPanelEnabled(enabled) {
       document.getElementById('leftPanelEnabled').checked = enabled;
       document.getElementById('leftPanelSettings').hidden = !enabled;
@@ -2288,7 +2303,9 @@ module.exports = QRCode;
           leftPanelEnabled,
           leftVisualMode: mode,
           uploadedImageSrc,
-          qrUrl: document.getElementById('qrUrl').value.trim()
+          qrUrl: document.getElementById('qrUrl').value.trim(),
+          timerBackgroundSrc,
+          timerBackgroundOpacity
         },
         palette: document.querySelector('input[name="palette"]:checked').value,
         timerFont: document.getElementById('timerFontSelect').value,
@@ -2302,6 +2319,8 @@ module.exports = QRCode;
         savedPalette = settings.palette;
         savedTimerFont = settings.timerFont;
         savedLeftPanelEnabled = leftPanelEnabled;
+        savedTimerBackgroundSrc = timerBackgroundSrc;
+        savedTimerBackgroundOpacity = timerBackgroundOpacity;
         if (minutes !== savedMinutes) window.updateTimerTime();
         savedMinutes = minutes;
         closeModal();
@@ -2316,6 +2335,11 @@ module.exports = QRCode;
       savedTimerFont = Object.prototype.hasOwnProperty.call(timerFonts, settings.timerFont) ? settings.timerFont : 'system';
       applyTimerFont(savedTimerFont);
       const images = settings.images;
+      timerBackgroundSrc = images?.timerBackgroundSrc || '';
+      timerBackgroundOpacity = Number.isFinite(Number(images?.timerBackgroundOpacity)) ? Math.max(0, Math.min(100, Number(images.timerBackgroundOpacity))) : 35;
+      savedTimerBackgroundSrc = timerBackgroundSrc;
+      savedTimerBackgroundOpacity = timerBackgroundOpacity;
+      applyTimerBackground();
       savedLeftPanelEnabled = images?.leftPanelEnabled !== false;
       setLeftPanelEnabled(savedLeftPanelEnabled);
       if (images) {
@@ -2525,6 +2549,35 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
 
     let qrImageSrc = '';
     let uploadedImageSrc = '';
+    function applyTimerBackground() {
+      const layer = document.getElementById('timerBackgroundLayer');
+      const opacityInput = document.getElementById('timerBackgroundOpacity');
+      const opacityValue = document.getElementById('timerBackgroundOpacityValue');
+      layer.style.backgroundImage = timerBackgroundSrc ? 'url(' + JSON.stringify(timerBackgroundSrc) + ')' : 'none';
+      layer.style.opacity = String(timerBackgroundOpacity / 100);
+      opacityInput.value = String(timerBackgroundOpacity);
+      opacityValue.textContent = String(timerBackgroundOpacity) + '%';
+      document.getElementById('removeTimerBackgroundButton').hidden = !timerBackgroundSrc;
+    }
+    function removeTimerBackground() {
+      timerBackgroundSrc = '';
+      document.getElementById('timerBackgroundInput').value = '';
+      applyTimerBackground();
+      document.getElementById('qrStatus').textContent = 'Fondo quitado. Presiona Guardar cambios para aplicar el cambio.';
+    }
+    document.getElementById('timerBackgroundInput').addEventListener('change', event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/') || file.size > 2 * 1024 * 1024) {
+        document.getElementById('qrStatus').textContent = 'Elige una imagen válida de hasta 2 MB.';
+        event.target.value = ''; return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => { timerBackgroundSrc = reader.result; applyTimerBackground(); document.getElementById('qrStatus').textContent = 'Fondo cargado. Presiona Guardar cambios para conservarlo.'; };
+      reader.onerror = () => { document.getElementById('qrStatus').textContent = 'No se pudo leer la imagen de fondo.'; };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('timerBackgroundOpacity').addEventListener('input', event => { timerBackgroundOpacity = Number(event.target.value); applyTimerBackground(); });
     let pairingsQrSrc = '';
     let pairingsAvailable = false;
     window.pairingsPublished = () => {
