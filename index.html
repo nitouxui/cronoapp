@@ -16,7 +16,7 @@
     #languageSelect:focus-visible { outline: 3px solid var(--accent-soft, #ffad64); outline-offset: 2px; }
     body.no-room #languageControl { top: 18px; left: 22px; right: auto; }
     @media (max-width: 600px) { #languageControl { position: absolute; } body.no-room #languageControl { top: 12px; left: 12px; right: auto; } #languageSelect { height: 36px; } }
-    .container { display: flex; height: 100vh; }
+    .container { position: relative; isolation: isolate; display: flex; height: 100vh; }
     .panel { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .edit-button { position: absolute; top: 10px; right: 10px; z-index: 10; }
     .modal { display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
@@ -115,9 +115,9 @@
     body { background: #101115; color: #fff; }
     .container { min-height: 100dvh; height: auto; padding-top: 112px; background: #111216; }
     .panel { min-height: calc(100dvh - 112px); }
-    #leftPanel { flex: 0 0 48%; padding: clamp(26px, 4vw, 78px); gap: 20px; background: radial-gradient(circle at 20% 80%, #3c2117, #18191d 65%); border-right: 1px solid #4c3023; text-align: center; }
+    #leftPanel { flex: 0 0 48%; padding: clamp(26px, 4vw, 78px); gap: 20px; background: radial-gradient(circle at 20% 80%, color-mix(in srgb, #3c2117 78%, transparent), color-mix(in srgb, #18191d 84%, transparent) 65%); border-right: 1px solid #4c3023; text-align: center; }
     #leftImage { width: auto; max-width: min(100%, 62vh); max-height: min(62vh, 650px); background: #fff; padding: clamp(10px, 1.5vw, 22px); border-radius: 12px; box-shadow: 0 16px 45px #0005; margin: 0 auto; }
-    #rightPanel { position: relative; isolation: isolate; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, #202127, #111216 75%); }
+    #rightPanel { position: relative; isolation: isolate; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, color-mix(in srgb, #202127 74%, transparent), color-mix(in srgb, #111216 84%, transparent) 75%); }
     #timerBackgroundLayer { position: absolute; inset: 0; z-index: -1; background-position: center; background-size: cover; background-repeat: no-repeat; pointer-events: none; }
     .timer-stage { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; flex: 1; }
     #logo { width: 150px; max-width: min(100%, 300px) !important; max-height: 82px; object-fit: contain; margin-bottom: 8px; }
@@ -265,8 +265,8 @@
     body { background: var(--surface); color: var(--text); }
     .container { padding-top: 0; background: var(--surface); }
     .panel { min-height: 100dvh; }
-    #leftPanel { background: radial-gradient(circle at 20% 80%, var(--glow), var(--surface) 65%); border-color: var(--edge); }
-    #rightPanel { background: radial-gradient(circle at 75% 35%, var(--surface-raised), var(--surface) 74%); }
+    #leftPanel { background: radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--glow) 45%, transparent), color-mix(in srgb, var(--surface) 82%, transparent) 65%); border-color: var(--edge); }
+    #rightPanel { background: radial-gradient(circle at 75% 35%, color-mix(in srgb, var(--surface-raised) 48%, transparent), color-mix(in srgb, var(--surface) 84%, transparent) 74%); }
     #timer { color: var(--text); }
     .progress-track { background: var(--accent-dark); }
     #timerProgress { background: var(--accent); }
@@ -563,11 +563,11 @@
     <div id="pairingsList"></div>
   </div></section>
   <div class="container">
+    <div id="timerBackgroundLayer" aria-hidden="true"></div>
     <div id="leftPanel" class="panel">
       <img id="leftImage" src="" alt="Contenido visual del torneo" style="display:none;">
     </div>
     <div id="rightPanel" class="panel">
-      <div id="timerBackgroundLayer" aria-hidden="true"></div>
       <div class="top-actions">
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <details id="roomActionsMenu" class="room-actions-menu">
