@@ -88,7 +88,7 @@
         <div class="field"><label for="kind" data-i18n="kind">Actividad</label><select id="kind" required><option value="tournament" data-i18n="tournament">Torneo</option><option value="free" data-i18n="free">Juego libre</option></select></div>
         <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option><option value="Abacaxi Showdown" data-neruda-only hidden disabled>Abacaxi Showdown</option></select></div>
         <div class="field tournament-field"><label for="format" data-i18n="format">Formato</label><select id="format"><option>Rondas Suizas Bo1</option><option>Rondas Suizas Bo3</option></select></div>
-        <div class="field"><label for="entryType" data-i18n="entryType">Costo de participación</label><select id="entryType" required><option value="amount" data-i18n="amountOption">Valor</option><option value="free" data-i18n="freeEntry">Gratis</option><option value="beverage" data-i18n="beverageEntry">Consumo de bebestible en tienda</option></select></div>
+        <div class="field tournament-field"><label for="entryType" data-i18n="entryType">Costo de participación</label><select id="entryType" required><option value="amount" data-i18n="amountOption">Valor</option><option value="free" data-i18n="freeEntry">Gratis</option><option value="beverage" data-i18n="beverageEntry">Consumo de bebestible en tienda</option></select></div>
         <div id="valueField" class="field" hidden><label for="value" data-i18n="value">Valor (CLP)</label><input id="value" type="number" min="0" step="1" inputmode="numeric"></div>
         <div class="field"><label for="date" data-i18n="date">Fecha</label><input id="date" type="date" required></div>
         <div class="field"><label for="time" data-i18n="time">Hora de inicio</label><input id="time" type="time" required></div>
@@ -193,9 +193,11 @@
               const isPast = `${event.date}T${event.time}` < now;
               item.append(element('h3','',event.kind === 'free' ? t('free') : event.type),element('p','event-time',`${event.time}${event.endTime ? `–${event.endTime}` : ''}`));
               if (event.kind === 'tournament') item.append(element('p','',event.format));
-              const costType = entryTypeFor(event);
-              const costText = costType === 'beverage' ? t('beverageEntry') : costType === 'amount' ? new Intl.NumberFormat(locale,{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(event.value) : t('freeEntry');
-              item.append(element('p','event-entry-cost',costText));
+              if (event.kind === 'tournament') {
+                const costType = entryTypeFor(event);
+                const costText = costType === 'beverage' ? t('beverageEntry') : costType === 'amount' ? new Intl.NumberFormat(locale,{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(event.value) : t('freeEntry');
+                item.append(element('p','event-entry-cost',costText));
+              }
               if (event.kind === 'free' && event.showTableAvailabilityNote) item.append(element('p','',t('tableNoticePublic')));
               if (isPast) item.append(element('p','',t('past')));
               if (isAdmin) {
@@ -272,9 +274,14 @@
     function collectEvent() {
       const kind = document.getElementById('kind').value;
       const entryType = document.getElementById('entryType').value;
-      const event = { store:document.getElementById('store').value, kind, entryType, value:entryType === 'amount' ? Number(document.getElementById('value').value) : 0, date:document.getElementById('date').value, time:document.getElementById('time').value };
+      const event = { store:document.getElementById('store').value, kind, date:document.getElementById('date').value, time:document.getElementById('time').value };
       if (kind === 'free') { event.endTime = document.getElementById('endTime').value; event.showTableAvailabilityNote = document.getElementById('tablesNotice').checked; }
-      else { event.type = document.getElementById('eventType').value; event.format = document.getElementById('format').value; }
+      else {
+        event.entryType = document.getElementById('entryType').value;
+        if (event.entryType === 'amount') event.value = Number(document.getElementById('value').value);
+        event.type = document.getElementById('eventType').value;
+        event.format = document.getElementById('format').value;
+      }
       return event;
     }
     async function deleteEvent(id) {
