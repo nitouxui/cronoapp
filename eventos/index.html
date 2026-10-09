@@ -88,7 +88,8 @@
         <div class="field"><label for="kind" data-i18n="kind">Actividad</label><select id="kind" required><option value="tournament" data-i18n="tournament">Torneo</option><option value="free" data-i18n="free">Juego libre</option></select></div>
         <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option><option value="Abacaxi Showdown" data-neruda-only hidden disabled>Abacaxi Showdown</option></select></div>
         <div class="field tournament-field"><label for="format" data-i18n="format">Formato</label><select id="format"><option>Rondas Suizas Bo1</option><option>Rondas Suizas Bo3</option></select></div>
-        <div class="field tournament-field"><label for="value" data-i18n="value">Valor de inscripción (CLP)</label><input id="value" type="number" min="0" step="1" inputmode="numeric" required></div>
+        <div class="field"><label for="entryType" data-i18n="entryType">Costo de participación</label><select id="entryType" required><option value="amount" data-i18n="amountOption">Valor</option><option value="free" data-i18n="freeEntry">Gratis</option><option value="beverage" data-i18n="beverageEntry">Consumo de bebestible en tienda</option></select></div>
+        <div id="valueField" class="field" hidden><label for="value" data-i18n="value">Valor (CLP)</label><input id="value" type="number" min="0" step="1" inputmode="numeric"></div>
         <div class="field"><label for="date" data-i18n="date">Fecha</label><input id="date" type="date" required></div>
         <div class="field"><label for="time" data-i18n="time">Hora de inicio</label><input id="time" type="time" required></div>
         <div id="endField" class="field full" hidden><label for="endTime" data-i18n="endTime">Hora de término</label><input id="endTime" type="time"></div>
@@ -111,9 +112,9 @@
     const storeAddresses = { neruda:'Avenida Pablo Neruda 1980', trizano:'Trizano 430', bluecard:'Lago Riñihue 01890' };
     const storeLogos = { trizano:'assets/logos/top8.svg', neruda:'assets/logos/top8.svg', bluecard:'assets/logos/bluecard.svg' };
     const messages = {
-      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos semanal', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', value:'Valor de inscripción (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
-      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Weekly event schedule', all:'All stores', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', value:'Entry fee (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability' },
-      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda semanal de eventos', all:'Todas as lojas', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', value:'Valor da inscrição (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas' }
+      es: { back:'Volver al inicio', eyebrow:'JUEGA EN TEMUCO', title:'Agenda de eventos semanal', all:'Todas las tiendas', loading:'Cargando agenda…', empty:'No hay actividades publicadas para esta tienda.', unavailable:'No se pudo cargar la agenda.', adminTitle:'Administrar agenda', signIn:'Inicia sesión con tu cuenta de administración para publicar eventos.', google:'Ingresar con Google', signOut:'Cerrar sesión', store:'Tienda', kind:'Actividad', tournament:'Torneo', free:'Juego libre', eventType:'Tipo de torneo', format:'Formato', entryType:'Costo de participación', amountOption:'Valor', beverageEntry:'Consumo de bebestible en tienda', value:'Valor (CLP)', date:'Fecha', time:'Hora de inicio', endTime:'Hora de término', publish:'Publicar actividad', update:'Guardar cambios', cancel:'Cancelar edición', edit:'Editar', delete:'Eliminar', deleteConfirm:'¿Eliminar esta actividad?', saved:'Actividad guardada.', removed:'Actividad eliminada.', saveError:'No se pudo guardar. Revisa las reglas de acceso de Firebase.', deleteError:'No se pudo eliminar la actividad.', denied:'Esta cuenta no tiene permiso para administrar la agenda.', welcome:'Puedes crear, editar y eliminar actividades.', authError:'No se pudo iniciar sesión con Google.', past:'Actividad pasada', count:'actividades', dateError:'Ingresa una fecha y hora válidas.', endError:'La hora de término debe ser posterior a la de inicio.', freeEntry:'Gratis', tableNotice:'Mostrar aviso: sujeto a disponibilidad de mesas', tableNoticePublic:'Sujeto a disponibilidad de mesas' },
+      en: { back:'Back to home', eyebrow:'PLAY IN TEMUCO', title:'Weekly event schedule', all:'All stores', loading:'Loading schedule…', empty:'No activities have been published for this store.', unavailable:'Could not load the schedule.', adminTitle:'Manage schedule', signIn:'Sign in with your admin account to publish events.', google:'Sign in with Google', signOut:'Sign out', store:'Store', kind:'Activity', tournament:'Tournament', free:'Free play', eventType:'Tournament type', format:'Format', entryType:'Entry cost', amountOption:'Price', beverageEntry:'Purchase a drink at the store', value:'Amount (CLP)', date:'Date', time:'Start time', endTime:'End time', publish:'Publish activity', update:'Save changes', cancel:'Cancel edit', edit:'Edit', delete:'Delete', deleteConfirm:'Delete this activity?', saved:'Activity saved.', removed:'Activity deleted.', saveError:'Could not save. Check the Firebase access rules.', deleteError:'Could not delete the activity.', denied:'This account cannot manage the schedule.', welcome:'You can create, edit and delete activities.', authError:'Could not sign in with Google.', past:'Past activity', count:'activities', dateError:'Enter a valid date and time.', endError:'End time must be later than start time.', freeEntry:'Free', tableNotice:'Show notice: subject to table availability', tableNoticePublic:'Subject to table availability' },
+      pt: { back:'Voltar ao início', eyebrow:'JOGUE EM TEMUCO', title:'Agenda semanal de eventos', all:'Todas as lojas', loading:'Carregando agenda…', empty:'Não há atividades publicadas para esta loja.', unavailable:'Não foi possível carregar a agenda.', adminTitle:'Administrar agenda', signIn:'Entre com sua conta de administração para publicar eventos.', google:'Entrar com Google', signOut:'Sair', store:'Loja', kind:'Atividade', tournament:'Torneio', free:'Jogo livre', eventType:'Tipo de torneio', format:'Formato', entryType:'Custo de participação', amountOption:'Valor', beverageEntry:'Consumo de bebida na loja', value:'Valor (CLP)', date:'Data', time:'Hora de início', endTime:'Hora de término', publish:'Publicar atividade', update:'Salvar alterações', cancel:'Cancelar edição', edit:'Editar', delete:'Excluir', deleteConfirm:'Excluir esta atividade?', saved:'Atividade salva.', removed:'Atividade excluída.', saveError:'Não foi possível salvar. Verifique as regras de acesso do Firebase.', deleteError:'Não foi possível excluir a atividade.', denied:'Esta conta não pode administrar a agenda.', welcome:'Você pode criar, editar e excluir atividades.', authError:'Não foi possível entrar com Google.', past:'Atividade passada', count:'atividades', dateError:'Informe uma data e hora válidas.', endError:'A hora de término deve ser posterior à de início.', freeEntry:'Grátis', tableNotice:'Mostrar aviso: sujeito à disponibilidade de mesas', tableNoticePublic:'Sujeito à disponibilidade de mesas' }
     };
     let language = 'es';
     try { const preference = localStorage.getItem('cronoapp-language'); if (messages[preference]) language = preference; } catch (_) {}
@@ -130,12 +131,21 @@
     let isAdmin = false;
     let database, eventsRef, auth;
 
+    function entryTypeFor(event) {
+      return ['free','amount','beverage'].includes(event.entryType)
+        ? event.entryType
+        : Number(event.value) > 0 ? 'amount' : 'free';
+    }
     function validEvent(event) {
-      return event && Object.hasOwn(stores, event.store) && ['tournament','free'].includes(event.kind)
-        && /^\d{4}-\d{2}-\d{2}$/.test(event.date || '') && /^\d{2}:\d{2}$/.test(event.time || '')
-        && (!event.endTime || /^\d{2}:\d{2}$/.test(event.endTime))
-        && (event.showTableAvailabilityNote === undefined || typeof event.showTableAvailabilityNote === 'boolean')
-        && (event.kind === 'free' || ((['Torneo Casual','League Challenge','League Cup'].includes(event.type) || (event.type === 'Abacaxi Showdown' && event.store === 'neruda')) && ['Rondas Suizas Bo1','Rondas Suizas Bo3'].includes(event.format) && Number.isSafeInteger(event.value) && event.value >= 0));
+      if (!event || !Object.hasOwn(stores, event.store) || !['tournament','free'].includes(event.kind)
+        || (event.entryType !== undefined && !['free','amount','beverage'].includes(event.entryType))
+        || !/^\d{4}-\d{2}-\d{2}$/.test(event.date || '') || !/^\d{2}:\d{2}$/.test(event.time || '')
+        || (event.endTime && !/^\d{2}:\d{2}$/.test(event.endTime))
+        || (event.showTableAvailabilityNote !== undefined && typeof event.showTableAvailabilityNote !== 'boolean')) return false;
+      const amountIsValid = Number.isSafeInteger(event.value) && event.value >= 0;
+      if (event.kind === 'free') return (!event.endTime || /^\d{2}:\d{2}$/.test(event.endTime)) && (entryTypeFor(event) !== 'amount' || amountIsValid);
+      return (['Torneo Casual','League Challenge','League Cup'].includes(event.type) || (event.type === 'Abacaxi Showdown' && event.store === 'neruda'))
+        && ['Rondas Suizas Bo1','Rondas Suizas Bo3'].includes(event.format) && amountIsValid;
     }
     function element(tag, className, value) {
       const node = document.createElement(tag);
@@ -182,7 +192,10 @@
               const item = element('div','event-entry');
               const isPast = `${event.date}T${event.time}` < now;
               item.append(element('h3','',event.kind === 'free' ? t('free') : event.type),element('p','event-time',`${event.time}${event.endTime ? `–${event.endTime}` : ''}`));
-              if (event.kind === 'tournament') item.append(element('p','',event.format),element('p','',event.value === 0 ? t('freeEntry') : `${new Intl.NumberFormat(locale,{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(event.value)}`));
+              if (event.kind === 'tournament') item.append(element('p','',event.format));
+              const costType = entryTypeFor(event);
+              const costText = costType === 'beverage' ? t('beverageEntry') : costType === 'amount' ? new Intl.NumberFormat(locale,{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(event.value) : t('freeEntry');
+              item.append(element('p','event-entry-cost',costText));
               if (event.kind === 'free' && event.showTableAvailabilityNote) item.append(element('p','',t('tableNoticePublic')));
               if (isPast) item.append(element('p','',t('past')));
               if (isAdmin) {
@@ -205,15 +218,28 @@
     }
     function syncKind() {
       const free = document.getElementById('kind').value === 'free';
-      document.getElementById('value').required = !free;
-      document.getElementById('value').disabled = free;
-      document.querySelectorAll('.tournament-field').forEach(field => { field.hidden = free; field.querySelector('select, input').disabled = free; });
+      document.querySelectorAll('.tournament-field').forEach(field => {
+        field.hidden = free;
+        field.querySelectorAll('select, input').forEach(control => { control.disabled = free; });
+      });
       document.getElementById('endField').hidden = !free;
       document.getElementById('endTime').required = free;
       document.getElementById('tablesNoticeField').hidden = !free;
       document.getElementById('tablesNotice').disabled = !free;
+      syncEntryType();
     }
-    document.getElementById('kind').addEventListener('change', syncKind);
+    function syncEntryType() {
+      const priceType = document.getElementById('entryType').value;
+      const amount = priceType === 'amount';
+      document.getElementById('valueField').hidden = !amount;
+      document.getElementById('value').disabled = !amount;
+      document.getElementById('value').required = amount;
+    }
+    document.getElementById('entryType').addEventListener('change', syncEntryType);
+    document.getElementById('kind').addEventListener('change', () => {
+      document.getElementById('entryType').value = document.getElementById('kind').value === 'free' ? 'free' : 'amount';
+      syncKind();
+    });
     function syncStoreType() {
       const option = document.querySelector('[data-neruda-only]');
       const allowed = document.getElementById('store').value === 'neruda';
@@ -232,6 +258,7 @@
       const event = events[id];
       editingId = id;
       for (const key of ['store','kind','date','time','endTime','value']) document.getElementById(key).value = event[key] ?? '';
+      document.getElementById('entryType').value = entryTypeFor(event);
       syncStoreType();
       document.getElementById('eventType').value = event.type || 'Torneo Casual';
       document.getElementById('format').value = event.format || 'Rondas Suizas Bo1';
@@ -244,9 +271,10 @@
     }
     function collectEvent() {
       const kind = document.getElementById('kind').value;
-      const event = { store:document.getElementById('store').value, kind, date:document.getElementById('date').value, time:document.getElementById('time').value };
+      const entryType = document.getElementById('entryType').value;
+      const event = { store:document.getElementById('store').value, kind, entryType, value:entryType === 'amount' ? Number(document.getElementById('value').value) : 0, date:document.getElementById('date').value, time:document.getElementById('time').value };
       if (kind === 'free') { event.endTime = document.getElementById('endTime').value; event.showTableAvailabilityNote = document.getElementById('tablesNotice').checked; }
-      else { event.type = document.getElementById('eventType').value; event.format = document.getElementById('format').value; event.value = Number(document.getElementById('value').value); }
+      else { event.type = document.getElementById('eventType').value; event.format = document.getElementById('format').value; }
       return event;
     }
     async function deleteEvent(id) {

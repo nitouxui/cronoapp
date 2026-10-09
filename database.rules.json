@@ -61,7 +61,7 @@
       "events": {
         "$eventId": {
           ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
-          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') && !newData.hasChild('value') : newData.hasChildren(['type', 'format', 'value']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
+          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (!newData.hasChild('entryType') || newData.child('entryType').val() === 'free' || newData.child('entryType').val() === 'amount' || newData.child('entryType').val() === 'beverage') && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') : newData.hasChildren(['type', 'format', 'value']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
           "store": {
             ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')"
           },
@@ -91,6 +91,9 @@
           },
           "showTableAvailabilityNote": {
             ".validate": "newData.isBoolean()"
+          },
+          "entryType": {
+            ".validate": "newData.isString() && (newData.val() === 'free' || newData.val() === 'amount' || newData.val() === 'beverage')"
           }
         }
       }
