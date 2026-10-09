@@ -132,6 +132,7 @@
     let database, eventsRef, auth;
 
     function entryTypeFor(event) {
+      if (event.kind === 'free') return 'free';
       return ['free','amount','beverage'].includes(event.entryType)
         ? event.entryType
         : Number(event.value) > 0 ? 'amount' : 'free';
@@ -232,7 +233,7 @@
     }
     function syncEntryType() {
       const priceType = document.getElementById('entryType').value;
-      const amount = priceType === 'amount';
+      const amount = document.getElementById('kind').value !== 'free' && priceType === 'amount';
       document.getElementById('valueField').hidden = !amount;
       document.getElementById('value').disabled = !amount;
       document.getElementById('value').required = amount;
