@@ -714,6 +714,18 @@
           <option value="classic">Clásica</option>
         </select>
       </div>
+      <div class="alarm-sound-setting">
+        <label for="alarmSoundSelect">Sonido de la alarma</label>
+        <div class="alarm-sound-row">
+          <select id="alarmSoundSelect" class="editor-select" onchange="setAlarmSound(this.value)">
+            <option value="classic">Clásica</option>
+            <option value="bell">Campana</option>
+            <option value="digital">Digital</option>
+          </select>
+          <button class="editor-button editor-button-secondary" type="button" onclick="previewAlarmSound()">Probar</button>
+        </div>
+        <p id="alarmSoundStatus" role="status" aria-live="polite"></p>
+      </div>
       <div id="imagenes" class="tab-content active">
         <label>Logo</label>
         <div class="logo-control-row">
@@ -2246,6 +2258,8 @@ module.exports = QRCode;
     let savedPalette = 'graphite';
     let savedMinutes = 2;
     let savedTimerFont = 'system';
+    let selectedAlarmSound = 'classic';
+    const alarmSoundOptions = new Set(['classic', 'bell', 'digital']);
     let savedLeftPanelEnabled = true;
     let timerBackgroundSrc = '';
     let savedTimerBackgroundSrc = '';
@@ -2330,6 +2344,7 @@ module.exports = QRCode;
         },
         palette: document.querySelector('input[name="palette"]:checked').value,
         timerFont: document.getElementById('timerFontSelect').value,
+        alarmSound: document.getElementById('alarmSoundSelect').value,
         minutes
       };
       if (JSON.stringify(settings).length > 5800000) {
@@ -2360,6 +2375,7 @@ module.exports = QRCode;
       applyPalette(savedPalette, true);
       savedTimerFont = Object.prototype.hasOwnProperty.call(timerFonts, settings.timerFont) ? settings.timerFont : 'system';
       applyTimerFont(savedTimerFont);
+      setAlarmSound(settings.alarmSound || 'classic');
       const images = settings.images;
       timerBackgroundSrc = images?.timerBackgroundSrc || '';
       timerBackgroundOpacity = Number.isFinite(Number(images?.timerBackgroundOpacity)) ? Math.max(0, Math.min(100, Number(images.timerBackgroundOpacity))) : 35;
@@ -2421,6 +2437,12 @@ module.exports = QRCode;
       }
       return alarmBufferPromise;
     }
+    function setAlarmSound(name) {
+      selectedAlarmSound = alarmSoundOptions.has(name) ? name : 'classic';
+      const selector = document.getElementById('alarmSoundSelect');
+      if (selector) selector.value = selectedAlarmSound;
+    }
+    window.setAlarmSound = setAlarmSound;
     function prepareSound() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return Promise.resolve(false);
@@ -2429,9 +2451,9 @@ module.exports = QRCode;
       const resume = soundContext.state !== 'running'
         ? soundContext.resume().catch(() => false)
         : Promise.resolve();
-      const loaded = loadAlarmBuffer().catch(() => null);
+      const loaded = selectedAlarmSound === 'classic' ? loadAlarmBuffer().catch(() => null) : Promise.resolve(null);
       return Promise.all([resume, loaded]).then(() => {
-        const isReady = soundContext.state === 'running' && !!alarmBuffer;
+        const isReady = soundContext.state === 'running' && (selectedAlarmSound !== 'classic' || !!alarmBuffer);
         if (isReady && pendingEndSoundUntil) {
           const shouldPlay = Date.now() <= pendingEndSoundUntil;
           pendingEndSoundUntil = 0;
@@ -2440,17 +2462,60 @@ module.exports = QRCode;
         return isReady;
       });
     }
+    function playSelectedAlarm() {
+      if (!soundContext || soundContext.state !== 'running') return false;
+      if (selectedAlarmSound === 'classic') {
+        if (!alarmBuffer) return false;
+        const source = soundContext.createBufferSource();
+        source.buffer = alarmBuffer;
+        source.connect(soundContext.destination);
+        source.start();
+        return true;
+      }
+      const patterns = {
+        bell: [[880, 0.24, 'sine'], [1174.66, 0.28, 'sine'], [1567.98, 0.62, 'sine']],
+        digital: [[880, 0.14, 'square'], [0, 0.10, 'square'], [880, 0.14, 'square'], [0, 0.10, 'square'], [1174.66, 0.38, 'square']]
+      };
+      const pattern = patterns[selectedAlarmSound];
+      if (!pattern) return false;
+      let startAt = soundContext.currentTime;
+      pattern.forEach(([frequency, duration, type]) => {
+        if (frequency > 0) {
+          const oscillator = soundContext.createOscillator();
+          const gain = soundContext.createGain();
+          oscillator.type = type;
+          oscillator.frequency.setValueAtTime(frequency, startAt);
+          gain.gain.setValueAtTime(0.0001, startAt);
+          gain.gain.exponentialRampToValueAtTime(0.16, startAt + 0.025);
+          gain.gain.setValueAtTime(0.16, startAt + Math.max(0.03, duration - 0.04));
+          gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+          oscillator.connect(gain);
+          gain.connect(soundContext.destination);
+          oscillator.start(startAt);
+          oscillator.stop(startAt + duration + 0.01);
+        }
+        startAt += duration;
+      });
+      return true;
+    }
+    async function previewAlarmSound() {
+      const status = document.getElementById('alarmSoundStatus');
+      const ready = await prepareSound();
+      if (!ready || !playSelectedAlarm()) {
+        status.textContent = 'No se pudo activar el sonido. Intenta nuevamente.';
+        return;
+      }
+      status.textContent = 'Reproduciendo sonido de prueba.';
+    }
+    window.previewAlarmSound = previewAlarmSound;
     function playEndSound() {
       try { if (typeof navigator.vibrate === 'function') navigator.vibrate([220, 100, 220, 100, 320]); } catch (_) {}
-      if (!soundContext || soundContext.state !== 'running' || !alarmBuffer) {
+      if (!soundContext || soundContext.state !== 'running' || (selectedAlarmSound === 'classic' && !alarmBuffer)) {
         pendingEndSoundUntil = Date.now() + 8000;
         prepareSound();
         return;
       }
-      const source = soundContext.createBufferSource();
-      source.buffer = alarmBuffer;
-      source.connect(soundContext.destination);
-      source.start();
+      playSelectedAlarm();
     }
     window.prepareSound = prepareSound;
     window.playEndSound = playEndSound;
@@ -3810,7 +3875,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Azul láser': 'Laser blue', 'Lima ácido': 'Acid lime', 'Naranja pop': 'Pop orange',
           'Violeta neón': 'Neon violet', 'Verde voltio': 'Volt green', 'Cian ciber': 'Cyber cyan',
           'Amarillo flúor': 'Fluorescent yellow', 'Paletas disponibles': 'Available palettes',
-          'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Logo': 'Logo',
+          'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Sonido de la alarma': 'Alarm sound', 'Campana': 'Bell', 'Digital': 'Digital', 'Probar': 'Preview', 'Reproduciendo sonido de prueba.': 'Playing sound preview.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Could not activate sound. Try again.', 'Logo': 'Logo',
           'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Mostrar panel izquierdo': 'Show left panel', 'Contenido del panel izquierdo': 'Left panel content',
           'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
           'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
@@ -3928,7 +3993,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Azul láser': 'Azul laser', 'Lima ácido': 'Lima ácido', 'Naranja pop': 'Laranja pop',
           'Violeta neón': 'Violeta neon', 'Verde voltio': 'Verde volt', 'Cian ciber': 'Ciano ciber',
           'Amarillo flúor': 'Amarelo fluorescente', 'Paletas disponibles': 'Paletas disponíveis',
-          'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Logo': 'Logotipo',
+          'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Sonido de la alarma': 'Som do alarme', 'Campana': 'Sino', 'Digital': 'Digital', 'Probar': 'Testar', 'Reproduciendo sonido de prueba.': 'Reproduzindo som de teste.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Não foi possível ativar o som. Tente novamente.', 'Logo': 'Logotipo',
           'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Mostrar panel izquierdo': 'Mostrar painel esquerdo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
           'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
           'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
