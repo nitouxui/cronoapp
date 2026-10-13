@@ -3616,15 +3616,24 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               return;
             }
             try {
-              const settings = JSON.parse(snap.val());
+              const rawSettings = snap.val();
+              const settings = typeof rawSettings === 'string' ? JSON.parse(rawSettings) : rawSettings;
               currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
               updateStaffPairingsLink();
               if (isJudge || isPairings) {
                 window.applyPalette(currentRoomSettings.palette, true);
                 if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
               } else window.loadSettings(currentRoomSettings);
-            } catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
-          }, () => { syncStatus.textContent = 'No se pudieron cargar los ajustes de la sala.'; });
+            } catch {
+              const message = 'No se pudieron leer los ajustes de la sala.';
+              if (isProjection) document.getElementById('timerStatus').textContent = message;
+              else syncStatus.textContent = message;
+            }
+          }, () => {
+            const message = 'No se pudieron cargar los ajustes de la sala.';
+            if (isProjection) document.getElementById('timerStatus').textContent = message;
+            else syncStatus.textContent = message;
+          });
         }
         dbModule.onValue(dbModule.ref(db, '.info/serverTimeOffset'), snap => {
           serverOffset = snap.val() || 0;
