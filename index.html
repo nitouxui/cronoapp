@@ -721,6 +721,9 @@
             <option value="classic">Clásica</option>
             <option value="bell">Campana</option>
             <option value="digital">Digital</option>
+            <option value="bell-long">Campana extendida</option>
+            <option value="digital-long">Digital extendido</option>
+            <option value="crescendo">Progresivo</option>
           </select>
           <button class="editor-button editor-button-secondary" type="button" onclick="previewAlarmSound()">Probar</button>
         </div>
@@ -2259,7 +2262,7 @@ module.exports = QRCode;
     let savedMinutes = 2;
     let savedTimerFont = 'system';
     let selectedAlarmSound = 'classic';
-    const alarmSoundOptions = new Set(['classic', 'bell', 'digital']);
+    const alarmSoundOptions = new Set(['classic', 'bell', 'digital', 'bell-long', 'digital-long', 'crescendo']);
     let savedLeftPanelEnabled = true;
     let timerBackgroundSrc = '';
     let savedTimerBackgroundSrc = '';
@@ -2474,7 +2477,10 @@ module.exports = QRCode;
       }
       const patterns = {
         bell: [[880, 0.24, 'sine'], [1174.66, 0.28, 'sine'], [1567.98, 0.62, 'sine']],
-        digital: [[880, 0.14, 'square'], [0, 0.10, 'square'], [880, 0.14, 'square'], [0, 0.10, 'square'], [1174.66, 0.38, 'square']]
+        digital: [[880, 0.14, 'square'], [0, 0.10, 'square'], [880, 0.14, 'square'], [0, 0.10, 'square'], [1174.66, 0.38, 'square']],
+        'bell-long': [[880, 0.42, 'sine'], [0, 0.12, 'sine'], [1174.66, 0.48, 'sine'], [0, 0.12, 'sine'], [1567.98, 1.1, 'sine'], [0, 0.12, 'sine'], [1174.66, 0.48, 'sine'], [0, 0.12, 'sine'], [880, 0.75, 'sine']],
+        'digital-long': [[880, 0.18, 'square'], [0, 0.12, 'square'], [880, 0.18, 'square'], [0, 0.12, 'square'], [988, 0.28, 'square'], [0, 0.16, 'square'], [988, 0.28, 'square'], [0, 0.16, 'square'], [1174.66, 0.42, 'square'], [0, 0.12, 'square'], [1174.66, 0.42, 'square']],
+        crescendo: [[440, 0.48, 'triangle'], [554.37, 0.48, 'triangle'], [659.25, 0.48, 'triangle'], [783.99, 0.55, 'triangle'], [987.77, 0.75, 'triangle'], [1174.66, 0.9, 'triangle']]
       };
       const pattern = patterns[selectedAlarmSound];
       if (!pattern) return false;
@@ -3875,7 +3881,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Azul láser': 'Laser blue', 'Lima ácido': 'Acid lime', 'Naranja pop': 'Pop orange',
           'Violeta neón': 'Neon violet', 'Verde voltio': 'Volt green', 'Cian ciber': 'Cyber cyan',
           'Amarillo flúor': 'Fluorescent yellow', 'Paletas disponibles': 'Available palettes',
-          'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Sonido de la alarma': 'Alarm sound', 'Campana': 'Bell', 'Digital': 'Digital', 'Probar': 'Preview', 'Reproduciendo sonido de prueba.': 'Playing sound preview.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Could not activate sound. Try again.', 'Logo': 'Logo',
+          'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Sonido de la alarma': 'Alarm sound', 'Campana': 'Bell', 'Digital': 'Digital', 'Campana extendida': 'Extended bell', 'Digital extendido': 'Extended digital', 'Progresivo': 'Progressive', 'Probar': 'Preview', 'Reproduciendo sonido de prueba.': 'Playing sound preview.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Could not activate sound. Try again.', 'Logo': 'Logo',
           'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Mostrar panel izquierdo': 'Show left panel', 'Contenido del panel izquierdo': 'Left panel content',
           'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
           'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
@@ -3993,7 +3999,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Azul láser': 'Azul laser', 'Lima ácido': 'Lima ácido', 'Naranja pop': 'Laranja pop',
           'Violeta neón': 'Violeta neon', 'Verde voltio': 'Verde volt', 'Cian ciber': 'Ciano ciber',
           'Amarillo flúor': 'Amarelo fluorescente', 'Paletas disponibles': 'Paletas disponíveis',
-          'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Sonido de la alarma': 'Som do alarme', 'Campana': 'Sino', 'Digital': 'Digital', 'Probar': 'Testar', 'Reproduciendo sonido de prueba.': 'Reproduzindo som de teste.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Não foi possível ativar o som. Tente novamente.', 'Logo': 'Logotipo',
+          'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Sonido de la alarma': 'Som do alarme', 'Campana': 'Sino', 'Digital': 'Digital', 'Campana extendida': 'Sino prolongado', 'Digital extendido': 'Digital prolongado', 'Progresivo': 'Progressivo', 'Probar': 'Testar', 'Reproduciendo sonido de prueba.': 'Reproduzindo som de teste.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Não foi possível ativar o som. Tente novamente.', 'Logo': 'Logotipo',
           'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Mostrar panel izquierdo': 'Mostrar painel esquerdo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
           'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
           'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
