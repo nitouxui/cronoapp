@@ -489,6 +489,21 @@
       body:not(.no-room) #modal { inset: 60px 8px 8px auto; width: calc(100vw - 16px); }
       body:not(.no-room) #modal .modal-content { padding: 18px; }
     }
+    /* Compatibilidad con navegadores de TV: fallback de viewport y reloj en pantallas bajas. */
+    @supports not (height: 100dvh) {
+      .container { min-height: 100vh; }
+      #roomWelcome, #judgeView, #pairingsView { min-height: 100vh; }
+    }
+    @media (min-width: 801px) and (max-height: 720px) {
+      .container { min-height: 100vh; min-height: 100dvh; }
+      .panel { min-height: 100vh; min-height: 100dvh; }
+      #rightPanel { padding: 16px 32px 82px; }
+      .timer-stage { gap: 10px; }
+      #logo { max-height: 9vh; margin-bottom: 0; }
+      #timer { font-size: clamp(72px, 20vh, 180px); }
+      #timerStatus { padding: 8px 18px; }
+      .control-bar { min-height: 72px; padding: 8px 32px; }
+    }
   </style>
 </head>
 <body data-palette="graphite" data-timer-font="system">
@@ -3058,6 +3073,39 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     };
   </script>
 
+  <script>
+    // Mantiene operativa la entrada TV/Staff aunque el navegador no complete la inicializacion modular.
+    (function () {
+      var match = /(?:^|&)entry=(tv|staff)(?:&|$)/.exec(window.location.search.replace(/^\?/, ''));
+      if (!match) return;
+      var entryMode = match[1];
+      document.body.classList.add('code-entry-mode');
+      var copy = entryMode === 'staff'
+        ? { kicker: 'VISTA STAFF', title: 'Acceder a vista Staff', description: 'Ingresa el código de sala para abrir las herramientas de Staff.', button: 'Ingresar a Staff' }
+        : { kicker: 'TEMPORIZADOR PARA TV', title: 'Ver temporizador', description: 'Ingresa el código de sala para mostrar el temporizador en una pantalla.', button: 'Ver temporizador' };
+      document.getElementById('entryKicker').textContent = copy.kicker;
+      document.getElementById('shortCodeTitle').textContent = copy.title;
+      document.getElementById('shortCodeDescription').textContent = copy.description;
+      document.getElementById('shortCodeButtonLabel').textContent = copy.button;
+      var form = document.getElementById('shortCodeForm');
+      var input = document.getElementById('shortCodeInput');
+      var status = document.getElementById('shortCodeStatus');
+      input.addEventListener('input', function () {
+        input.value = input.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, '').slice(0, 6);
+        status.textContent = '';
+      });
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var code = input.value.trim().toUpperCase();
+        if (!/^[A-HJ-NP-Z2-9]{6}$/.test(code)) {
+          status.textContent = 'Ingresa un código válido de 6 caracteres.';
+          input.focus();
+          return;
+        }
+        window.location.assign(window.location.protocol + '//' + window.location.host + '/?s=' + encodeURIComponent(code) + '&view=' + (entryMode === 'staff' ? 'staff' : 'pantalla'));
+      });
+    })();
+  </script>
   <script type="module">
     const firebaseConfig = {
       apiKey: "AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8",
@@ -3073,41 +3121,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const rawRoom = params.get('sala');
     const rawCode = params.get('s');
     const entryMode = ['tv', 'staff'].includes(params.get('entry')) ? params.get('entry') : '';
-    if (entryMode) {
-      document.body.classList.add('code-entry-mode');
-      const copy = entryMode === 'staff'
-        ? { kicker: 'VISTA STAFF', title: 'Acceder a vista Staff', description: 'Ingresa el código de sala para abrir las herramientas de Staff.', button: 'Ingresar a Staff' }
-        : { kicker: 'TEMPORIZADOR PARA TV', title: 'Ver temporizador', description: 'Ingresa el código de sala para mostrar el temporizador en una pantalla.', button: 'Ver temporizador' };
-      document.getElementById('entryKicker').textContent = copy.kicker;
-      document.getElementById('shortCodeTitle').textContent = copy.title;
-      document.getElementById('shortCodeDescription').textContent = copy.description;
-      document.getElementById('shortCodeButtonLabel').textContent = copy.button;
-    }
-    const shortCodeForm = document.getElementById('shortCodeForm');
-    const shortCodeInput = document.getElementById('shortCodeInput');
-    const shortCodeStatus = document.getElementById('shortCodeStatus');
-    shortCodeInput.addEventListener('input', () => {
-      shortCodeInput.value = shortCodeInput.value.toUpperCase().replace(/[^A-HJ-NP-Z2-9]/g, '').slice(0, 6);
-      shortCodeStatus.textContent = '';
-    });
-    shortCodeForm.addEventListener('submit', event => {
-      event.preventDefault();
-      const code = shortCodeInput.value.trim().toUpperCase();
-      if (!/^[A-HJ-NP-Z2-9]{6}$/.test(code)) {
-        shortCodeStatus.textContent = 'Ingresa un código válido de 6 caracteres.';
-        shortCodeInput.focus();
-        return;
-      }
-      const target = new URL(location.href);
-      target.pathname = '/';
-      target.searchParams.delete('entry');
-      target.searchParams.delete('sala');
-      target.searchParams.delete('s');
-      target.searchParams.delete('view');
-      target.searchParams.set('s', code);
-      target.searchParams.set('view', entryMode === 'staff' ? 'staff' : 'pantalla');
-      location.assign(target.href);
-    });
     const hasRoomLink = Boolean(rawRoom || rawCode);
     const validRoom = (!rawRoom || /^[A-Za-z0-9_-]{8,64}$/.test(rawRoom))
       && (!rawCode || /^[A-HJ-NP-Z2-9]{6}$/.test(rawCode)) && !(rawRoom && rawCode);
