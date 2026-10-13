@@ -3076,7 +3076,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
   <script>
     // Mantiene operativa la entrada TV/Staff aunque el navegador no complete la inicializacion modular.
     (function () {
-      var match = /(?:^|&)entry=(tv|staff)(?:&|$)/.exec(window.location.search.replace(/^\?/, ''));
+      var query = window.location.search.replace(/^\?/, '');
+      var match = /(?:^|&)entry=(tv|staff)(?:&|$)/.exec(query);
+      var viewMatch = /(?:^|&)view=([^&]*)/.exec(query);
+      var codeMatch = /(?:^|&)s=([A-HJ-NP-Z2-9]{6})(?:&|$)/.exec(query);
+      if (viewMatch && viewMatch[1] === 'pantalla' || codeMatch) {
+        document.body.classList.add('projection-mode');
+      }
       if (!match) return;
       var entryMode = match[1];
       document.body.classList.add('code-entry-mode');
