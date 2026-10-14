@@ -4118,7 +4118,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       });
     }
     function renderRoomResults() {
-      const section=document.getElementById('staffResultsModule'); if(section)section.hidden=!isJudge;
+      const enabled = window.TDF_UPLOAD_ENABLED === true;
+      const section=document.getElementById('staffResultsModule');
+      const adminSection=document.getElementById('adminStaffResults');
+      if(section)section.hidden=!enabled || !isJudge;
+      if(adminSection)adminSection.hidden=!enabled;
+      if(!enabled)return;
       renderResultsList('staffResultList','staffResultStatus','staffResultRound',false);
       renderResultsList('adminResultList','adminResultStatus','adminResultRound',true);
     }
@@ -4291,7 +4296,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         staffRequestsRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/requests') : null;
         staffMembersRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/members') : null;
         roomChatAdminNameRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/adminName') : null;
-        roomResultsRef = roomId ? dbModule.ref(db, 'roomResults/' + roomId + '/tables') : null;
+        roomResultsRef = roomId && window.TDF_UPLOAD_ENABLED === true ? dbModule.ref(db, 'roomResults/' + roomId + '/tables') : null;
         startStaffRosterSubscriptions();
         if (roomResultsRef) dbModule.onValue(roomResultsRef, snapshot => {
           roomResultsData = snapshot.val() || {};
