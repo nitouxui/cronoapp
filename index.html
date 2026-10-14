@@ -74,6 +74,8 @@
     #callStopwatch { color: var(--text); font-size: clamp(48px, 10vw, 68px); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
     #staffChatModule[hidden], #adminStaffChat[hidden] { display: none !important; }
     #staffChatModule { width: min(480px, calc(100vw - 32px)); text-align: left; }
+    #staffChatNameForm { display: grid; gap: 8px; margin: 10px 0; }
+    #staffChatNameInput { width: 100%; min-height: 42px; padding: 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; }
     #adminStaffChat { width: 100%; padding: 14px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); color: var(--text); }
     #adminStaffChat h3 { margin: 0 0 8px; font-size: 16px; }
     #adminStaffChatStatus, #staffChatStatus { color: var(--muted); font-size: 13px; line-height: 1.45; }
@@ -83,6 +85,7 @@
     #adminStaffChatMessages strong, #staffChatMessages strong { display: block; margin-bottom: 4px; color: var(--accent-soft); font-size: 12px; }
     #adminStaffChatMessages p, #staffChatMessages p { margin: 0; white-space: pre-wrap; }
     #adminStaffChatForm, #staffChatForm { display: grid; gap: 8px; margin-top: 10px; }
+    #staffChatNameForm button { min-height: 40px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
     #adminStaffChatForm textarea, #staffChatForm textarea { width: 100%; min-height: 76px; resize: vertical; padding: 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; }
     #adminStaffChatForm button, #staffChatForm button, #toggleStaffChat, #staffChatLogin { min-height: 40px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
     #callStopwatchStatus { min-height: 1.4em; margin: 5px 0 14px; color: var(--muted); font-size: 14px; }
@@ -580,7 +583,7 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con administración</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><button id="staffChatLogin" type="button" hidden>Iniciar sesión con Google para escribir</button><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con administración</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><form id="staffChatNameForm" hidden><label for="staffChatNameInput">Tu nombre</label><input id="staffChatNameInput" type="text" maxlength="60" autocomplete="name" placeholder="Escribe tu nombre" required><button type="submit">Continuar</button></form><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><a id="pairingsStaffLink" href="/staff/" hidden>← Volver a Staff</a><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
@@ -632,7 +635,7 @@
 
     </div>
   </div>
-      <section id="adminStaffChat" class="room-chat-panel" aria-labelledby="adminStaffChatTitle" hidden><h3 id="adminStaffChatTitle">Mensajería de prueba · Staff</h3><p id="adminStaffChatStatus" role="status" aria-live="polite"></p><button id="toggleStaffChat" type="button">Activar mensajería</button><ol id="adminStaffChatMessages" aria-label="Mensajes de la sala"></ol><form id="adminStaffChatForm" hidden><label class="visually-hidden" for="adminStaffChatInput">Escribe un mensaje</label><textarea id="adminStaffChatInput" maxlength="500" placeholder="Escribe un mensaje para Staff" required></textarea><button type="submit">Enviar</button></form></section>
+      <section id="adminStaffChat" class="room-chat-panel" aria-labelledby="adminStaffChatTitle" hidden><h3 id="adminStaffChatTitle">Mensajes con Staff</h3><p id="adminStaffChatStatus" role="status" aria-live="polite"></p><button id="toggleStaffChat" type="button">Activar mensajería</button><ol id="adminStaffChatMessages" aria-label="Mensajes de la sala"></ol><form id="adminStaffChatForm" hidden><label class="visually-hidden" for="adminStaffChatInput">Escribe un mensaje</label><textarea id="adminStaffChatInput" maxlength="500" placeholder="Escribe un mensaje para Staff" required></textarea><button type="submit">Enviar</button></form></section>
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
           <a class="flyer-menu-link" href="/flyer/">Generador de flyers</a>
@@ -3479,12 +3482,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatEnabledRef = null;
     let roomChatMessagesRef = null;
     let roomChatEnabled = false;
+    let roomChatHasSetting = false;
+    let roomChatDefaultPending = false;
     let stopRoomChatRead = null;
-    let roomChatReaderUid = null;
+    let roomChatIsSubscribed = false;
+    let staffChatName = '';
     function stopRoomChatSubscription() {
       if (stopRoomChatRead) stopRoomChatRead();
       stopRoomChatRead = null;
-      roomChatReaderUid = null;
+      roomChatIsSubscribed = false;
     }
     function renderRoomChat(messages) {
       const lists = [document.getElementById('adminStaffChatMessages'), document.getElementById('staffChatMessages')];
@@ -3505,11 +3511,19 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         list.scrollTop = list.scrollHeight;
       });
     }
+    function ensureRoomChatEnabledByDefault() {
+      if (!roomChatEnabledRef || roomChatHasSetting || roomChatEnabled || roomChatDefaultPending || isReadOnly || !canControl) return;
+      roomChatDefaultPending = true;
+      dbModule.set(roomChatEnabledRef, true).catch(error => {
+        console.error('CronoApp could not enable room messaging by default:', error);
+        document.getElementById('adminStaffChatStatus').textContent = 'No se pudo activar la mensajería. Revisa las reglas de Firebase.';
+      }).finally(() => { roomChatDefaultPending = false; });
+    }
     function startRoomChatSubscription() {
-      if (!roomChatMessagesRef || !auth?.currentUser || !roomChatEnabled) return;
-      if (stopRoomChatRead && roomChatReaderUid === auth.currentUser.uid) return;
+      if (!roomChatMessagesRef || !roomChatEnabled) return;
+      if (stopRoomChatRead && roomChatIsSubscribed) return;
       stopRoomChatSubscription();
-      roomChatReaderUid = auth.currentUser.uid;
+      roomChatIsSubscribed = true;
       const recentMessages = dbModule.query(roomChatMessagesRef, dbModule.orderByKey(), dbModule.limitToLast(50));
       const messages = new Map();
       const renderLatest = () => {
@@ -3543,31 +3557,26 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function updateRoomChatAccess() {
       const adminPanel = document.getElementById('adminStaffChat');
       const staffPanel = document.getElementById('staffChatModule');
-      const isAdminPilot = !isReadOnly && canControl && window.isPilotUser(currentUser);
-      const isStaffGoogle = !!currentUser?.emailVerified && currentUser.providerData?.some(provider => provider.providerId === 'google.com');
-      const isRoomOwner = !!currentUser && currentUser.uid === roomOwner;
-      adminPanel.hidden = !isAdminPilot;
+      const isRoomAdmin = !isReadOnly && canControl;
+      adminPanel.hidden = !isRoomAdmin;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
-      if (isAdminPilot) {
+      if (isRoomAdmin) {
         const status = document.getElementById('adminStaffChatStatus');
         document.getElementById('toggleStaffChat').textContent = roomChatEnabled ? 'Desactivar mensajería' : 'Activar mensajería';
-        status.textContent = roomChatEnabled ? 'Prueba activa. El Staff debe iniciar sesión con Google para leer y responder.' : 'Prueba privada: solo disponible en las salas de la cuenta autorizada.';
+        status.textContent = roomChatEnabled ? 'Mensajería activa. Staff puede participar indicando su nombre.' : 'Mensajería desactivada para esta sala.';
         document.getElementById('adminStaffChatForm').hidden = !roomChatEnabled;
       }
       if (isJudge && roomChatEnabled) {
-        const login = document.getElementById('staffChatLogin');
+        const nameForm = document.getElementById('staffChatNameForm');
         const form = document.getElementById('staffChatForm');
         const status = document.getElementById('staffChatStatus');
-        login.hidden = isStaffGoogle && !isRoomOwner;
-        login.textContent = currentUser ? 'Cambiar cuenta de Google' : 'Iniciar sesión con Google para escribir';
-        form.hidden = !isStaffGoogle || isRoomOwner;
-        status.textContent = !currentUser ? 'Inicia sesión con Google para leer y responder.'
-          : !isStaffGoogle ? 'Usa una cuenta de Google verificada para participar.'
-          : isRoomOwner ? 'En Staff, inicia sesión con una cuenta distinta a la del administrador.'
-          : '';
+        nameForm.hidden = !!staffChatName;
+        form.hidden = !staffChatName;
+        status.textContent = staffChatName ? '' : 'Indica tu nombre para participar en el chat.';
       }
-      if ((isAdminPilot || (isJudge && roomChatEnabled && isStaffGoogle && !isRoomOwner))) startRoomChatSubscription();
+      if ((isRoomAdmin || (isJudge && roomChatEnabled))) startRoomChatSubscription();
       else stopRoomChatSubscription();
+      ensureRoomChatEnabledByDefault();
     }
     async function sendRoomChatMessage(event, role) {
       event.preventDefault();
@@ -3575,12 +3584,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const input = document.getElementById(isAdmin ? 'adminStaffChatInput' : 'staffChatInput');
       const status = document.getElementById(isAdmin ? 'adminStaffChatStatus' : 'staffChatStatus');
       const text = input.value.trim();
-      if (!text || text.length > 500 || !roomChatEnabled || !auth?.currentUser) return;
-      const user = auth.currentUser;
+      if (!text || text.length > 500 || !roomChatEnabled) return;
+      const user = isAdmin ? auth?.currentUser : null;
+      if (isAdmin && (!user || !canControl)) return;
+      if (!isAdmin && !staffChatName) return;
       const message = {
-        uid: user.uid,
+        uid: isAdmin ? user.uid : 'staff',
         role,
-        name: isAdmin ? 'Administración' : (user.displayName || 'Staff'),
+        name: isAdmin ? 'Administración' : staffChatName,
         text,
         createdAt: Date.now()
       };
@@ -3664,13 +3675,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
         const [{ initializeApp }, database, authentication] = await Promise.all([
           import(base + 'firebase-app.js'), import(base + 'firebase-database.js'),
-          isReadOnly && !isPrivatePairings && !isJudge ? Promise.resolve(null) : import(base + 'firebase-auth.js')
+          isReadOnly && !isPrivatePairings ? Promise.resolve(null) : import(base + 'firebase-auth.js')
         ]);
         dbModule = database;
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
-        if (isPrivatePairings || isJudge) auth = authModule.getAuth(app);
+        if (isPrivatePairings) auth = authModule.getAuth(app);
         if (rawCode) {
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
           roomId = alias.val();
@@ -3689,6 +3700,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         roomChatMessagesRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/messages') : null;
         const pairingsRef = roomId && !isPrivatePairings ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         if (roomChatEnabledRef) dbModule.onValue(roomChatEnabledRef, snap => {
+          roomChatHasSetting = snap.exists();
           roomChatEnabled = snap.val() === true;
           updateRoomChatAccess();
         }, () => {
@@ -3859,22 +3871,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           else syncStatus.textContent = 'No se pudo acceder al conteo.';
         });
         if (stateRef) setInterval(renderLive, 200);
-        if (isJudge) {
-          authModule.onAuthStateChanged(auth, user => {
-            currentUser = user;
-            updateRoomChatAccess();
-          });
-          document.getElementById('staffChatLogin').addEventListener('click', async () => {
-            try {
-              if (auth.currentUser) await authModule.signOut(auth);
-              await authModule.signInWithPopup(auth, new authModule.GoogleAuthProvider());
-            } catch (error) {
-              document.getElementById('staffChatStatus').textContent = 'No se pudo iniciar sesión con Google (' + error.code + ').';
-            }
-          });
-        }
+
         document.getElementById('toggleStaffChat').addEventListener('click', async () => {
-          if (!canControl || !window.isPilotUser(currentUser) || !roomChatEnabledRef) return;
+          if (!canControl || !roomChatEnabledRef) return;
           const button = document.getElementById('toggleStaffChat');
           button.disabled = true;
           try { await dbModule.set(roomChatEnabledRef, !roomChatEnabled); }
@@ -3883,6 +3882,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
         document.getElementById('staffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'staff'));
+        document.getElementById('staffChatNameForm').addEventListener('submit', event => {
+          event.preventDefault();
+          const input = document.getElementById('staffChatNameInput');
+          const name = input.value.trim().slice(0, 60);
+          if (!name) return;
+          staffChatName = name;
+          updateRoomChatAccess();
+        });
         if (!isReadOnly) {
           auth = authModule.getAuth(app);
           async function openOwnRoom(user) {
@@ -4118,7 +4125,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'No se pudo conectar al servicio.': 'Could not connect to the service.'
           ,'Frambuesa': 'Raspberry', 'Grafito': 'Graphite', 'Orquídea': 'Orchid', 'Cobre': 'Copper',
           'Abrir control de sala': 'Open room control', 'Acciones de sala': 'Room actions', 'Temporizador para staff': 'Staff timer',
-          'Mensajería de prueba · Staff': 'Staff messaging test', 'Mensajes con administración': 'Messages with the administrator', 'Activar mensajería': 'Enable messaging', 'Desactivar mensajería': 'Disable messaging', 'Administración': 'Administration', 'Inicia sesión con Google para leer y responder.': 'Sign in with Google to read and reply.', 'Prueba activa. El Staff debe iniciar sesión con Google para leer y responder.': 'Test active. Staff must sign in with Google to read and reply.', 'Prueba privada: solo disponible en las salas de la cuenta autorizada.': 'Private test: only available in rooms owned by the authorized account.', 'Usa una cuenta de Google verificada para participar.': 'Use a verified Google account to participate.', 'En Staff, inicia sesión con una cuenta distinta a la del administrador.': 'On Staff, sign in with an account different from the administrator.', 'Iniciar sesión con Google para escribir': 'Sign in with Google to write', 'Cambiar cuenta de Google': 'Switch Google account', 'Escribe un mensaje': 'Write a message', 'Escribe un mensaje para administración': 'Write a message to the administrator', 'Escribe un mensaje para Staff': 'Write a message to Staff', 'Enviar': 'Send', 'No se pudo consultar la mensajería.': 'Could not check messaging.', 'No se pudo acceder a los mensajes. Revisa las reglas de Firebase.': 'Could not access messages. Check the Firebase rules.', 'No se pudo enviar el mensaje. Revisa las reglas de Firebase.': 'Could not send the message. Check the Firebase rules.', 'No se pudo actualizar la prueba. Revisa las reglas de Firebase.': 'Could not update the test. Check the Firebase rules.', 'No se pudo iniciar sesión con Google': 'Could not sign in with Google',
+          'Mensajes con Staff': 'Messages with Staff', 'Mensajes con administración': 'Messages with the administrator', 'Tu nombre': 'Your name', 'Escribe tu nombre': 'Enter your name', 'Continuar': 'Continue', 'Indica tu nombre para participar en el chat.': 'Enter your name to join the chat.', 'Mensajería activa. Staff puede participar indicando su nombre.': 'Messaging is active. Staff can join by entering a name.', 'Mensajería desactivada para esta sala.': 'Messaging is disabled for this room.', 'Activar mensajería': 'Enable messaging', 'Desactivar mensajería': 'Disable messaging', 'Administración': 'Administration', 'Inicia sesión con Google para leer y responder.': 'Sign in with Google to read and reply.', 'Prueba activa. El Staff debe iniciar sesión con Google para leer y responder.': 'Test active. Staff must sign in with Google to read and reply.', 'Prueba privada: solo disponible en las salas de la cuenta autorizada.': 'Private test: only available in rooms owned by the authorized account.', 'Usa una cuenta de Google verificada para participar.': 'Use a verified Google account to participate.', 'En Staff, inicia sesión con una cuenta distinta a la del administrador.': 'On Staff, sign in with an account different from the administrator.', 'Iniciar sesión con Google para escribir': 'Sign in with Google to write', 'Cambiar cuenta de Google': 'Switch Google account', 'Escribe un mensaje': 'Write a message', 'Escribe un mensaje para administración': 'Write a message to the administrator', 'Escribe un mensaje para Staff': 'Write a message to Staff', 'Enviar': 'Send', 'No se pudo consultar la mensajería.': 'Could not check messaging.', 'No se pudo acceder a los mensajes. Revisa las reglas de Firebase.': 'Could not access messages. Check the Firebase rules.', 'No se pudo enviar el mensaje. Revisa las reglas de Firebase.': 'Could not send the message. Check the Firebase rules.', 'No se pudo actualizar la prueba. Revisa las reglas de Firebase.': 'Could not update the test. Check the Firebase rules.', 'No se pudo iniciar sesión con Google': 'Could not sign in with Google',
           'https://ejemplo.com/torneo': 'https://example.com/tournament'
         },
         pt: {
@@ -4237,7 +4244,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'No se pudo conectar al servicio.': 'Não foi possível conectar ao serviço.'
           ,'Frambuesa': 'Framboesa', 'Grafito': 'Grafite', 'Orquídea': 'Orquídea', 'Cobre': 'Cobre',
           'Abrir control de sala': 'Abrir o controle da sala', 'Acciones de sala': 'Ações da sala', 'Temporizador para staff': 'Temporizador da equipe',
-          'Mensajería de prueba · Staff': 'Teste de mensagens · Equipe', 'Mensajes con administración': 'Mensagens com a administração', 'Activar mensajería': 'Ativar mensagens', 'Desactivar mensajería': 'Desativar mensagens', 'Administración': 'Administração', 'Inicia sesión con Google para leer y responder.': 'Entre com o Google para ler e responder.', 'Prueba activa. El Staff debe iniciar sesión con Google para leer y responder.': 'Teste ativo. A equipe deve entrar com o Google para ler e responder.', 'Prueba privada: solo disponible en las salas de la cuenta autorizada.': 'Teste privado: disponível apenas nas salas da conta autorizada.', 'Usa una cuenta de Google verificada para participar.': 'Use uma conta Google verificada para participar.', 'En Staff, inicia sesión con una cuenta distinta a la del administrador.': 'No Staff, entre com uma conta diferente da administração.', 'Iniciar sesión con Google para escribir': 'Entre com o Google para escrever', 'Cambiar cuenta de Google': 'Trocar conta do Google', 'Escribe un mensaje': 'Escreva uma mensagem', 'Escribe un mensaje para administración': 'Escreva uma mensagem para a administração', 'Escribe un mensaje para Staff': 'Escreva uma mensagem para a equipe', 'Enviar': 'Enviar', 'No se pudo consultar la mensajería.': 'Não foi possível consultar as mensagens.', 'No se pudo acceder a los mensajes. Revisa las reglas de Firebase.': 'Não foi possível acessar as mensagens. Verifique as regras do Firebase.', 'No se pudo enviar el mensaje. Revisa las reglas de Firebase.': 'Não foi possível enviar a mensagem. Verifique as regras do Firebase.', 'No se pudo actualizar la prueba. Revisa las reglas de Firebase.': 'Não foi possível atualizar o teste. Verifique as regras do Firebase.', 'No se pudo iniciar sesión con Google': 'Não foi possível entrar com o Google',
+          'Mensajes con Staff': 'Mensagens com a equipe', 'Mensajes con administración': 'Mensagens com a administração', 'Tu nombre': 'Seu nome', 'Escribe tu nombre': 'Digite seu nome', 'Continuar': 'Continuar', 'Indica tu nombre para participar en el chat.': 'Informe seu nome para participar do chat.', 'Mensajería activa. Staff puede participar indicando su nombre.': 'Mensagens ativas. A equipe pode participar informando seu nome.', 'Mensajería desactivada para esta sala.': 'Mensagens desativadas para esta sala.', 'Activar mensajería': 'Ativar mensagens', 'Desactivar mensajería': 'Desativar mensagens', 'Administración': 'Administração', 'Inicia sesión con Google para leer y responder.': 'Entre com o Google para ler e responder.', 'Prueba activa. El Staff debe iniciar sesión con Google para leer y responder.': 'Teste ativo. A equipe deve entrar com o Google para ler e responder.', 'Prueba privada: solo disponible en las salas de la cuenta autorizada.': 'Teste privado: disponível apenas nas salas da conta autorizada.', 'Usa una cuenta de Google verificada para participar.': 'Use uma conta Google verificada para participar.', 'En Staff, inicia sesión con una cuenta distinta a la del administrador.': 'No Staff, entre com uma conta diferente da administração.', 'Iniciar sesión con Google para escribir': 'Entre com o Google para escrever', 'Cambiar cuenta de Google': 'Trocar conta do Google', 'Escribe un mensaje': 'Escreva uma mensagem', 'Escribe un mensaje para administración': 'Escreva uma mensagem para a administração', 'Escribe un mensaje para Staff': 'Escreva uma mensagem para a equipe', 'Enviar': 'Enviar', 'No se pudo consultar la mensajería.': 'Não foi possível consultar as mensagens.', 'No se pudo acceder a los mensajes. Revisa las reglas de Firebase.': 'Não foi possível acessar as mensagens. Verifique as regras do Firebase.', 'No se pudo enviar el mensaje. Revisa las reglas de Firebase.': 'Não foi possível enviar a mensagem. Verifique as regras do Firebase.', 'No se pudo actualizar la prueba. Revisa las reglas de Firebase.': 'Não foi possível atualizar o teste. Verifique as regras do Firebase.', 'No se pudo iniciar sesión con Google': 'Não foi possível entrar com o Google',
           'https://ejemplo.com/torneo': 'https://exemplo.com/torneio'
         }
       };
