@@ -87,7 +87,8 @@
     #adminStaffChatForm, #staffChatForm { display: grid; gap: 8px; margin-top: 10px; }
     #staffChatNameForm button { min-height: 40px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
     #adminStaffChatForm textarea, #staffChatForm textarea { width: 100%; min-height: 76px; resize: vertical; padding: 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; }
-    #adminStaffChatForm button, #staffChatForm button, #toggleStaffChat, #staffChatLogin { min-height: 40px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    #adminStaffChatForm button, #staffChatForm button, #toggleStaffChat { min-height: 40px; padding: 0 14px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    #clearStaffChatHistory { min-height: 40px; margin-top: 8px; padding: 0 14px; border: 1px solid var(--edge); border-radius: 9px; background: transparent; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
     #callStopwatchStatus { min-height: 1.4em; margin: 5px 0 14px; color: var(--muted); font-size: 14px; }
     .staff-call-actions { display: flex; justify-content: center; gap: 10px; }
     .staff-call-actions button { min-height: 48px; padding: 0 18px; border: 1px solid var(--edge); border-radius: 12px; background: var(--accent); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
@@ -583,7 +584,7 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con administración</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><form id="staffChatNameForm" hidden><label for="staffChatNameInput">Tu nombre</label><input id="staffChatNameInput" type="text" maxlength="60" autocomplete="name" placeholder="Escribe tu nombre" required><button type="submit">Continuar</button></form><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con administración</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
   <section id="pairingsView" aria-label="Pareos del torneo"><a id="pairingsStaffLink" href="/staff/" hidden>← Volver a Staff</a><div class="pairings-shell">
     <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
@@ -635,7 +636,7 @@
 
     </div>
   </div>
-      <section id="adminStaffChat" class="room-chat-panel" aria-labelledby="adminStaffChatTitle" hidden><h3 id="adminStaffChatTitle">Mensajes con Staff</h3><p id="adminStaffChatStatus" role="status" aria-live="polite"></p><button id="toggleStaffChat" type="button">Activar mensajería</button><ol id="adminStaffChatMessages" aria-label="Mensajes de la sala"></ol><form id="adminStaffChatForm" hidden><label class="visually-hidden" for="adminStaffChatInput">Escribe un mensaje</label><textarea id="adminStaffChatInput" maxlength="500" placeholder="Escribe un mensaje para Staff" required></textarea><button type="submit">Enviar</button></form></section>
+      <section id="adminStaffChat" class="room-chat-panel" aria-labelledby="adminStaffChatTitle" hidden><h3 id="adminStaffChatTitle">Mensajes con Staff</h3><p id="adminStaffChatStatus" role="status" aria-live="polite"></p><button id="toggleStaffChat" type="button">Activar mensajería</button><button id="clearStaffChatHistory" type="button">Eliminar historial</button><ol id="adminStaffChatMessages" aria-label="Mensajes de la sala"></ol><form id="adminStaffChatForm" hidden><label class="visually-hidden" for="adminStaffChatInput">Escribe un mensaje</label><textarea id="adminStaffChatInput" maxlength="500" placeholder="Escribe un mensaje para Staff" required></textarea><button type="submit">Enviar</button></form></section>
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
           <a class="flyer-menu-link" href="/flyer/">Generador de flyers</a>
@@ -3164,6 +3165,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
   <script>
     // Mantiene operativa la entrada TV/Staff aunque el navegador no complete la inicializacion modular.
     (function () {
+      var params = new URLSearchParams(window.location.search);
+      var view = params.get('view');
+      if (view === 'staff' && !params.get('nombre')) {
+        var staffEntry = new URL('/staff/', window.location.origin);
+        if (params.get('s')) staffEntry.searchParams.set('s', params.get('s'));
+        else if (params.get('sala')) staffEntry.searchParams.set('sala', params.get('sala'));
+        window.location.replace(staffEntry.href);
+        return;
+      }
       var query = window.location.search.replace(/^\?/, '');
       var match = /(?:^|&)entry=(tv|staff)(?:&|$)/.exec(query);
       var viewMatch = /(?:^|&)view=([^&]*)/.exec(query);
@@ -3175,7 +3185,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       var entryMode = match[1];
       document.body.classList.add('code-entry-mode');
       var copy = entryMode === 'staff'
-        ? { kicker: 'VISTA STAFF', title: 'Acceder a vista Staff', description: 'Ingresa el código de sala para abrir las herramientas de Staff.', button: 'Ingresar a Staff' }
+        ? { kicker: 'VISTA STAFF', title: 'Acceder a vista Staff', description: 'Ingresa el código de sala para continuar.', button: 'Continuar' }
         : { kicker: 'TEMPORIZADOR PARA TV', title: 'Ver temporizador', description: 'Ingresa el código de sala para mostrar el temporizador en una pantalla.', button: 'Ver temporizador' };
       document.getElementById('entryKicker').textContent = copy.kicker;
       document.getElementById('shortCodeTitle').textContent = copy.title;
@@ -3196,7 +3206,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           input.focus();
           return;
         }
-        window.location.assign(window.location.protocol + '//' + window.location.host + '/?s=' + encodeURIComponent(code) + '&view=' + (entryMode === 'staff' ? 'staff' : 'pantalla'));
+        var target = entryMode === 'staff' ? new URL('/staff/', window.location.origin) : new URL('/', window.location.origin);
+        if (entryMode === 'staff') target.searchParams.set('s', code);
+        else {
+          target.searchParams.set('s', code);
+          target.searchParams.set('view', 'pantalla');
+        }
+        window.location.assign(target.href);
       });
     })();
   </script>
@@ -3486,7 +3502,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatDefaultPending = false;
     let stopRoomChatRead = null;
     let roomChatIsSubscribed = false;
-    let staffChatName = '';
+    let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
     function stopRoomChatSubscription() {
       if (stopRoomChatRead) stopRoomChatRead();
       stopRoomChatRead = null;
@@ -3567,12 +3583,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('adminStaffChatForm').hidden = !roomChatEnabled;
       }
       if (isJudge && roomChatEnabled) {
-        const nameForm = document.getElementById('staffChatNameForm');
         const form = document.getElementById('staffChatForm');
         const status = document.getElementById('staffChatStatus');
-        nameForm.hidden = !!staffChatName;
         form.hidden = !staffChatName;
-        status.textContent = staffChatName ? '' : 'Indica tu nombre para participar en el chat.';
+        status.textContent = '';
       }
       if (roomChatEnabled && (isRoomAdmin || isJudge)) startRoomChatSubscription();
       else stopRoomChatSubscription();
@@ -3882,13 +3896,20 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
         document.getElementById('staffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'staff'));
-        document.getElementById('staffChatNameForm').addEventListener('submit', event => {
-          event.preventDefault();
-          const input = document.getElementById('staffChatNameInput');
-          const name = input.value.trim().slice(0, 60);
-          if (!name) return;
-          staffChatName = name;
-          updateRoomChatAccess();
+        document.getElementById('clearStaffChatHistory').addEventListener('click', async () => {
+          if (!canControl || !roomChatMessagesRef) return;
+          if (!window.confirm('¿Eliminar todos los mensajes de esta sala? Esta acción no se puede deshacer.')) return;
+          const button = document.getElementById('clearStaffChatHistory');
+          button.disabled = true;
+          try {
+            await dbModule.remove(roomChatMessagesRef);
+            document.getElementById('adminStaffChatStatus').textContent = 'Historial eliminado.';
+          } catch (error) {
+            console.error('CronoApp room chat history deletion failed:', error);
+            document.getElementById('adminStaffChatStatus').textContent = 'No se pudo eliminar el historial (' + (error?.code || 'error desconocido') + ').';
+          } finally {
+            button.disabled = false;
+          }
         });
         if (!isReadOnly) {
           auth = authModule.getAuth(app);
