@@ -2246,6 +2246,7 @@ module.exports = QRCode;
     let privatePairingsContext = null;
     let privatePairingsReadStop = null;
     let privatePairingsReadKey = '';
+    let privatePairingsData = null;
     async function beginPrivatePairingsSync(context, chooseNew = false) {
       if (!context?.allowed || !context?.canControl) {
         document.getElementById('htmlPairingsStatus').textContent = 'Inicia sesión con la cuenta administradora y abre tu propia sala.';
@@ -2281,17 +2282,17 @@ module.exports = QRCode;
         return;
       }
       privatePairingsContext = { ...context, allowed, canControl: true };
-      // Remove TDF pairings previously stored in the public room path.
       const readKey = user.uid + ':' + context.roomId;
       if (privatePairingsReadKey !== readKey) {
         if (privatePairingsReadStop) privatePairingsReadStop();
         const ref = context.dbModule.ref(context.db, 'privatePairings/' + user.uid + '/' + context.roomId);
         privatePairingsReadStop = context.dbModule.onValue(ref, snap => {
           try {
-            if (snap.exists()) {
-              window.setPairings(JSON.parse(snap.val()));
-              window.pairingsPublished();
-            } else window.pairingsCleared();
+            privatePairingsData = snap.exists() ? JSON.parse(snap.val()) : null;
+            if (document.getElementById('leftVisualModeSelect').value === 'html-pairings') {
+              if (privatePairingsData) { window.setPairings(privatePairingsData); window.pairingsPublished(); }
+              else { window.setPairings(null); window.pairingsCleared(); }
+            }
           } catch (_) {}
         });
         privatePairingsReadKey = readKey;
@@ -2865,6 +2866,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       document.getElementById('imageControls').hidden = mode !== 'upload';
       document.getElementById('tdfControls').hidden = mode !== 'tdf';
       htmlPairingsControls.hidden = mode !== 'html-pairings' || !window.isPilotUser(window.cronoCurrentUser);
+      if (mode === 'html-pairings' && window.isPilotUser(window.cronoCurrentUser)) {
+        if (privatePairingsData) { window.setPairings(privatePairingsData); window.pairingsPublished(); }
+        else { window.setPairings(null); window.pairingsCleared(); }
+      }
       const copyPairingsButton = document.getElementById('copyPairingsLink');
       const roomQuery = new URLSearchParams(location.search);
       if (copyPairingsButton) copyPairingsButton.hidden = !(roomQuery.has('sala') || roomQuery.has('s')) || (mode !== 'html-pairings' && !window.TDF_UPLOAD_ENABLED);
