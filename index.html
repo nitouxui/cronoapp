@@ -571,6 +571,12 @@
     .staff-result-actions button:disabled { opacity: .5; cursor: not-allowed; }
     #staffResultsModule, #adminStaffResults { width: min(760px, 100%); }
     #staffResultRound, #adminResultRound { min-width: 120px; padding: 8px; border-radius: 8px; }
+      #adminResultsPanel { position: fixed; top: 68px; right: 14px; z-index: 29; width: min(680px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; padding: 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 18px 50px #0009; }
+    #adminResultsPanel[hidden] { display: none !important; }
+    #adminResultsClose { min-height: 36px; padding: 0 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .staff-result-card { transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+    .staff-result-card:hover, .staff-result-card:focus-within { border-color: var(--accent, #a78bfa); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #a78bfa) 30%, transparent); transform: translateY(-1px); }
+    .staff-result-players .is-winning-player { color: var(--accent, #c4b5fd); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
   </style>
 </head>
 <body data-palette="graphite" data-timer-font="system">
@@ -654,6 +660,7 @@
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
   <button id="adminStaffManagerOpen" class="room-chat-open-button" type="button" aria-label="Gestionar Staff" title="Gestionar Staff" aria-controls="adminStaffManager" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg></button>
+  <button id="adminResultsOpen" class="room-chat-open-button" type="button" aria-label="Resultados de mesas" title="Resultados de mesas" aria-controls="adminResultsPanel" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
     <summary aria-label="Acciones de sala" title="Acciones de sala">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -702,7 +709,10 @@
         <div class="staff-manager-section"><h4>Solicitudes pendientes</h4><div id="staffRequestsList" class="staff-manager-list"></div></div>
         <div class="staff-manager-section"><h4>Admitidos</h4><div id="admittedStaffList" class="staff-manager-list"></div></div>
         <div class="staff-manager-section"><h4>Expulsados</h4><div id="kickedStaffList" class="staff-manager-list"></div></div>
-        <div id="adminStaffResults" class="staff-manager-section" hidden><h4>Resultados de mesas</h4><label for="adminResultRound">Ronda<select id="adminResultRound"><option value="latest">Última ronda</option></select></label><p id="adminResultStatus" role="status" aria-live="polite"></p><div id="adminResultList" class="staff-result-list"></div></div>
+        </section>
+      <section id="adminResultsPanel" aria-labelledby="adminResultsTitle" hidden>
+        <div class="staff-manager-heading"><h3 id="adminResultsTitle">Resultados de mesas</h3><button id="adminResultsClose" type="button" aria-label="Cerrar resultados">Cerrar</button></div>
+        <div id="adminStaffResults" class="staff-manager-section" hidden><label for="adminResultRound">Ronda<select id="adminResultRound"><option value="latest">Última ronda</option></select></label><p id="adminResultStatus" role="status" aria-live="polite"></p><div id="adminResultList" class="staff-result-list"></div></div>
       </section>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
       <div class="timer-stage">
@@ -3582,6 +3592,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomResultsRef = null;
     let roomResultsData = {};
     let adminStaffManagerOpen = false;
+    let adminResultsOpen = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
     function unlockRoomChatAudio() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -3737,12 +3748,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const chatButton = document.getElementById('adminStaffChatOpen');
       const managerButton = document.getElementById('adminStaffManagerOpen');
       const managerPanel = document.getElementById('adminStaffManager');
-      if (!isRoomAdmin) adminStaffManagerOpen = false;
+      const resultsButton = document.getElementById('adminResultsOpen');
+      const resultsPanel = document.getElementById('adminResultsPanel');
+      if (!isRoomAdmin) { adminStaffManagerOpen = false; adminResultsOpen = false; }
       chatButton.hidden = !isRoomAdmin;
       chatButton.setAttribute('aria-expanded', String(isRoomAdmin && adminChatOpen));
       managerButton.hidden = !isRoomAdmin;
       managerButton.setAttribute('aria-expanded', String(isRoomAdmin && adminStaffManagerOpen));
       managerPanel.hidden = !isRoomAdmin || !adminStaffManagerOpen;
+      resultsButton.hidden = !isRoomAdmin || !window.TDF_UPLOAD_ENABLED;
+      resultsButton.setAttribute('aria-expanded', String(isRoomAdmin && adminResultsOpen));
+      resultsPanel.hidden = !isRoomAdmin || !adminResultsOpen || !window.TDF_UPLOAD_ENABLED;
       adminPanel.hidden = !isRoomAdmin || !adminChatOpen;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
       if (isRoomAdmin) {
@@ -4105,7 +4121,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const r=roomResultsData[e.key], card=document.createElement('article'); card.className='staff-result-card';
         const meta=document.createElement('div');meta.className='staff-result-meta';meta.textContent='Ronda '+e.round+' · '+e.category+' · Mesa '+e.match.table;
         const players=document.createElement('div');players.className='staff-result-players';
-        [e.match.first,'vs.',e.match.second].forEach((name,i)=>{const span=document.createElement('span');span.textContent=name;players.append(span)});
+        [e.match.first,'vs.',e.match.second].forEach((name,i)=>{const span=document.createElement('span');span.textContent=name;if(r&&((i===0&&r.winner==='first')||(i===2&&r.winner==='second')))span.classList.add('is-winning-player');players.append(span)});
         const actions=document.createElement('div');actions.className='staff-result-actions'; card.append(meta,players,actions);
         if(!r){
           if(isAdmin){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Esperando reporte de Staff';actions.append(p)}
@@ -4491,6 +4507,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('adminStaffChatOpen').addEventListener('click', () => {
           if (!canControl) return;
           adminStaffManagerOpen = false;
+          adminResultsOpen = false;
           adminChatOpen = !adminChatOpen;
           updateRoomChatAccess();
           if (adminChatOpen && roomChatEnabled) document.getElementById('adminStaffChatInput').focus();
@@ -4498,12 +4515,24 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('adminStaffManagerOpen').addEventListener('click', () => {
           if (!canControl) return;
           adminChatOpen = false;
+          adminResultsOpen = false;
           adminStaffManagerOpen = !adminStaffManagerOpen;
           updateRoomChatAccess();
           if (adminStaffManagerOpen) startStaffRosterSubscriptions();
         });
         document.getElementById('staffManagerClose').addEventListener('click', () => {
           adminStaffManagerOpen = false;
+          updateRoomChatAccess();
+        });
+        document.getElementById('adminResultsOpen').addEventListener('click', () => {
+          if (!canControl || !window.TDF_UPLOAD_ENABLED) return;
+          adminChatOpen = false;
+          adminStaffManagerOpen = false;
+          adminResultsOpen = !adminResultsOpen;
+          updateRoomChatAccess();
+        });
+        document.getElementById('adminResultsClose').addEventListener('click', () => {
+          adminResultsOpen = false;
           updateRoomChatAccess();
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
