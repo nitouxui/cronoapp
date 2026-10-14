@@ -187,6 +187,88 @@
           }
         }
       }
+    },
+    "roomResults": {
+      "$room": {
+        "tables": {
+          ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || (auth != null && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
+          "$resultKey": {
+            "round": {
+              ".validate": "newData.isNumber() && newData.val() >= 1"
+            },
+            "category": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+            },
+            "table": {
+              ".validate": "newData.isNumber() && newData.val() >= 1"
+            },
+            "first": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "second": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "winner": {
+              ".validate": "newData.isString() && (newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
+            },
+            "winnerName": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "status": {
+              ".validate": "newData.val() === 'locked'"
+            },
+            "reportedBy": {
+              ".validate": "newData.isString()"
+            },
+            "reporterName": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+            },
+            "reportedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "updatedBy": {
+              ".validate": "newData.isString()"
+            },
+            "updatedName": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "history": {
+              "$entry": {
+                ".validate": "newData.hasChildren(['winner','winnerName','changedBy','changedByName','changedAt','reason']) && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('winnerName').isString() && newData.child('winnerName').val().length <= 120 && newData.child('changedBy').isString() && newData.child('changedByName').isString() && newData.child('changedByName').val().length <= 60 && newData.child('changedAt').isNumber() && newData.child('reason').isString() && newData.child('reason').val().length >= 1 && newData.child('reason').val().length <= 200",
+                "winner": {
+                  ".validate": "newData.isString()"
+                },
+                "winnerName": {
+                  ".validate": "newData.isString()"
+                },
+                "changedBy": {
+                  ".validate": "newData.isString()"
+                },
+                "changedByName": {
+                  ".validate": "newData.isString()"
+                },
+                "changedAt": {
+                  ".validate": "newData.isNumber()"
+                },
+                "reason": {
+                  ".validate": "newData.isString()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "$other": {
+              ".validate": false
+            },
+            ".validate": "newData.hasChildren(['round','category','table','first','second','winner','winnerName','status','reportedBy','reporterName','reportedAt']) && newData.child('round').isNumber() && newData.child('round').val() >= 1 && newData.child('table').isNumber() && newData.child('table').val() >= 1 && newData.child('category').isString() && newData.child('category').val().length >= 1 && newData.child('category').val().length <= 60 && newData.child('first').isString() && newData.child('first').val().length >= 1 && newData.child('first').val().length <= 120 && newData.child('second').isString() && newData.child('second').val().length >= 1 && newData.child('second').val().length <= 120 && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('winnerName').isString() && newData.child('winnerName').val().length >= 1 && newData.child('winnerName').val().length <= 120 && newData.child('status').val() === 'locked' && newData.child('reportedBy').isString() && newData.child('reporterName').isString() && newData.child('reporterName').val().length >= 1 && newData.child('reporterName').val().length <= 60 && newData.child('reportedAt').isNumber()",
+            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid && newData.exists()) || (auth != null && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted' && !data.exists() && newData.exists() && newData.child('reportedBy').val() === auth.uid && !newData.hasChild('history') && !newData.hasChild('updatedBy'))"
+          }
+        }
+      }
     }
   }
 }
