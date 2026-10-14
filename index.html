@@ -162,6 +162,12 @@
     /* Menú compacto para las acciones principales de la sala. */
     body:not(.no-room) .top-actions { position: absolute; top: 14px; right: 14px; z-index: 30; display: flex; align-items: flex-start; gap: 8px; }
     body:not(.no-room) .room-actions-menu { position: relative; }
+    body:not(.no-room) .room-chat-open-button { display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 8px 24px #0004; cursor: pointer; }
+    body:not(.no-room) .room-chat-open-button[hidden] { display: none !important; }
+    body:not(.no-room) .room-chat-open-button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    body:not(.no-room) .room-chat-open-button:hover, body:not(.no-room) .room-chat-open-button[aria-expanded="true"] { border-color: var(--accent); color: var(--accent-soft); }
+    body:not(.no-room) .room-chat-open-button:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
+    body:not(.no-room) #adminStaffChat { position: fixed; top: 68px; right: 14px; z-index: 28; width: min(420px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; box-shadow: 0 18px 50px #0009; }
     body:not(.no-room) .room-home-link { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 8px 24px #0004; text-decoration: none; }
     body:not(.no-room) .room-home-link svg { width: 22px; height: 22px; }
     body:not(.no-room) .room-home-link:hover { border-color: var(--accent); color: var(--accent-soft); }
@@ -613,6 +619,7 @@
     <div id="rightPanel" class="panel">
       <div class="top-actions">
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
+  <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
     <summary aria-label="Acciones de sala" title="Acciones de sala">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -3509,6 +3516,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatEnabledRef = null;
     let roomChatMessagesRef = null;
     let roomChatEnabled = false;
+    let adminChatOpen = false;
     let roomChatHasSetting = false;
     let roomChatDefaultPending = false;
     let stopRoomChatRead = null;
@@ -3659,7 +3667,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const adminPanel = document.getElementById('adminStaffChat');
       const staffPanel = document.getElementById('staffChatModule');
       const isRoomAdmin = !isReadOnly && canControl;
-      adminPanel.hidden = !isRoomAdmin;
+      if (!isRoomAdmin) adminChatOpen = false;
+      const chatButton = document.getElementById('adminStaffChatOpen');
+      chatButton.hidden = !isRoomAdmin;
+      chatButton.setAttribute('aria-expanded', String(isRoomAdmin && adminChatOpen));
+      adminPanel.hidden = !isRoomAdmin || !adminChatOpen;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
       if (isRoomAdmin) {
         const status = document.getElementById('adminStaffChatStatus');
@@ -4051,6 +4063,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           try { await dbModule.set(roomChatEnabledRef, !roomChatEnabled); }
           catch (_) { document.getElementById('adminStaffChatStatus').textContent = 'No se pudo actualizar la prueba. Revisa las reglas de Firebase.'; }
           finally { button.disabled = false; }
+        });
+        document.getElementById('adminStaffChatOpen').addEventListener('click', () => {
+          if (!canControl) return;
+          adminChatOpen = !adminChatOpen;
+          updateRoomChatAccess();
+          if (adminChatOpen && roomChatEnabled) document.getElementById('adminStaffChatInput').focus();
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
         document.getElementById('staffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'staff'));
