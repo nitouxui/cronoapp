@@ -130,6 +130,11 @@
             }
           },
           ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid && !newData.exists()"
+        },
+        "adminName": {
+          ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
         }
       }
     },
@@ -159,7 +164,7 @@
           }
         },
         "members": {
-          ".read": "auth != null && (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
+          ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
           "$uid": {
             ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid))",
             ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
