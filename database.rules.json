@@ -110,6 +110,21 @@
           "$messageId": {
             ".write": "!data.exists() && auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('roomMessages').child($room).child('enabled').val() === true",
             ".validate": "newData.hasChildren(['uid', 'role', 'name', 'text', 'createdAt']) && newData.child('uid').val() === auth.uid && newData.child('name').isString() && newData.child('name').val().length <= 60 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500 && newData.child('createdAt').isNumber() && ((newData.child('role').val() === 'admin' && auth.uid === root.child('rooms').child($room).child('ownerUid').val() && auth.token.email === 'quidel.dsgn@gmail.com') || (newData.child('role').val() === 'staff' && auth.uid !== root.child('rooms').child($room).child('ownerUid').val()))",
+            "uid": {
+              ".validate": "newData.isString()"
+            },
+            "role": {
+              ".validate": "newData.isString() && (newData.val() === 'admin' || newData.val() === 'staff')"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 60"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
             "$other": {
               ".validate": false
             }
