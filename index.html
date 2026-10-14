@@ -4104,7 +4104,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const rounds = c.rounds || [], round = choice === 'latest' ? rounds.at(-1) : rounds.find(r => String(r.number) === String(choice));
         (round?.matches || []).forEach(m => {
           if (!Number(m.table) || !m.first || !m.second || m.second === 'BYE') return;
-          out.push({ key: 'c'+ci+'_r'+round.number+'_t'+m.table, category:c.name || 'Categoría', round:Number(round.number), match:m });
+          const eventId = data.eventId || 'legacy';
+          out.push({ key: 'e'+eventId+'_c'+ci+'_r'+round.number+'_t'+m.table, category:c.name || 'Categoría', round:Number(round.number), match:m });
         });
       });
       return out;
@@ -4389,13 +4390,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             button.disabled = true; status.textContent = 'Leyendo el TDF…';
             try {
               const pairings = window.parseTdf(await file.text());
+              const players = new Set(pairings.categories.flatMap(category => category.rounds.flatMap(round => round.matches.flatMap(match => [match.first, match.second]).filter(name => name && name !== 'BYE'))));
+              const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(pairings)));
+              pairings.eventId = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
               const payload = JSON.stringify(pairings);
               if (payload.length > 900_000) throw new Error('Los pareos superan el límite permitido.');
               await dbModule.set(pairingsRef, payload);
+              const saved = await dbModule.get(pairingsRef);
+              if (!saved.exists() || saved.val() !== payload) throw new Error('Firebase no confirmó el TDF cargado. Los pareos anteriores pueden seguir visibles.');
               const total = pairings.categories.reduce((sum, category) => sum + category.rounds.length, 0);
               window.pairingsPublished();
-              status.textContent = `Pareos publicados: ${total} rondas en ${pairings.categories.length} categoría(s).`;
-            } catch (error) { status.textContent = error?.message || 'No se pudo publicar el TDF. Revisa las reglas de Firebase.'; }
+              status.textContent = `TDF «${pairings.title}» confirmado: ${players.size} jugadores, ${total} rondas en ${pairings.categories.length} categoría(s).`;
+            } catch (error) { status.textContent = (error?.message || 'No se pudo publicar el TDF.') + ' La sala puede seguir mostrando los pareos anteriores; revisa las reglas de Firebase.'; }
             finally { button.disabled = false; }
           });
         }
