@@ -3565,7 +3565,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       try {
         await dbModule.set(dbModule.push(roomChatMessagesRef), message);
         input.value = '';
-      } catch (_) { status.textContent = 'No se pudo enviar el mensaje. Revisa las reglas de Firebase.'; }
+      } catch (error) {
+        console.error('CronoApp room message send failed:', error);
+        status.textContent = 'No se pudo enviar el mensaje (' + (error?.code || 'error desconocido') + '). Revisa las reglas de Firebase.';
+      }
     }
     function updateAccess() {
       const verified = !!currentUser?.emailVerified;
