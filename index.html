@@ -3556,10 +3556,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatAudioContext = null;
     let roomChatAudioUnlocked = false;
     let roomChatParticipantNames = [];
+    let roomChatStaffNames = [];
+    let roomChatAdminName = '';
+    let roomChatAdminNameRef = null;
+    let roomChatAdminNameWriteStarted = false;
     let staffRequestsRef = null;
     let staffMembersRef = null;
     let stopStaffRequestsRead = null;
     let stopStaffMembersRead = null;
+    let stopRoomChatAdminNameRead = null;
     let stopStaffMembershipRead = null;
     let adminStaffManagerOpen = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
@@ -3632,12 +3637,20 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         }
       }
     }
+    function refreshRoomChatParticipantNames(messages = []) {
+      const names = [
+        ...roomChatStaffNames,
+        roomChatAdminName,
+        ...(auth?.currentUser?.displayName ? [auth.currentUser.displayName] : []),
+        staffChatName,
+        ...messages.map(message => typeof message?.name === 'string' ? message.name : '')
+      ];
+      roomChatParticipantNames = [...new Set(names.map(name => String(name || '').trim()).filter(Boolean))];
+    }
     function renderRoomChat(messages) {
       const lists = [document.getElementById('adminStaffChatMessages'), document.getElementById('staffChatMessages')];
       const items = Array.isArray(messages) ? messages : [];
-      roomChatParticipantNames = [...new Set(items.map(message => typeof message?.name === 'string' ? message.name.trim() : '').filter(Boolean))];
-      if (auth?.currentUser?.displayName) roomChatParticipantNames.push(auth.currentUser.displayName.trim());
-      if (staffChatName) roomChatParticipantNames.push(staffChatName);
+      refreshRoomChatParticipantNames(items);
       lists.forEach(list => {
         list.replaceChildren();
         items.forEach(message => {
@@ -3835,9 +3848,29 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       ]));
     }
     function startStaffRosterSubscriptions() {
-      if (!canControl || !staffRequestsRef || !staffMembersRef) return;
+      const canReadParticipants = canControl || isJudge;
+      if (!canReadParticipants || !auth?.currentUser) return;
+      if (staffMembersRef && !stopStaffMembersRead) {
+        stopStaffMembersRead = dbModule.onValue(staffMembersRef, snapshot => {
+          const members = Object.values(snapshot.val() || {});
+          roomChatStaffNames = members
+            .filter(member => member?.status === 'admitted')
+            .map(member => String(member.name || '').trim())
+            .filter(Boolean);
+          refreshRoomChatParticipantNames();
+          if (canControl) renderStaffMembers(snapshot);
+        }, () => {
+          if (canControl) setStaffManagerStatus('No se pudo cargar la lista de Staff. Revisa las reglas de Firebase.');
+        });
+      }
+      if (roomChatAdminNameRef && !stopRoomChatAdminNameRead) {
+        stopRoomChatAdminNameRead = dbModule.onValue(roomChatAdminNameRef, snapshot => {
+          roomChatAdminName = typeof snapshot.val() === 'string' ? snapshot.val().trim() : '';
+          refreshRoomChatParticipantNames();
+        }, () => {});
+      }
+      if (!canControl || !staffRequestsRef) return;
       if (!stopStaffRequestsRead) stopStaffRequestsRead = dbModule.onValue(staffRequestsRef, renderStaffRequests, () => setStaffManagerStatus('No se pudieron cargar las solicitudes. Revisa las reglas de Firebase.'));
-      if (!stopStaffMembersRead) stopStaffMembersRead = dbModule.onValue(staffMembersRef, renderStaffMembers, () => setStaffManagerStatus('No se pudo cargar la lista de Staff. Revisa las reglas de Firebase.'));
     }
     function setStaffAccessGate(message, showRetry = false) {
       const gate = document.getElementById('staffAccessGate');
@@ -4054,6 +4087,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function updateAccess() {
       const verified = !!currentUser?.emailVerified;
       canControl = verified && currentUser.uid === roomOwner;
+      startStaffRosterSubscriptions();
+      if (canControl && roomChatAdminNameRef && !roomChatAdminNameWriteStarted && auth?.currentUser) {
+        const adminName = String(auth.currentUser.displayName?.trim() || auth.currentUser.email?.split('@')[0] || '').slice(0, 60);
+        if (adminName) {
+          roomChatAdminNameWriteStarted = true;
+          dbModule.set(roomChatAdminNameRef, adminName).catch(error => {
+            roomChatAdminNameWriteStarted = false;
+            console.warn('CronoApp could not sync the admin display name:', error);
+          });
+        }
+      }
       startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = !canControl;
       roomDurationControl.hidden = !canControl;
       googleButton.hidden = !!currentUser;
@@ -4152,6 +4196,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         roomChatMessagesRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/messages') : null;
         staffRequestsRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/requests') : null;
         staffMembersRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/members') : null;
+        roomChatAdminNameRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/adminName') : null;
+        startStaffRosterSubscriptions();
         const pairingsRef = roomId && !isPrivatePairings ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         if (roomChatEnabledRef) dbModule.onValue(roomChatEnabledRef, snap => {
           roomChatHasSetting = snap.exists();
