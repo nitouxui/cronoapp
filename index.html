@@ -3508,7 +3508,42 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatDefaultPending = false;
     let stopRoomChatRead = null;
     let roomChatIsSubscribed = false;
+    let roomChatAudioContext = null;
+    let roomChatAudioUnlocked = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
+    function unlockRoomChatAudio() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      try {
+        if (!roomChatAudioContext) roomChatAudioContext = new AudioContextClass();
+        if (roomChatAudioContext.state === 'suspended') {
+          roomChatAudioContext.resume().then(() => { roomChatAudioUnlocked = true; }).catch(() => {});
+        } else {
+          roomChatAudioUnlocked = true;
+        }
+      } catch (_) {}
+    }
+    document.addEventListener('pointerdown', unlockRoomChatAudio, { passive: true });
+    document.addEventListener('keydown', unlockRoomChatAudio);
+    function playRoomChatAlert() {
+      const context = roomChatAudioContext;
+      if (!roomChatAudioUnlocked || !context || context.state !== 'running') return;
+      try {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const now = context.currentTime;
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(740, now);
+        oscillator.frequency.setValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.075, now + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.34);
+      } catch (_) {}
+    }
     function stopRoomChatSubscription() {
       if (stopRoomChatRead) stopRoomChatRead();
       stopRoomChatRead = null;
@@ -3547,6 +3582,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       stopRoomChatSubscription();
       roomChatIsSubscribed = true;
       const recentMessages = dbModule.query(roomChatMessagesRef, dbModule.orderByKey(), dbModule.limitToLast(50));
+      const subscriptionStartedAt = Date.now();
       const messages = new Map();
       const renderLatest = () => {
         const latest = [...messages.entries()]
@@ -3562,8 +3598,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       };
       const unsubscribe = [
         dbModule.onChildAdded(recentMessages, snapshot => {
-          messages.set(snapshot.key, snapshot.val());
+          const message = snapshot.val();
+          messages.set(snapshot.key, message);
           renderLatest();
+          const isIncoming = isJudge ? message?.role === 'admin' : message?.role === 'staff';
+          if (isIncoming && Number(message?.createdAt) > subscriptionStartedAt) playRoomChatAlert();
         }, onError),
         dbModule.onChildChanged(recentMessages, snapshot => {
           messages.set(snapshot.key, snapshot.val());
