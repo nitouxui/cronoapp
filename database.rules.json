@@ -128,7 +128,8 @@
             "$other": {
               ".validate": false
             }
-          }
+          },
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid"
         }
       }
     }
