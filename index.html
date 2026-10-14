@@ -3486,10 +3486,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       stopRoomChatRead = null;
       roomChatReaderUid = null;
     }
-    function renderRoomChat(snapshot) {
+    function renderRoomChat(messages) {
       const lists = [document.getElementById('adminStaffChatMessages'), document.getElementById('staffChatMessages')];
-      const items = [];
-      snapshot.forEach(child => items.push(child.val()));
+      const items = Array.isArray(messages) ? messages : [];
       lists.forEach(list => {
         list.replaceChildren();
         items.forEach(message => {
@@ -3512,11 +3511,34 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       stopRoomChatSubscription();
       roomChatReaderUid = auth.currentUser.uid;
       const recentMessages = dbModule.query(roomChatMessagesRef, dbModule.orderByKey(), dbModule.limitToLast(50));
-      stopRoomChatRead = dbModule.onValue(recentMessages, renderRoomChat, () => {
+      const messages = new Map();
+      const renderLatest = () => {
+        const latest = [...messages.entries()]
+          .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+          .slice(-50)
+          .map(([, message]) => message);
+        renderRoomChat(latest);
+      };
+      const onError = () => {
         const message = 'No se pudo acceder a los mensajes. Revisa las reglas de Firebase.';
         document.getElementById('adminStaffChatStatus').textContent = message;
         document.getElementById('staffChatStatus').textContent = message;
-      });
+      };
+      const unsubscribe = [
+        dbModule.onChildAdded(recentMessages, snapshot => {
+          messages.set(snapshot.key, snapshot.val());
+          renderLatest();
+        }, onError),
+        dbModule.onChildChanged(recentMessages, snapshot => {
+          messages.set(snapshot.key, snapshot.val());
+          renderLatest();
+        }, onError),
+        dbModule.onChildRemoved(recentMessages, snapshot => {
+          messages.delete(snapshot.key);
+          renderLatest();
+        }, onError)
+      ];
+      stopRoomChatRead = () => unsubscribe.forEach(stop => stop());
     }
     function updateRoomChatAccess() {
       const adminPanel = document.getElementById('adminStaffChat');
