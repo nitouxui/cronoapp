@@ -3863,7 +3863,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           if (!user) user = (await authModule.signInAnonymously(auth)).user;
         } catch (error) {
           console.error('CronoApp could not establish staff identity:', error);
-          setStaffAccessGate('No se pudo identificar esta sesión. Habilita el inicio de sesión anónimo en Firebase Authentication e inténtalo nuevamente.');
+          const authCode = error?.code || '';
+          const authMessage = authCode === 'auth/operation-not-allowed'
+            ? 'Firebase tiene deshabilitado el acceso anónimo. Activa Authentication > Sign-in method > Anonymous y vuelve a cargar.'
+            : authCode === 'auth/unauthorized-domain'
+              ? 'Agrega cronoapp.cl en Firebase Authentication > Settings > Authorized domains.'
+              : authCode === 'auth/network-request-failed'
+                ? 'No se pudo conectar con Firebase. Revisa la conexión de la TV o dispositivo.'
+                : 'No se pudo identificar esta sesión (' + (authCode || 'error desconocido') + '). Revisa Firebase Authentication.';
+          setStaffAccessGate(authMessage, true);
           return false;
         }
       }
@@ -4021,11 +4029,15 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const status = document.getElementById(isAdmin ? 'adminStaffChatStatus' : 'staffChatStatus');
       const text = input.value.trim();
       if (!text || text.length > 500 || !roomChatEnabled) return;
-      const user = isAdmin ? auth?.currentUser : null;
-      if (isAdmin && (!user || !canControl)) return;
+      const user = auth?.currentUser;
+      if (!user) {
+        status.textContent = 'No se pudo identificar tu sesión. Vuelve a ingresar a la sala.';
+        return;
+      }
+      if (isAdmin && !canControl) return;
       if (!isAdmin && !staffChatName) return;
       const message = {
-        uid: isAdmin ? user.uid : 'staff',
+        uid: user.uid,
         role,
         name: isAdmin ? (user.displayName?.trim() || user.email?.split('@')[0] || 'Administración') : staffChatName,
         text,
