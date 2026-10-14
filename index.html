@@ -574,9 +574,10 @@
       #adminResultsPanel { position: fixed; top: 68px; right: 14px; z-index: 29; width: min(680px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; padding: 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 18px 50px #0009; }
     #adminResultsPanel[hidden] { display: none !important; }
     #adminResultsClose { min-height: 36px; padding: 0 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .staff-result-card { transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
-    .staff-result-card:hover, .staff-result-card:focus-within { border-color: var(--accent, #a78bfa); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #a78bfa) 30%, transparent); transform: translateY(-1px); }
-    .staff-result-players .is-winning-player { color: var(--accent, #c4b5fd); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+    .staff-result-card.has-winner { border-color: var(--accent, #a78bfa); background: rgba(139, 92, 246, .18); box-shadow: inset 4px 0 0 var(--accent, #a78bfa); }
+    .staff-result-card.is-draw { border-color: #d6a84f; background: rgba(214, 168, 79, .12); box-shadow: inset 4px 0 0 #d6a84f; }
+    .staff-result-players .is-winning-player { color: var(--accent, #c4b5fd); font-weight: 800; }
+    .staff-result-players .is-winning-player::after { content: ' · GANADOR'; display: inline-block; margin-left: 5px; color: var(--accent, #c4b5fd); font-size: 10px; letter-spacing: .07em; vertical-align: middle; }
   </style>
 </head>
 <body data-palette="graphite" data-timer-font="system">
@@ -4118,7 +4119,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const entries=resultEntries(document.getElementById(roundId)?.value || 'latest');
       if(!entries.length){status.textContent='No hay mesas en esta ronda.';return;} status.textContent='';
       entries.forEach(e=>{
-        const r=roomResultsData[e.key], card=document.createElement('article'); card.className='staff-result-card';
+        const r=roomResultsData[e.key], card=document.createElement('article'); card.className='staff-result-card'; if(r)card.classList.add('has-result'); if(r&&r.winner!=='draw')card.classList.add('has-winner'); if(r?.winner==='draw')card.classList.add('is-draw');
         const meta=document.createElement('div');meta.className='staff-result-meta';meta.textContent='Ronda '+e.round+' · '+e.category+' · Mesa '+e.match.table;
         const players=document.createElement('div');players.className='staff-result-players';
         [e.match.first,'vs.',e.match.second].forEach((name,i)=>{const span=document.createElement('span');span.textContent=name;if(r&&((i===0&&r.winner==='first')||(i===2&&r.winner==='second')))span.classList.add('is-winning-player');players.append(span)});
