@@ -3654,7 +3654,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const message = {
         uid: isAdmin ? user.uid : 'staff',
         role,
-        name: isAdmin ? 'Administración' : staffChatName,
+        name: isAdmin ? (user.displayName?.trim() || user.email?.split('@')[0] || 'Administración') : staffChatName,
         text,
         createdAt: Date.now()
       };
