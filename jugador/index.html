@@ -57,8 +57,20 @@
           for(const [winner,label] of options){const button=document.createElement('button');button.type='button';button.textContent=label;button.addEventListener('click',async()=>{
             if(!confirm(`¿Confirmas el resultado de la mesa ${match.table}: ${label}?`))return;
             button.disabled=true;
-            try{const target=ref(db,`playerReports/${roomId}/${pairings.eventId}/tables/${key}/${side}`);await set(target,{winner,uid:auth.currentUser.uid,submittedAt:Date.now()})}
-            catch(error){$('playerStatus').textContent='No se pudo registrar tu confirmación. Revisa las reglas de Firebase.';button.disabled=false;console.error(error)}
+            const target=ref(db,`playerReports/${roomId}/${pairings.eventId}/tables/${key}/${side}`),vote={winner,uid:auth.currentUser.uid,submittedAt:Date.now()};
+            try{await set(target,vote);$('playerStatus').textContent='Confirmación registrada.'}
+            catch(error){
+              console.error('Error al guardar confirmación del jugador:',error);
+              try{
+                const existing=await get(target);
+                if(existing.exists()&&existing.val()?.uid===auth.currentUser.uid){$('playerStatus').textContent='Tu confirmación ya estaba registrada.';button.disabled=true;return}
+              }catch(readError){console.error('No se pudo comprobar la confirmación:',readError)}
+              const code=error?.code||'desconocido';
+              $('playerStatus').textContent=code==='PERMISSION_DENIED'||code==='permission-denied'
+                ?'Firebase rechazó el permiso. Publica las reglas actualizadas de database.rules.json, que incluyen playerReports.'
+                :`No se pudo registrar tu confirmación (${code}). Inténtalo nuevamente.`;
+              button.disabled=false;
+            }
           });controls.append(button)}card.append(controls);
         } else if(latest&&match.second==='BYE'){const note=document.createElement('p');note.textContent='Esta ronda es un BYE; no requiere reporte.';card.append(note)}
       }
