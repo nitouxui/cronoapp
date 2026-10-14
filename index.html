@@ -77,7 +77,20 @@
     #staffChatNameForm { display: grid; gap: 8px; margin: 10px 0; }
     #staffChatNameInput { width: 100%; min-height: 42px; padding: 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; }
     #adminStaffChat { width: 100%; padding: 14px; border: 1px solid var(--edge); border-radius: 12px; background: var(--surface); color: var(--text); }
+    body:not(.no-room) #adminStaffChat { position: fixed; top: 68px; right: 14px; z-index: 28; width: min(420px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; box-shadow: 0 18px 50px #0009; }
     #adminStaffChat h3 { margin: 0; font-size: 16px; }
+    #adminStaffManager { position: fixed; top: 68px; right: 14px; z-index: 29; width: min(480px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; padding: 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 18px 50px #0009; }
+    #adminStaffManager[hidden] { display: none !important; }
+    .staff-manager-heading, .staff-manager-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .staff-manager-heading h3 { margin: 0; }
+    .staff-manager-section { margin-top: 16px; }
+    .staff-manager-section h4 { margin: 0 0 8px; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+    .staff-manager-list { display: grid; gap: 8px; }
+    .staff-manager-row { padding: 10px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface); }
+    .staff-manager-row span { min-width: 0; overflow-wrap: anywhere; }
+    .staff-manager-row button, #staffManagerClose { min-height: 36px; padding: 0 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .staff-manager-row button:hover, #staffManagerClose:hover { border-color: var(--accent); color: var(--accent-soft); }
+    .staff-manager-empty { margin: 8px 0; color: var(--muted); font-size: 14px; }
     .room-chat-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .room-chat-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
     .room-chat-icon-button { display: inline-grid; width: 36px; height: 36px; place-items: center; padding: 0; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); cursor: pointer; }
@@ -106,6 +119,16 @@
     .staff-call-actions #callStopwatchReset { background: var(--surface); color: var(--text); }
     .staff-call-actions button:disabled { opacity: .45; cursor: not-allowed; }
     #judgeStatus { position: fixed; bottom: 16px; left: 16px; right: 16px; font-size: 14px; opacity: .8; }
+    #staffAccessGate { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: #10131bf5; color: #fff; }
+    #staffAccessGate[hidden] { display: none !important; }
+    body.viewer-mode:not(.staff-access-ready) #staffAccessGate { display: grid; }
+    body.viewer-mode:not(.staff-access-ready) #judgeView { visibility: hidden; }
+    .staff-access-card { width: min(100%, 460px); padding: 28px; border: 1px solid #454657; border-radius: 18px; background: #1a1c26; box-shadow: 0 24px 70px #0008; }
+    .staff-access-eyebrow { color: #b8a9ff; font-size: 12px; font-weight: 800; letter-spacing: .14em; }
+    .staff-access-card h1 { margin: 10px 0; font-size: clamp(24px, 6vw, 32px); }
+    .staff-access-card p { color: #c4c5d0; line-height: 1.5; }
+    .staff-access-card button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 9px; background: #8065ec; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+    .staff-access-card a { display: inline-block; margin-left: 12px; color: #c5b8ff; }
     #enableSound { display: none; position: fixed; z-index: 25; left: 50%; bottom: 20px; transform: translateX(-50%); align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border: 1px solid #ffffff55; border-radius: 999px; background: #202734; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px #0006; }
     #enableSound:not([hidden]) { display: inline-flex; }
     #enableSound[aria-pressed="true"] { border-color: #71d7a4; color: #b8f5d2; }
@@ -620,6 +643,7 @@
       <div class="top-actions">
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
+  <button id="adminStaffManagerOpen" class="room-chat-open-button" type="button" aria-label="Gestionar Staff" title="Gestionar Staff" aria-controls="adminStaffManager" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
     <summary aria-label="Acciones de sala" title="Acciones de sala">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -662,6 +686,13 @@
   </details>
       </div>
       <section id="adminStaffChat" class="room-chat-panel" aria-labelledby="adminStaffChatTitle" hidden><div class="room-chat-heading"><h3 id="adminStaffChatTitle">Mensajes con Staff</h3><div class="room-chat-actions"><button id="toggleStaffChat" class="room-chat-icon-button" type="button" aria-label="Desactivar mensajería" title="Desactivar mensajería" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10"></path><path d="M18.4 6.6a8 8 0 1 1-12.8 0"></path></svg></button><button id="clearStaffChatHistory" class="room-chat-icon-button room-chat-delete-button" type="button" aria-label="Eliminar historial" title="Eliminar historial"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m5 6 1 15h12l1-15"></path><path d="M10 11v6M14 11v6"></path></svg></button></div></div><p id="adminStaffChatStatus" role="status" aria-live="polite"></p><ol id="adminStaffChatMessages" aria-label="Mensajes de la sala"></ol><form id="adminStaffChatForm" hidden><label class="visually-hidden" for="adminStaffChatInput">Escribe un mensaje</label><textarea id="adminStaffChatInput" maxlength="500" placeholder="Escribe un mensaje para Staff" required></textarea><div id="adminStaffChatMentionSuggestions" class="room-chat-mention-suggestions" role="listbox" aria-label="Sugerencias de mención" hidden></div><button type="submit">Enviar</button></form></section>
+      <section id="adminStaffManager" aria-labelledby="adminStaffManagerTitle" hidden>
+        <div class="staff-manager-heading"><h3 id="adminStaffManagerTitle">Staff de la sala</h3><button id="staffManagerClose" type="button" aria-label="Cerrar gestión de Staff">Cerrar</button></div>
+        <p id="staffManagerStatus" role="status" aria-live="polite">Cargando integrantes…</p>
+        <div class="staff-manager-section"><h4>Solicitudes pendientes</h4><div id="staffRequestsList" class="staff-manager-list"></div></div>
+        <div class="staff-manager-section"><h4>Admitidos</h4><div id="admittedStaffList" class="staff-manager-list"></div></div>
+        <div class="staff-manager-section"><h4>Expulsados</h4><div id="kickedStaffList" class="staff-manager-list"></div></div>
+      </section>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
       <div class="timer-stage">
         <img id="logo" src="" alt="Logo" style="display:none;">
@@ -3525,6 +3556,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let roomChatAudioContext = null;
     let roomChatAudioUnlocked = false;
     let roomChatParticipantNames = [];
+    let staffRequestsRef = null;
+    let staffMembersRef = null;
+    let stopStaffRequestsRead = null;
+    let stopStaffMembersRead = null;
+    let stopStaffMembershipRead = null;
+    let adminStaffManagerOpen = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
     function unlockRoomChatAudio() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -3670,8 +3707,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const isRoomAdmin = !isReadOnly && canControl;
       if (!isRoomAdmin) adminChatOpen = false;
       const chatButton = document.getElementById('adminStaffChatOpen');
+      const managerButton = document.getElementById('adminStaffManagerOpen');
+      const managerPanel = document.getElementById('adminStaffManager');
+      if (!isRoomAdmin) adminStaffManagerOpen = false;
       chatButton.hidden = !isRoomAdmin;
       chatButton.setAttribute('aria-expanded', String(isRoomAdmin && adminChatOpen));
+      managerButton.hidden = !isRoomAdmin;
+      managerButton.setAttribute('aria-expanded', String(isRoomAdmin && adminStaffManagerOpen));
+      managerPanel.hidden = !isRoomAdmin || !adminStaffManagerOpen;
       adminPanel.hidden = !isRoomAdmin || !adminChatOpen;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
       if (isRoomAdmin) {
@@ -3693,6 +3736,214 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (roomChatEnabled && (isRoomAdmin || isJudge)) startRoomChatSubscription();
       else stopRoomChatSubscription();
       ensureRoomChatEnabledByDefault();
+    }
+    function setStaffManagerStatus(message) {
+      document.getElementById('staffManagerStatus').textContent = message;
+    }
+    function addStaffManagerRow(container, name, actions) {
+      const row = document.createElement('div');
+      row.className = 'staff-manager-row';
+      const label = document.createElement('span');
+      label.textContent = name;
+      row.append(label);
+      actions.forEach(({ label: actionLabel, run }) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = actionLabel;
+        button.addEventListener('click', run);
+        row.append(button);
+      });
+      container.append(row);
+    }
+    function showStaffManagerEmpty(container, message) {
+      const empty = document.createElement('p');
+      empty.className = 'staff-manager-empty';
+      empty.textContent = message;
+      container.append(empty);
+    }
+    async function admitStaff(uid, request) {
+      if (!canControl || !staffMembersRef || !staffRequestsRef) return;
+      try {
+        await dbModule.set(dbModule.child(staffMembersRef, uid), {
+          name: String(request.name || 'Staff').slice(0, 60),
+          status: 'admitted',
+          admittedAt: Date.now()
+        });
+        await dbModule.remove(dbModule.child(staffRequestsRef, uid));
+      } catch (error) {
+        console.error('CronoApp staff admission failed:', error);
+        setStaffManagerStatus('No se pudo admitir a Staff. Revisa las reglas de Firebase.');
+      }
+    }
+    async function rejectStaff(uid, request) {
+      if (!canControl || !staffRequestsRef) return;
+      try {
+        await dbModule.set(dbModule.child(staffRequestsRef, uid), {
+          name: String(request.name || 'Staff').slice(0, 60),
+          status: 'rejected',
+          requestedAt: Number(request.requestedAt) || Date.now(),
+          resolvedAt: Date.now()
+        });
+      } catch (error) {
+        console.error('CronoApp staff request rejection failed:', error);
+        setStaffManagerStatus('No se pudo rechazar la solicitud. Revisa las reglas de Firebase.');
+      }
+    }
+    async function setStaffMembership(uid, member, status) {
+      if (!canControl || !staffMembersRef) return;
+      try {
+        const next = {
+          name: String(member.name || 'Staff').slice(0, 60),
+          status,
+          [status === 'kicked' ? 'kickedAt' : 'admittedAt']: Date.now()
+        };
+        await dbModule.set(dbModule.child(staffMembersRef, uid), next);
+      } catch (error) {
+        console.error('CronoApp staff membership update failed:', error);
+        setStaffManagerStatus(status === 'kicked'
+          ? 'No se pudo expulsar a Staff. Revisa las reglas de Firebase.'
+          : 'No se pudo readmitir a Staff. Revisa las reglas de Firebase.');
+      }
+    }
+    function renderStaffRequests(snapshot) {
+      const list = document.getElementById('staffRequestsList');
+      list.replaceChildren();
+      const requests = Object.entries(snapshot.val() || {}).filter(([, request]) => request?.status === 'pending');
+      if (!requests.length) { showStaffManagerEmpty(list, 'No hay solicitudes pendientes.'); return; }
+      requests.forEach(([uid, request]) => addStaffManagerRow(list, request.name || 'Staff', [
+        { label: 'Admitir', run: () => admitStaff(uid, request) },
+        { label: 'Rechazar', run: () => rejectStaff(uid, request) }
+      ]));
+    }
+    function renderStaffMembers(snapshot) {
+      const admitted = document.getElementById('admittedStaffList');
+      const kicked = document.getElementById('kickedStaffList');
+      admitted.replaceChildren();
+      kicked.replaceChildren();
+      const members = Object.entries(snapshot.val() || {});
+      const active = members.filter(([, member]) => member?.status === 'admitted');
+      const removed = members.filter(([, member]) => member?.status === 'kicked');
+      if (!active.length) showStaffManagerEmpty(admitted, 'Aún no hay Staff admitido.');
+      active.forEach(([uid, member]) => addStaffManagerRow(admitted, member.name || 'Staff', [
+        { label: 'Expulsar', run: () => {
+          if (window.confirm('¿Expulsar a ' + (member.name || 'este integrante') + ' de la sala?')) setStaffMembership(uid, member, 'kicked');
+        } }
+      ]));
+      if (!removed.length) showStaffManagerEmpty(kicked, 'No hay integrantes expulsados.');
+      removed.forEach(([uid, member]) => addStaffManagerRow(kicked, member.name || 'Staff', [
+        { label: 'Readmitir', run: () => setStaffMembership(uid, member, 'admitted') }
+      ]));
+    }
+    function startStaffRosterSubscriptions() {
+      if (!canControl || !staffRequestsRef || !staffMembersRef) return;
+      if (!stopStaffRequestsRead) stopStaffRequestsRead = dbModule.onValue(staffRequestsRef, renderStaffRequests, () => setStaffManagerStatus('No se pudieron cargar las solicitudes. Revisa las reglas de Firebase.'));
+      if (!stopStaffMembersRead) stopStaffMembersRead = dbModule.onValue(staffMembersRef, renderStaffMembers, () => setStaffManagerStatus('No se pudo cargar la lista de Staff. Revisa las reglas de Firebase.'));
+    }
+    function setStaffAccessGate(message, showRetry = false) {
+      const gate = document.getElementById('staffAccessGate');
+      gate.hidden = false;
+      document.body.classList.remove('staff-access-ready');
+      document.getElementById('staffAccessStatus').textContent = message;
+      document.getElementById('staffRequestAgain').hidden = !showRetry;
+    }
+    async function prepareStaffRoomAccess(db) {
+      const gate = document.getElementById('staffAccessGate');
+      const retryButton = document.getElementById('staffRequestAgain');
+      setStaffAccessGate('Verificando tu acceso a la sala…');
+      let user = auth?.currentUser;
+      if (!user) {
+        try {
+          user = await new Promise((resolve, reject) => {
+            let unsubscribe = null;
+            unsubscribe = authModule.onAuthStateChanged(auth, current => {
+              if (unsubscribe) unsubscribe();
+              resolve(current);
+            }, reject);
+          });
+          if (!user) user = (await authModule.signInAnonymously(auth)).user;
+        } catch (error) {
+          console.error('CronoApp could not establish staff identity:', error);
+          setStaffAccessGate('No se pudo identificar esta sesión. Habilita el inicio de sesión anónimo en Firebase Authentication e inténtalo nuevamente.');
+          return false;
+        }
+      }
+      currentUser = user;
+      const possibleOwnerRoom = await dbModule.get(dbModule.ref(db, 'rooms/' + roomId)).catch(() => null);
+      if (possibleOwnerRoom?.val()?.ownerUid === user.uid) {
+        roomOwner = user.uid;
+        gate.hidden = true;
+        document.body.classList.add('staff-access-ready');
+        return true;
+      }
+      const base = dbModule.ref(db, 'roomStaff/' + roomId);
+      const memberRef = dbModule.child(dbModule.child(base, 'members'), user.uid);
+      const requestRef = dbModule.child(dbModule.child(base, 'requests'), user.uid);
+      let memberSnapshot;
+      let requestSnapshot;
+      try {
+        [memberSnapshot, requestSnapshot] = await Promise.all([dbModule.get(memberRef), dbModule.get(requestRef)]);
+      } catch (error) {
+        console.error('CronoApp staff access check failed:', error);
+        setStaffAccessGate('No se pudo verificar el acceso. Publica las reglas de Firebase para Staff e inténtalo nuevamente.');
+        return false;
+      }
+      const initialMember = memberSnapshot.val();
+      if (initialMember?.status === 'kicked') {
+        setStaffAccessGate('Administración retiró tu acceso a esta sala. Contacta a quien administra el evento.', false);
+        return false;
+      }
+      let resolveAdmission;
+      let resolved = false;
+      const admission = new Promise(resolve => { resolveAdmission = resolve; });
+      const admitInView = () => {
+        resolved = true;
+        gate.hidden = true;
+        document.body.classList.add('staff-access-ready');
+        resolveAdmission(true);
+      };
+      stopStaffMembershipRead = dbModule.onValue(memberRef, snap => {
+        const member = snap.val();
+        if (member?.status === 'admitted') admitInView();
+        else if (member?.status === 'kicked') {
+          setStaffAccessGate('Administración retiró tu acceso a esta sala. Contacta a quien administra el evento.', false);
+          if (!resolved) { resolved = true; resolveAdmission(false); }
+        }
+      }, () => setStaffAccessGate('Se perdió la conexión para validar tu acceso. Revisa las reglas de Firebase.'));
+      dbModule.onValue(requestRef, snap => {
+        const request = snap.val();
+        if (request?.status === 'rejected') setStaffAccessGate('Tu solicitud fue rechazada. Puedes volver a solicitar acceso si corresponde.', true);
+        else if (!resolved) setStaffAccessGate('Solicitud enviada. Espera a que administración te admita.', false);
+      }, () => setStaffAccessGate('No se pudo consultar tu solicitud. Revisa las reglas de Firebase.'));
+      retryButton.onclick = async () => {
+        retryButton.disabled = true;
+        setStaffAccessGate('Enviando nuevamente tu solicitud…');
+        try {
+          await dbModule.set(requestRef, { name: staffChatName, status: 'pending', requestedAt: Date.now() });
+          setStaffAccessGate('Solicitud enviada. Espera a que administración te admita.', false);
+        } catch (error) {
+          console.error('CronoApp staff access request retry failed:', error);
+          setStaffAccessGate('No se pudo volver a solicitar acceso. Revisa las reglas de Firebase.', true);
+        } finally { retryButton.disabled = false; }
+      };
+      if (initialMember?.status === 'admitted') {
+        admitInView();
+        return true;
+      }
+      if (requestSnapshot.val()?.status === 'rejected') {
+        setStaffAccessGate('Tu solicitud fue rechazada. Puedes volver a solicitar acceso si corresponde.', true);
+        return admission;
+      }
+      if (!requestSnapshot.exists()) {
+        try {
+          await dbModule.set(requestRef, { name: staffChatName, status: 'pending', requestedAt: Date.now() });
+          setStaffAccessGate('Solicitud enviada. Espera a que administración te admita.', false);
+        } catch (error) {
+          console.error('CronoApp staff access request failed:', error);
+          setStaffAccessGate('No se pudo enviar tu solicitud. Publica las reglas de Firebase e inténtalo nuevamente.');
+          return false;
+        }
+      }
+      return admission;
     }
     function getRoomChatMentionContext(input) {
       const caret = input.selectionStart ?? input.value.length;
@@ -3860,17 +4111,21 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
         const [{ initializeApp }, database, authentication] = await Promise.all([
           import(base + 'firebase-app.js'), import(base + 'firebase-database.js'),
-          isReadOnly && !isPrivatePairings ? Promise.resolve(null) : import(base + 'firebase-auth.js')
+          isReadOnly && !isPrivatePairings && !isJudge ? Promise.resolve(null) : import(base + 'firebase-auth.js')
         ]);
         dbModule = database;
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
-        if (isPrivatePairings) auth = authModule.getAuth(app);
+        if (isPrivatePairings || isJudge) auth = authModule.getAuth(app);
         if (rawCode) {
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
           roomId = alias.val();
           if (!roomId || !/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) throw new Error('Código de sala no encontrado.');
+        }
+        if (isJudge && roomId) {
+          const canEnterStaffRoom = await prepareStaffRoomAccess(db);
+          if (!canEnterStaffRoom) { const accessError = new Error('Staff access is pending.'); accessError.code = 'CRONO_STAFF_ACCESS_PENDING'; throw accessError; }
         }
         const flyerMenuLink = document.querySelector('.flyer-menu-link');
         if (flyerMenuLink && roomId) {
@@ -3883,6 +4138,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         settingsRef = roomId ? dbModule.ref(db, 'rooms/' + roomId + '/settings') : null;
         roomChatEnabledRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/enabled') : null;
         roomChatMessagesRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/messages') : null;
+        staffRequestsRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/requests') : null;
+        staffMembersRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/members') : null;
         const pairingsRef = roomId && !isPrivatePairings ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         if (roomChatEnabledRef) dbModule.onValue(roomChatEnabledRef, snap => {
           roomChatHasSetting = snap.exists();
@@ -4067,9 +4324,21 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         });
         document.getElementById('adminStaffChatOpen').addEventListener('click', () => {
           if (!canControl) return;
+          adminStaffManagerOpen = false;
           adminChatOpen = !adminChatOpen;
           updateRoomChatAccess();
           if (adminChatOpen && roomChatEnabled) document.getElementById('adminStaffChatInput').focus();
+        });
+        document.getElementById('adminStaffManagerOpen').addEventListener('click', () => {
+          if (!canControl) return;
+          adminChatOpen = false;
+          adminStaffManagerOpen = !adminStaffManagerOpen;
+          updateRoomChatAccess();
+          if (adminStaffManagerOpen) startStaffRosterSubscriptions();
+        });
+        document.getElementById('staffManagerClose').addEventListener('click', () => {
+          adminStaffManagerOpen = false;
+          updateRoomChatAccess();
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
         document.getElementById('staffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'staff'));
@@ -4194,10 +4463,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           window.updateTimerTime = window.resetTimer;
         }
       } catch (error) {
-        if (isJudge) judgeStatus.textContent = error.message || 'No se pudo conectar al servicio.';
-        else if (isPairings) document.getElementById('pairingsStatus').textContent = error.message || 'No se pudo conectar al servicio.';
-        else if (isProjection) document.getElementById('timerStatus').textContent = error.message || 'No se pudo conectar al servicio.';
-        else syncStatus.textContent = error.message || 'No se pudo conectar al servicio.';
+        if (error?.code !== 'CRONO_STAFF_ACCESS_PENDING') {
+          if (isJudge) judgeStatus.textContent = error.message || 'No se pudo conectar al servicio.';
+          else if (isPairings) document.getElementById('pairingsStatus').textContent = error.message || 'No se pudo conectar al servicio.';
+          else if (isProjection) document.getElementById('timerStatus').textContent = error.message || 'No se pudo conectar al servicio.';
+          else syncStatus.textContent = error.message || 'No se pudo conectar al servicio.';
+        }
       }
     }
   </script>
@@ -4581,5 +4852,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['placeholder', 'title', 'aria-label', 'aria-description'] });
     })();
   </script>
+  <section id="staffAccessGate" role="dialog" aria-modal="true" aria-labelledby="staffAccessTitle" hidden>
+    <div class="staff-access-card"><span class="staff-access-eyebrow">CRONOAPP · VISTA STAFF</span><h1 id="staffAccessTitle">Verificando acceso</h1><p id="staffAccessStatus" role="status" aria-live="polite">Un momento, estamos comprobando el acceso a esta sala.</p><button id="staffRequestAgain" type="button" hidden>Solicitar acceso nuevamente</button><a href="/staff/">Salir de la sala</a></div>
+  </section>
 </body>
 </html>
