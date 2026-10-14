@@ -3645,7 +3645,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           const item = document.createElement('li');
           item.dataset.role = message.role === 'admin' ? 'admin' : 'staff';
           const author = document.createElement('strong');
-          author.textContent = (message.role === 'admin' ? 'Administración' : (message.name || 'Staff')) + (Number.isFinite(message.createdAt) ? ' · ' + new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
+          author.textContent = (message.name || (message.role === 'admin' ? 'Administración' : 'Staff')) + (Number.isFinite(message.createdAt) ? ' · ' + new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
           const body = document.createElement('p');
           appendRoomChatMentions(body, message.text, roomChatParticipantNames);
           item.append(author, body);
