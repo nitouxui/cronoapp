@@ -3574,7 +3574,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         form.hidden = !staffChatName;
         status.textContent = staffChatName ? '' : 'Indica tu nombre para participar en el chat.';
       }
-      if ((isRoomAdmin || (isJudge && roomChatEnabled))) startRoomChatSubscription();
+      if (roomChatEnabled && (isRoomAdmin || isJudge)) startRoomChatSubscription();
       else stopRoomChatSubscription();
       ensureRoomChatEnabledByDefault();
     }
