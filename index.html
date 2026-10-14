@@ -610,6 +610,7 @@
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
         <div class="welcome-features"><span>Sincronizado en vivo</span><span>Temporizador para staff</span><span>Pareos del torneo</span></div>
+        <a class="agenda-entry" href="/jugador/">Buscar mis mesas como jugador <span aria-hidden="true">→</span></a>
         <a id="agendaPublicLink" class="agenda-entry" href="/eventos/" hidden>Ver agenda de Temuco <span aria-hidden="true">→</span></a>
         <a id="agendaAdminLink" class="agenda-entry" href="/eventos/?admin=1" hidden>Administrar agenda <span aria-hidden="true">→</span></a>
       </div>
@@ -3011,6 +3012,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             if (!firstPlayer?.name || (second && !secondPlayer?.name)) return null;
             return { table: Number.isInteger(table) && table > 0 ? table : 0,
               first: firstPlayer.name, second: second ? secondPlayer.name : 'BYE',
+              firstPlayerId: first?.getAttribute('userid') || '', secondPlayerId: second?.getAttribute('userid') || '',
               firstDivision: firstPlayer.division, secondDivision: secondPlayer?.division || '',
               outcome: match.getAttribute('outcome') || '',
               _firstId: first?.getAttribute('userid') || '', _secondId: second?.getAttribute('userid') || '' };
@@ -3592,6 +3594,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let stopStaffMembershipRead = null;
     let roomResultsRef = null;
     let roomResultsData = {};
+    let playerReportsData = {};
+    let stopPlayerReportsRead = null;
+    let playerReportsEventId = '';
     let adminStaffManagerOpen = false;
     let adminResultsOpen = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
@@ -4126,8 +4131,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         [e.match.first,'vs.',e.match.second].forEach((name,i)=>{const span=document.createElement('span');span.textContent=name;if(r&&((i===0&&r.winner==='first')||(i===2&&r.winner==='second')))span.classList.add('is-winning-player');players.append(span)});
         const actions=document.createElement('div');actions.className='staff-result-actions'; card.append(meta,players,actions);
         if(!r){
-          if(isAdmin){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Esperando reporte de Staff';actions.append(p)}
-          else actions.append(resultAction('Gana '+e.match.first,()=>submitTableResult(e,'first')),resultAction('Gana '+e.match.second,()=>submitTableResult(e,'second')),resultAction('Empate',()=>submitTableResult(e,'draw')));
+          const votes=playerReportsData[e.key]||{};
+          if(votes.first&&votes.second){const p=document.createElement('span');p.className='staff-result-meta';const confirmedWinner=votes.first.winner==='first'?e.match.first:votes.first.winner==='second'?e.match.second:'Empate';p.textContent=votes.first.winner===votes.second.winner?'Confirmado por ambos jugadores · '+confirmedWinner:'Los jugadores reportaron resultados distintos · Requiere revisión de Staff';actions.append(p)}
+          else if(votes.first||votes.second){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Resultado informado por un jugador · Esperando al oponente';actions.append(p)}
+          else if(isAdmin){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Esperando reporte de Staff o de los jugadores';actions.append(p)}
+          if(!isAdmin&&!(votes.first&&votes.second&&votes.first.winner===votes.second.winner))actions.append(resultAction('Gana '+e.match.first,()=>submitTableResult(e,'first')),resultAction('Gana '+e.match.second,()=>submitTableResult(e,'second')),resultAction('Empate',()=>submitTableResult(e,'draw')));
+          else actions.append(resultAction('Confirmar '+e.match.first,()=>overrideTableResult(e,null,'first')),resultAction('Confirmar '+e.match.second,()=>overrideTableResult(e,null,'second')),resultAction('Confirmar empate',()=>overrideTableResult(e,null,'draw')));
         } else {
           const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Resultado: '+resultLabel(r)+' · '+(r.updatedAt?'Corregido por administración':'Reportó '+(r.reporterName||'Staff')+' · Mesa bloqueada');actions.append(p);
           if(isAdmin) actions.append(resultAction('Corregir '+e.match.first,()=>overrideTableResult(e,r,'first')),resultAction('Corregir '+e.match.second,()=>overrideTableResult(e,r,'second')),resultAction('Corregir empate',()=>overrideTableResult(e,r,'draw')));
@@ -4156,12 +4165,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       catch(error){console.error('CronoApp table report failed:',error);document.getElementById('staffResultStatus').textContent='No se pudo guardar. Revisa las reglas de Firebase.'}
     }
     async function overrideTableResult(e,current,winner) {
-      if(!canControl||!roomResultsRef||!auth?.currentUser||winner===current.winner)return;
-      const reason=window.prompt('Motivo de la corrección:'); if(!reason?.trim())return;
+      if(!canControl||!roomResultsRef||!auth?.currentUser||(current&&winner===current.winner))return;
+      const reason=window.prompt(current?'Motivo de la corrección:':'Motivo para confirmar el resultado:'); if(!reason?.trim())return;
       const user=auth.currentUser, winnerName=winner==='first'?e.match.first:winner==='second'?e.match.second:'Empate';
       try {
         const tx=await dbModule.runTransaction(dbModule.child(roomResultsRef,e.key),saved=>{
-          if(!saved)return;
+          if(!saved)return {round:e.round,category:e.category,table:Number(e.match.table),first:e.match.first,second:e.match.second,winner,winnerName,status:'locked',reportedBy:user.uid,reporterName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',reportedAt:Date.now(),updatedBy:user.uid,updatedName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',updatedAt:Date.now()};
           const history=Array.isArray(saved.history)?saved.history.slice():Object.values(saved.history||{});
           history.push({winner:saved.winner,winnerName:saved.winnerName,changedBy:user.uid,changedByName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',changedAt:Date.now(),reason:reason.trim().slice(0,200)});
           return {...saved,winner,winnerName,updatedBy:user.uid,updatedName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',updatedAt:Date.now(),history};
@@ -4373,7 +4382,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           dbModule.onValue(pairingsRef, snap => {
             updateStaffPairingsLink(snap.exists());
             try {
-              window.setPairings(snap.exists() ? JSON.parse(snap.val()) : null);
+              const currentPairings = snap.exists() ? JSON.parse(snap.val()) : null;
+              window.setPairings(currentPairings);
+              const nextEventId = currentPairings?.eventId || '';
+              if (nextEventId !== playerReportsEventId) {
+                if (stopPlayerReportsRead) stopPlayerReportsRead();
+                playerReportsEventId = nextEventId;
+                playerReportsData = {};
+                if (nextEventId) stopPlayerReportsRead = dbModule.onValue(dbModule.ref(db, 'playerReports/' + roomId + '/' + nextEventId + '/tables'), snapshot => {
+                  playerReportsData = snapshot.val() || {};
+                  renderRoomResults();
+                }, () => {});
+              }
               if (snap.exists()) window.pairingsPublished();
               else window.pairingsCleared();
             }
