@@ -838,7 +838,7 @@
         <select id="leftVisualModeSelect" class="editor-select" onchange="switchLeftVisualMode()">
           <option value="qr">Generar QR desde un enlace</option>
           <option value="upload">Subir una imagen</option>
-          <option value="tdf" hidden disabled>Subir TDF y generar QR de pareos</option>
+          <option value="tdf" hidden disabled>Subir TDF (solo mi perfil)</option>
           <option value="html-pairings" hidden>Sincronizar pareos desde HTML (prueba privada)</option>
         </select>
         <div id="qrControls">
@@ -854,8 +854,8 @@
         <div id="tdfControls" hidden>
           <label for="tdfInput">Archivo .tdf exportado del torneo (máximo 2 MB)</label>
           <input id="tdfInput" type="file" accept=".tdf,.xml,text/xml,application/xml">
-          <button id="publishPairings" class="editor-button editor-button-secondary" type="button">Publicar pareos y generar QR</button>
-          <p id="tdfStatus" role="status" aria-live="polite">Al subir un nuevo TDF, se reemplazan los pareos publicados.</p>
+          <button id="publishPairings" class="editor-button editor-button-secondary" type="button">Guardar TDF privado</button>
+          <p id="tdfStatus" role="status" aria-live="polite">El TDF y sus pareos se guardan solo en el espacio privado de tu perfil autorizado.</p>
         </div>
         <div id="htmlPairingsControls" hidden>
           <p>Prueba privada: el HTML se lee en este computador y se sincroniza solo con tu cuenta. El QR también requiere tu sesión de Google.</p>
@@ -2158,13 +2158,9 @@ module.exports = QRCode;
     const tdfModeOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
     const tdfFileInput = document.getElementById('tdfInput');
     const tdfPublishButton = document.getElementById('publishPairings');
-    if (tdfModeOption) {
-      tdfModeOption.disabled = !window.TDF_UPLOAD_ENABLED;
-      tdfModeOption.hidden = !window.TDF_UPLOAD_ENABLED;
-      if (!window.TDF_UPLOAD_ENABLED) tdfModeOption.remove();
-    }
-    if (tdfFileInput) tdfFileInput.disabled = !window.TDF_UPLOAD_ENABLED;
-    if (tdfPublishButton) tdfPublishButton.disabled = !window.TDF_UPLOAD_ENABLED;
+    if (tdfModeOption) { tdfModeOption.disabled = true; tdfModeOption.hidden = true; }
+    if (tdfFileInput) tdfFileInput.disabled = true;
+    if (tdfPublishButton) tdfPublishButton.disabled = true;
     const htmlPairingsModeOption = document.querySelector('#leftVisualModeSelect option[value="html-pairings"]');
     const htmlPairingsControls = document.getElementById('htmlPairingsControls');
     const PILOT_EMAIL = 'quidel.dsgn@gmail.com';
@@ -2174,11 +2170,16 @@ module.exports = QRCode;
     window.isPilotUser = isPilotUser;
     function setHtmlPairingsAccess(user) {
       const allowed = isPilotUser(user);
+      if (tdfModeOption) { tdfModeOption.hidden = !allowed; tdfModeOption.disabled = !allowed; }
+      if (tdfFileInput) tdfFileInput.disabled = !allowed;
+      if (tdfPublishButton) tdfPublishButton.disabled = !allowed;
       if (htmlPairingsModeOption) htmlPairingsModeOption.hidden = !allowed;
-      if (!allowed && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
+      const mode = document.getElementById('leftVisualModeSelect').value;
+      if (!allowed && ['tdf', 'html-pairings'].includes(mode)) {
         document.getElementById('leftVisualModeSelect').value = 'qr';
-      if (allowed && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
         switchLeftVisualMode();
+      }
+      if (allowed && ['tdf', 'html-pairings'].includes(mode)) switchLeftVisualMode();
       return allowed;
     }
     window.setHtmlPairingsAccess = setHtmlPairingsAccess;
@@ -2283,6 +2284,8 @@ module.exports = QRCode;
         return;
       }
       privatePairingsContext = { ...context, allowed, canControl: true };
+      // Remove TDF pairings previously stored in the public room path.
+      context.dbModule.remove(context.dbModule.ref(context.db, 'rooms/' + context.roomId + '/pairings')).catch(() => {});
       const readKey = user.uid + ':' + context.roomId;
       if (privatePairingsReadKey !== readKey) {
         if (privatePairingsReadStop) privatePairingsReadStop();
@@ -2408,7 +2411,7 @@ module.exports = QRCode;
     async function saveSettings() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const leftPanelEnabled = document.getElementById('leftPanelEnabled').checked;
-      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
+      if (mode === 'tdf' && (!window.TDF_UPLOAD_ENABLED || !window.isPilotUser(window.cronoCurrentUser))) return;
       if (mode === 'html-pairings' && !window.isPilotUser(window.cronoCurrentUser)) return;
       if (leftPanelEnabled && mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
       if (leftPanelEnabled && mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
@@ -2858,13 +2861,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function switchLeftVisualMode() {
       const selector = document.getElementById('leftVisualModeSelect');
       let mode = selector.value;
-      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) {
+      if (mode === 'tdf' && (!window.TDF_UPLOAD_ENABLED || !window.isPilotUser(window.cronoCurrentUser))) {
         mode = document.getElementById('qrUrl').value.trim() ? 'qr' : uploadedImageSrc ? 'upload' : 'qr';
         selector.value = mode;
       }
       document.getElementById('qrControls').hidden = mode !== 'qr';
       document.getElementById('imageControls').hidden = mode !== 'upload';
-      document.getElementById('tdfControls').hidden = mode !== 'tdf';
+      document.getElementById('tdfControls').hidden = mode !== 'tdf' || !window.isPilotUser(window.cronoCurrentUser);
       htmlPairingsControls.hidden = mode !== 'html-pairings' || !window.isPilotUser(window.cronoCurrentUser);
       const copyPairingsButton = document.getElementById('copyPairingsLink');
       const roomQuery = new URLSearchParams(location.search);
@@ -2900,7 +2903,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const target = new URL(location.href);
       if (window.currentShortCode) { target.searchParams.delete('sala'); target.searchParams.set('s', window.currentShortCode); }
       target.searchParams.set('view', 'pareos');
-      if (document.getElementById('leftVisualModeSelect').value === 'html-pairings') target.searchParams.set('privado', '1');
+      if (['tdf', 'html-pairings'].includes(document.getElementById('leftVisualModeSelect').value)) target.searchParams.set('privado', '1');
       else target.searchParams.delete('privado');
       return Boolean(pairingsQrSrc = qrDataUrl(target.href));
     }
@@ -3435,7 +3438,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         url.searchParams.set('sala', roomId);
       }
       url.searchParams.set('view', view);
-      if (view === 'pareos' && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
+      if (view === 'pareos' && ['tdf', 'html-pairings'].includes(document.getElementById('leftVisualModeSelect').value))
         url.searchParams.set('privado', '1');
       else url.searchParams.delete('privado');
       return url.href;
@@ -3505,13 +3508,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       const images = currentRoomSettings.images || {};
       const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
-      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) {
+      if (mode === 'tdf') {
         staffPairingsLink.hidden = true;
-        return;
-      }
-      if (mode === 'tdf' && staffPairingsAvailable) {
-        staffPairingsLink.href = makeRoomViewURL('pareos');
-        staffPairingsLink.hidden = false;
         return;
       }
       if (mode === 'qr' && images.qrUrl) {
@@ -3757,9 +3755,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       managerButton.hidden = !isRoomAdmin;
       managerButton.setAttribute('aria-expanded', String(isRoomAdmin && adminStaffManagerOpen));
       managerPanel.hidden = !isRoomAdmin || !adminStaffManagerOpen;
-      resultsButton.hidden = !isRoomAdmin || !window.TDF_UPLOAD_ENABLED;
+      resultsButton.hidden = !isRoomAdmin || !window.TDF_UPLOAD_ENABLED || !window.isPilotUser(currentUser);
       resultsButton.setAttribute('aria-expanded', String(isRoomAdmin && adminResultsOpen));
-      resultsPanel.hidden = !isRoomAdmin || !adminResultsOpen || !window.TDF_UPLOAD_ENABLED;
+      resultsPanel.hidden = !isRoomAdmin || !adminResultsOpen || !window.TDF_UPLOAD_ENABLED || !window.isPilotUser(currentUser);
       adminPanel.hidden = !isRoomAdmin || !adminChatOpen;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
       if (isRoomAdmin) {
@@ -4135,7 +4133,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       });
     }
     function renderRoomResults() {
-      const enabled = window.TDF_UPLOAD_ENABLED === true;
+      const enabled = window.TDF_UPLOAD_ENABLED === true && window.isPilotUser(currentUser) && !isJudge;
       const section=document.getElementById('staffResultsModule');
       const adminSection=document.getElementById('adminStaffResults');
       if(section)section.hidden=!enabled || !isJudge;
@@ -4146,7 +4144,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
     async function submitTableResult(e,winner) {
       const user=auth?.currentUser;
-      if(!isJudge||!staffChatName||!user||!roomResultsRef)return;
+      if(!isJudge||!staffChatName||!user||!roomResultsRef||!window.isPilotUser(user))return;
       if(!window.confirm('¿Confirmas el resultado de la mesa '+e.match.table+'? Después quedará bloqueado para Staff.'))return;
       const winnerName=winner==='first'?e.match.first:winner==='second'?e.match.second:'Empate';
       const ref=dbModule.child(roomResultsRef,e.key);
@@ -4155,7 +4153,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       catch(error){console.error('CronoApp table report failed:',error);document.getElementById('staffResultStatus').textContent='No se pudo guardar. Revisa las reglas de Firebase.'}
     }
     async function overrideTableResult(e,current,winner) {
-      if(!canControl||!roomResultsRef||!auth?.currentUser||winner===current.winner)return;
+      if(!canControl||!window.isPilotUser(auth?.currentUser)||!roomResultsRef||!auth?.currentUser||winner===current.winner)return;
       const reason=window.prompt('Motivo de la corrección:'); if(!reason?.trim())return;
       const user=auth.currentUser, winnerName=winner==='first'?e.match.first:winner==='second'?e.match.second:'Empate';
       try {
@@ -4370,6 +4368,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
 
         if (pairingsRef) {
           dbModule.onValue(pairingsRef, snap => {
+            if (window.isPilotUser(currentUser)) return;
             try {
               window.setPairings(snap.exists() ? JSON.parse(snap.val()) : null);
               if (snap.exists()) window.pairingsPublished();
@@ -4378,10 +4377,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             catch { document.getElementById('pairingsStatus').textContent = 'No se pudieron leer los pareos.'; }
           }, () => { document.getElementById('pairingsStatus').textContent = 'No se pudo acceder a los pareos.'; });
           if (!isReadOnly) document.getElementById('publishPairings').addEventListener('click', async () => {
-            if (!window.TDF_UPLOAD_ENABLED) return;
+            if (!window.TDF_UPLOAD_ENABLED || !window.isPilotUser(currentUser)) return;
             const status = document.getElementById('tdfStatus');
             const file = document.getElementById('tdfInput').files[0];
-            if (!canControl) { status.textContent = 'Ingresa como propietario de la sala para publicar.'; return; }
+            if (!canControl || !window.isPilotUser(currentUser)) { status.textContent = 'Disponible solo para el perfil autorizado de CronoApp.'; return; }
             if (!file) { status.textContent = 'Selecciona un archivo TDF.'; return; }
             if (file.size > 2_000_000) { status.textContent = 'El archivo supera los 2 MB.'; return; }
             const button = document.getElementById('publishPairings');
@@ -4390,10 +4389,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               const pairings = window.parseTdf(await file.text());
               const payload = JSON.stringify(pairings);
               if (payload.length > 900_000) throw new Error('Los pareos superan el límite permitido.');
-              await dbModule.set(pairingsRef, payload);
+              const privateRef = dbModule.ref(db, 'privatePairings/' + currentUser.uid + '/' + roomId);
+              await dbModule.set(privateRef, payload);
+              if (pairingsRef) await dbModule.remove(pairingsRef);
               const total = pairings.categories.reduce((sum, category) => sum + category.rounds.length, 0);
               window.pairingsPublished();
-              status.textContent = `Pareos publicados: ${total} rondas en ${pairings.categories.length} categoría(s). Presiona Guardar para mostrar el QR.`;
+              status.textContent = `TDF guardado en privado: ${total} rondas en ${pairings.categories.length} categoría(s). Solo el perfil autorizado puede consultarlo.`;
             } catch (error) { status.textContent = error?.message || 'No se pudo publicar el TDF. Revisa las reglas de Firebase.'; }
             finally { button.disabled = false; }
           });
@@ -4726,7 +4727,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Enlace de destino del QR:': 'QR destination link:', 'Generar QR': 'Create QR code',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Image for the left panel (max. 2 MB):',
           'Quitar imagen': 'Remove image', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Tournament .tdf file (max. 2 MB)',
-          'Publicar pareos y generar QR': 'Publish pairings and create QR code',
+          'Guardar TDF privado': 'Save TDF privately',
+          'Subir TDF (solo mi perfil)': 'Upload TDF (my profile only)',
+          'El TDF y sus pareos se guardan solo en el espacio privado de tu perfil autorizado.': 'The TDF and its pairings are stored only in your authorized profile’s private space.',
           'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Uploading a new TDF replaces the published pairings.',
           'Guardar cambios': 'Save changes', 'Ej. 7KQ2BD': 'e.g. 7KQ2BD', 'Cerrar control de sala': 'Close room control',
           'Código para abrir la vista TV': 'Code to open the TV view', 'Enlaces de sala': 'Room links',
@@ -4845,7 +4848,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Enlace de destino del QR:': 'Link de destino do QR:', 'Generar QR': 'Gerar QR',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Imagem para o painel esquerdo (máximo 2 MB):',
           'Quitar imagen': 'Remover imagem', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Arquivo .tdf exportado do torneio (máximo 2 MB)',
-          'Publicar pareos y generar QR': 'Publicar emparceiramentos e gerar QR',
+          'Guardar TDF privado': 'Salvar TDF em privado',
+          'Subir TDF (solo mi perfil)': 'Enviar TDF (apenas meu perfil)',
+          'El TDF y sus pareos se guardan solo en el espacio privado de tu perfil autorizado.': 'O TDF e seus emparceiramentos ficam apenas no espaço privado do seu perfil autorizado.',
           'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Ao enviar um novo TDF, os emparceiramentos publicados serão substituídos.',
           'Guardar cambios': 'Salvar alterações', 'Ej. 7KQ2BD': 'Ex.: 7KQ2BD', 'Cerrar control de sala': 'Fechar controle da sala',
           'Código para abrir la vista TV': 'Código para abrir a visualização da TV', 'Enlaces de sala': 'Links da sala',
