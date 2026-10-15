@@ -187,6 +187,15 @@
     body:not(.no-room) .room-actions-menu-content > #syncLogout,
     body:not(.no-room) .room-actions-menu-content > .flyer-menu-link { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0 12px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; box-shadow: none; }
     body:not(.no-room) #syncToggle { position: static; white-space: nowrap; }
+    body:not(.no-room) .staff-menu-group { margin: 0; border: 1px solid var(--edge); border-radius: 10px; overflow: hidden; }
+    body:not(.no-room) .staff-menu-group > summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; list-style: none; }
+    body:not(.no-room) .staff-menu-group > summary::-webkit-details-marker { display: none; }
+    body:not(.no-room) .staff-menu-group > summary::after { content: '⌄'; color: var(--muted); }
+    body:not(.no-room) .staff-menu-group[open] > summary::after { content: '⌃'; }
+    body:not(.no-room) .staff-menu-group > summary:hover, body:not(.no-room) .staff-menu-group[open] > summary { background: var(--surface); color: var(--accent-soft); }
+    body:not(.no-room) #copyStaffLink { display: flex; align-items: center; justify-content: space-between; width: calc(100% - 16px); min-height: 42px; margin: 0 8px 8px; padding: 0 10px; border: 1px solid var(--edge); border-radius: 9px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; }
+    body:not(.no-room) #copyStaffLink:hover { border-color: var(--accent); color: var(--accent-soft); }
+    body:not(.no-room) #copyStaffLink[hidden] { display: none !important; }
     body:not(.no-room) .room-actions-menu #syncToggle { display: none; }
     body:not(.no-room) #syncToggle:hover, body:not(.no-room) #syncToggle[aria-expanded="true"],
     body:not(.no-room) .room-actions-menu-content > .edit-button:hover,
@@ -679,16 +688,16 @@
     </div>
     <button id="googleLogin" type="button" hidden>Iniciar sesión con Google</button>
     <button id="createRoom" type="button" hidden>Ir al control de mi sala</button>
-    <div class="room-actions" aria-label="Enlaces de sala">
-      <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-    </div>
-    <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
-
     </div>
   </div>
 
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
+          <details id="staffMenuGroup" class="staff-menu-group" hidden>
+            <summary>Staff</summary>
+            <button id="copyStaffLink" type="button"><span>Copiar enlace Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
+            <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
+          </details>
           <a class="flyer-menu-link" href="/flyer/">Generador de flyers</a>
           <a class="flyer-menu-link" href="/torneos/">Dashboard de torneos</a>
     </div>
@@ -3046,7 +3055,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     }
     document.getElementById('tvCodeCard').hidden = !hasRoomLink;
     const copyStaffLink = document.getElementById('copyStaffLink');
+    const staffMenuGroup = document.getElementById('staffMenuGroup');
     copyStaffLink.hidden = !hasRoomLink;
+    staffMenuGroup.hidden = !hasRoomLink;
     copyStaffLink.addEventListener('click', () => copyRoomView('staff', 'Staff'));
     staffTournamentLink.hidden = true;
     let currentState = null;
