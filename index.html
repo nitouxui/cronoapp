@@ -371,8 +371,6 @@
     .module-card-icon { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 12px; border-radius: 11px; background: var(--surface); color: var(--accent-soft); font-size: 20px; }
     .module-card strong { font-size: 18px; }
     .module-card span:last-child { margin-top: auto; padding-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
-    .module-card-disabled { opacity: .48; cursor: not-allowed; box-shadow: none; }
-    .module-card-disabled:hover, .module-card-disabled:focus-visible { transform: none; border-color: var(--edge); outline: none; }
     @media (max-width: 900px) { .module-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 520px) { .module-cards { grid-template-columns: 1fr; gap: 10px; } .module-card { min-height: 132px; } }
     body.no-room #roomWelcome .welcome-shell { width: min(100%, 1260px); max-width: 1260px; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(310px, .8fr); gap: clamp(28px, 6vw, 100px); align-items: center; text-align: left; }
@@ -646,7 +644,7 @@
         <a id="timerModuleLink" class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
         <a class="module-card" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
         <a class="module-card" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
-        <a id="agendaModuleLink" class="module-card module-card-disabled" href="/eventos/?admin=1" aria-disabled="true" tabindex="-1"><span class="module-card-icon" aria-hidden="true">▦</span><strong>Agenda</strong><span id="agendaModuleDescription">Acceso personal de administración</span></a>
+        <a id="agendaModuleLink" class="module-card" href="/eventos/?admin=1" hidden><span class="module-card-icon" aria-hidden="true">▦</span><strong>Agenda</strong><span>Administra y publica los eventos de la agenda →</span></a>
       </div>
     </section>
   </section>
@@ -694,6 +692,7 @@
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
           <a class="flyer-menu-link" href="/flyer/">Generador de flyers</a>
           <a class="flyer-menu-link" href="/torneos/">Dashboard de torneos</a>
+          <a id="agendaAdminMenuLink" class="flyer-menu-link" href="/eventos/?admin=1" hidden>Administrar agenda</a>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
     </div>
   </details>
@@ -4035,12 +4034,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             flyerAccessLink.hidden = !user;
             const canManageAgenda = user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com');
             const agendaModuleLink = document.getElementById('agendaModuleLink');
-            agendaModuleLink.classList.toggle('module-card-disabled', !canManageAgenda);
-            agendaModuleLink.setAttribute('aria-disabled', String(!canManageAgenda));
-            agendaModuleLink.tabIndex = canManageAgenda ? 0 : -1;
-            document.getElementById('agendaModuleDescription').textContent = canManageAgenda
-              ? 'Administra y publica los eventos de la agenda →'
-              : 'Acceso personal de administración';
+            agendaModuleLink.hidden = !canManageAgenda;
+            document.getElementById('agendaAdminMenuLink').hidden = !canManageAgenda;
             updateAccess();
             refreshTimerTournamentOptions();
             if (user?.emailVerified && !openOwnRoomOnLoad) primeOwnRoomNavigation(user);
