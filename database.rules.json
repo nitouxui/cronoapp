@@ -47,15 +47,6 @@
         ".validate": "newData.isString() && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/)"
       }
     },
-    "privatePairings": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
-        "$room": {
-          ".write": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
-          ".validate": "newData.isString() && newData.val().length <= 1000000"
-        }
-      }
-    },
     "agenda": {
       ".read": true,
       "events": {
@@ -188,73 +179,135 @@
         }
       }
     },
-    "roomResults": {
-      "$room": {
-        "tables": {
-          ".read": "(auth != null && (auth.token.firebase.sign_in_provider === 'anonymous' || (auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
-          "$resultKey": {
-            "round": {
-              ".validate": "newData.isNumber() && newData.val() >= 1"
+    "onlineTournaments": {
+      ".read": true,
+      "$event": {
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['title','type','game','date','venue','description','ownerUid','ownerName','status','published','signupOpen','createdAt']) && newData.child('title').isString() && newData.child('title').val().length >= 1 && newData.child('title').val().length <= 100 && newData.child('type').isString() && newData.child('type').val() === 'casual' && newData.child('game').isString() && (newData.child('game').val() === 'tcg' || newData.child('game').val() === 'vgc' || newData.child('game').val() === 'go') && newData.child('date').isString() && newData.child('venue').isString() && newData.child('venue').val().length <= 100 && newData.child('description').isString() && newData.child('description').val().length <= 240 && newData.child('ownerUid').isString() && newData.child('ownerName').isString() && newData.child('status').isString() && (newData.child('status').val() === 'registration' || newData.child('status').val() === 'active' || newData.child('status').val() === 'finished') && newData.child('published').isBoolean() && newData.child('signupOpen').isBoolean() && newData.child('createdAt').isNumber()",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+        },
+        "type": {
+          ".validate": "newData.isString() && newData.val() === 'casual'"
+        },
+        "game": {
+          ".validate": "newData.isString() && (newData.val() === 'tcg' || newData.val() === 'vgc' || newData.val() === 'go')"
+        },
+        "date": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
+        },
+        "venue": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length <= 240"
+        },
+        "ownerUid": {
+          ".validate": "newData.isString()"
+        },
+        "ownerName": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'registration' || newData.val() === 'active' || newData.val() === 'finished')"
+        },
+        "published": {
+          ".validate": "newData.isBoolean()"
+        },
+        "signupOpen": {
+          ".validate": "newData.isBoolean()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "roundsPlanned": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+        },
+        "finishedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "config": {
+          ".validate": "newData.hasChildren(['casualRounds','cutSize']) && newData.child('casualRounds').isNumber() && newData.child('casualRounds').val() >= 3 && newData.child('casualRounds').val() <= 8 && newData.child('cutSize').isNumber() && (newData.child('cutSize').val() === 0 || newData.child('cutSize').val() === 2 || newData.child('cutSize').val() === 4 || newData.child('cutSize').val() === 8)",
+          "casualRounds": {
+            ".validate": "newData.isNumber() && newData.val() >= 3 && newData.val() <= 8"
+          },
+          "cutSize": {
+            ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 2 || newData.val() === 4 || newData.val() === 8)"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "players": {
+          "$player": {
+            ".validate": "newData.hasChildren(['name','category','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && newData.child('category').isString() && (newData.child('category').val() === 'MA' || newData.child('category').val() === 'SR' || newData.child('category').val() === 'JR') && (newData.child('status').val() === 'active' || newData.child('status').val() === 'dropped') && newData.child('addedAt').isNumber()",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
             },
             "category": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-            },
-            "table": {
-              ".validate": "newData.isNumber() && newData.val() >= 1"
-            },
-            "first": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
-            },
-            "second": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
-            },
-            "winner": {
-              ".validate": "newData.isString() && (newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
-            },
-            "winnerName": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+              ".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"
             },
             "status": {
-              ".validate": "newData.val() === 'locked'"
+              ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dropped')"
             },
-            "reportedBy": {
-              ".validate": "newData.isString()"
-            },
-            "reporterName": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-            },
-            "reportedAt": {
+            "addedAt": {
               ".validate": "newData.isNumber()"
             },
-            "updatedBy": {
-              ".validate": "newData.isString()"
-            },
-            "updatedName": {
-              ".validate": "newData.isString() && newData.val().length <= 60"
-            },
-            "updatedAt": {
+            "droppedAt": {
               ".validate": "newData.isNumber()"
             },
-            "history": {
-              "$entry": {
-                ".validate": "newData.hasChildren(['winner','winnerName','changedBy','changedByName','changedAt','reason']) && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('winnerName').isString() && newData.child('winnerName').val().length <= 120 && newData.child('changedBy').isString() && newData.child('changedByName').isString() && newData.child('changedByName').val().length <= 60 && newData.child('changedAt').isNumber() && newData.child('reason').isString() && newData.child('reason').val().length >= 1 && newData.child('reason').val().length <= 200",
+            "registrationUid": {
+              ".validate": "newData.isString()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "rounds": {
+          "$round": {
+            ".validate": "newData.hasChildren(['number','createdAt','matches']) && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('number').val() <= 10 && newData.child('createdAt').isNumber()",
+            "number": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "needsRepair": {
+              ".validate": "newData.isBoolean()"
+            },
+            "repairSourceRound": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+            },
+            "repairedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "matches": {
+              "$match": {
+                ".validate": "newData.hasChildren(['firstId','first','secondId','second','winner','table']) && newData.child('firstId').isString() && newData.child('first').isString() && newData.child('secondId').isString() && newData.child('second').isString() && newData.child('winner').isString() && (newData.child('winner').val() === '' || newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('table').isNumber()",
+                "firstId": {
+                  ".validate": "newData.isString()"
+                },
+                "first": {
+                  ".validate": "newData.isString() && newData.val().length <= 80"
+                },
+                "secondId": {
+                  ".validate": "newData.isString()"
+                },
+                "second": {
+                  ".validate": "newData.isString() && newData.val().length <= 80"
+                },
                 "winner": {
-                  ".validate": "newData.isString()"
+                  ".validate": "newData.isString() && (newData.val() === '' || newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
                 },
-                "winnerName": {
-                  ".validate": "newData.isString()"
+                "table": {
+                  ".validate": "newData.isNumber() && newData.val() >= 1"
                 },
-                "changedBy": {
-                  ".validate": "newData.isString()"
+                "bye": {
+                  ".validate": "newData.isBoolean()"
                 },
-                "changedByName": {
-                  ".validate": "newData.isString()"
-                },
-                "changedAt": {
+                "reportedAt": {
                   ".validate": "newData.isNumber()"
-                },
-                "reason": {
-                  ".validate": "newData.isString()"
                 },
                 "$other": {
                   ".validate": false
@@ -263,116 +316,12 @@
             },
             "$other": {
               ".validate": false
-            },
-            ".validate": "newData.hasChildren(['round','category','table','first','second','winner','winnerName','status','reportedBy','reporterName','reportedAt']) && newData.child('round').isNumber() && newData.child('round').val() >= 1 && newData.child('table').isNumber() && newData.child('table').val() >= 1 && newData.child('category').isString() && newData.child('category').val().length >= 1 && newData.child('category').val().length <= 60 && newData.child('first').isString() && newData.child('first').val().length >= 1 && newData.child('first').val().length <= 120 && newData.child('second').isString() && newData.child('second').val().length >= 1 && newData.child('second').val().length <= 120 && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('winnerName').isString() && newData.child('winnerName').val().length >= 1 && newData.child('winnerName').val().length <= 120 && newData.child('status').val() === 'locked' && newData.child('reportedBy').isString() && newData.child('reporterName').isString() && newData.child('reporterName').val().length >= 1 && newData.child('reporterName').val().length <= 60 && newData.child('reportedAt').isNumber()",
-            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid && newData.exists()) || (auth != null && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted' && !data.exists() && newData.exists() && newData.child('reportedBy').val() === auth.uid && !newData.hasChild('history') && !newData.hasChild('updatedBy'))"
-          }
-        }
-      }
-    },
-    "playerReports": {
-      "$room": {
-        ".read": "auth != null && (auth.token.firebase.sign_in_provider === 'anonymous' || (auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
-        "$eventId": {
-          "tables": {
-            "$matchKey": {
-              "first": {
-                ".write": "auth != null && auth.token.firebase.sign_in_provider === 'anonymous' && !data.exists() && newData.child('uid').val() === auth.uid && root.child('playerReports').child($room).child($eventId).child('tables').child($matchKey).child('second').child('uid').val() !== auth.uid",
-                ".validate": "newData.hasChildren(['winner','uid','submittedAt']) && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('uid').isString() && newData.child('submittedAt').isNumber()",
-                "winner": {
-                  ".validate": "newData.isString() && (newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
-                },
-                "uid": {
-                  ".validate": "newData.isString()"
-                },
-                "submittedAt": {
-                  ".validate": "newData.isNumber()"
-                },
-                "$other": {
-                  ".validate": false
-                }
-              },
-              "second": {
-                ".write": "auth != null && auth.token.firebase.sign_in_provider === 'anonymous' && !data.exists() && newData.child('uid').val() === auth.uid && root.child('playerReports').child($room).child($eventId).child('tables').child($matchKey).child('first').child('uid').val() !== auth.uid",
-                ".validate": "newData.hasChildren(['winner','uid','submittedAt']) && newData.child('winner').isString() && (newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('uid').isString() && newData.child('submittedAt').isNumber()",
-                "winner": {
-                  ".validate": "newData.isString() && (newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
-                },
-                "uid": {
-                  ".validate": "newData.isString()"
-                },
-                "submittedAt": {
-                  ".validate": "newData.isNumber()"
-                },
-                "$other": {
-                  ".validate": false
-                }
-              },
-              "$other": {
-                ".validate": false
-              }
             }
           }
+        },
+        "$other": {
+          ".validate": false
         }
-      }
-    },
-    "onlineTournaments": {
-      ".read": true,
-      "$event": {
-        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid))",
-        ".validate": "newData.hasChildren(['title','type','game','date','venue','description','ownerUid','ownerName','status','published','signupOpen','createdAt']) && newData.child('title').isString() && newData.child('title').val().length >= 1 && newData.child('title').val().length <= 100 && newData.child('type').isString() && newData.child('type').val() === 'casual' && newData.child('game').isString() && (newData.child('game').val() === 'tcg' || newData.child('game').val() === 'vgc' || newData.child('game').val() === 'go') && newData.child('date').isString() && newData.child('venue').isString() && newData.child('venue').val().length <= 100 && newData.child('description').isString() && newData.child('description').val().length <= 240 && newData.child('ownerUid').isString() && newData.child('ownerName').isString() && newData.child('status').isString() && (newData.child('status').val() === 'registration' || newData.child('status').val() === 'active' || newData.child('status').val() === 'finished') && newData.child('published').isBoolean() && newData.child('signupOpen').isBoolean() && newData.child('createdAt').isNumber()",
-        "title": {".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"},
-        "type": {".validate": "newData.isString() && newData.val() === 'casual'"},
-        "game": {".validate": "newData.isString() && (newData.val() === 'tcg' || newData.val() === 'vgc' || newData.val() === 'go')"},
-        "date": {".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"},
-        "venue": {".validate": "newData.isString() && newData.val().length <= 100"},
-        "description": {".validate": "newData.isString() && newData.val().length <= 240"},
-        "ownerUid": {".validate": "newData.isString()"},
-        "ownerName": {".validate": "newData.isString() && newData.val().length <= 120"},
-        "status": {".validate": "newData.isString() && (newData.val() === 'registration' || newData.val() === 'active' || newData.val() === 'finished')"},
-        "published": {".validate": "newData.isBoolean()"},
-        "signupOpen": {".validate": "newData.isBoolean()"},
-        "createdAt": {".validate": "newData.isNumber()"},
-        "roundsPlanned": {".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"},
-        "finishedAt": {".validate": "newData.isNumber()"},
-        "config": {
-          ".validate": "newData.hasChildren(['casualRounds','cutSize']) && newData.child('casualRounds').isNumber() && newData.child('casualRounds').val() >= 3 && newData.child('casualRounds').val() <= 8 && newData.child('cutSize').isNumber() && (newData.child('cutSize').val() === 0 || newData.child('cutSize').val() === 2 || newData.child('cutSize').val() === 4 || newData.child('cutSize').val() === 8)",
-          "casualRounds": {".validate": "newData.isNumber() && newData.val() >= 3 && newData.val() <= 8"},
-          "cutSize": {".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 2 || newData.val() === 4 || newData.val() === 8)"},
-          "$other": {".validate": false}
-        },
-        "players": {
-          "$player": {
-            ".validate": "newData.hasChildren(['name','category','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && newData.child('category').isString() && (newData.child('category').val() === 'MA' || newData.child('category').val() === 'SR' || newData.child('category').val() === 'JR') && (newData.child('status').val() === 'active' || newData.child('status').val() === 'dropped') && newData.child('addedAt').isNumber()",
-            "name": {".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"},
-            "category": {".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"},
-            "status": {".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dropped')"},
-            "addedAt": {".validate": "newData.isNumber()"},
-            "droppedAt": {".validate": "newData.isNumber()"},
-            "registrationUid": {".validate": "newData.isString()"},
-            "$other": {".validate": false}
-          }
-        },
-        "rounds": {
-          "$round": {
-            ".validate": "newData.hasChildren(['number','createdAt','matches']) && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('number').val() <= 10 && newData.child('createdAt').isNumber()",
-            "number": {".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"},
-            "createdAt": {".validate": "newData.isNumber()"},
-            "needsRepair": {".validate": "newData.isBoolean()"},
-            "repairSourceRound": {".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"},
-            "repairedAt": {".validate": "newData.isNumber()"},
-            "matches": {
-              "$match": {
-                ".validate": "newData.hasChildren(['firstId','first','secondId','second','winner','table']) && newData.child('firstId').isString() && newData.child('first').isString() && newData.child('secondId').isString() && newData.child('second').isString() && newData.child('winner').isString() && (newData.child('winner').val() === '' || newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('table').isNumber()",
-                "firstId": {".validate": "newData.isString()"}, "first": {".validate": "newData.isString() && newData.val().length <= 80"},
-                "secondId": {".validate": "newData.isString()"}, "second": {".validate": "newData.isString() && newData.val().length <= 80"},
-                "winner": {".validate": "newData.isString() && (newData.val() === '' || newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"},
-                "table": {".validate": "newData.isNumber() && newData.val() >= 1"}, "bye": {".validate": "newData.isBoolean()"}, "reportedAt": {".validate": "newData.isNumber()"}, "$other": {".validate": false}
-              }
-            }, "$other": {".validate": false}
-          }
-        },
-        "$other": {".validate": false}
       }
     },
     "onlineRegistrations": {
@@ -382,9 +331,27 @@
           ".read": "auth != null && (root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid || auth.uid === $uid)",
           ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
           ".validate": "newData.hasChildren(['uid','name','category','status','submittedAt']) && newData.child('uid').val() === $uid && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && newData.child('category').isString() && (newData.child('category').val() === 'MA' || newData.child('category').val() === 'SR' || newData.child('category').val() === 'JR') && newData.child('status').isString() && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'approved' || newData.child('status').val() === 'rejected') && newData.child('submittedAt').isNumber()",
-          "uid": {".validate": "newData.isString()"}, "name": {".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"},
-          "category": {".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"},
-          "status": {".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected')"}, "submittedAt": {".validate": "newData.isNumber()"}, "resolvedAt": {".validate": "newData.isNumber()"}, "$other": {".validate": false}
+          "uid": {
+            ".validate": "newData.isString()"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+          },
+          "category": {
+            ".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected')"
+          },
+          "submittedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "resolvedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     }

@@ -36,32 +36,10 @@
     #judgeView { display: none; min-height: 100dvh; background: #101827; color: #fff; align-items: center; justify-content: center; flex-direction: column; gap: clamp(22px, 4vh, 38px); text-align: center; padding: 78px 16px 72px; }
     body.viewer-mode #judgeView { display: flex; }
     body.projection-mode #controlSync, body.projection-mode .edit-button, body.projection-mode .control-bar, body.projection-mode .modal, body.projection-mode .top-actions, body.projection-mode #enableSound { display: none !important; }
-    body.pairings-mode .container, body.pairings-mode .modal, body.pairings-mode #controlSync, body.pairings-mode #roomWelcome { display: none !important; }
-    #pairingsView { display: none; min-height: 100dvh; padding: clamp(20px, 5vw, 64px); background: var(--surface); color: var(--text); }
-    body.pairings-mode #pairingsView { display: block; }
-    .pairings-shell { max-width: 1000px; margin: auto; }
-    .pairings-eyebrow { color: var(--accent-soft); font-size: 13px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
-    #pairingsView h1 { font-size: clamp(32px, 5vw, 60px); margin: 12px 0; overflow-wrap: anywhere; }
-    .pairings-filters { display: flex; flex-wrap: wrap; gap: 16px; margin: 28px 0; }
-    .pairings-filters label { margin: 0; min-width: 160px; }
-    .pairings-filters select { display: block; width: 100%; margin-top: 8px; padding: 12px; background: var(--surface-raised); border: 1px solid var(--edge); border-radius: 10px; color: var(--text); font: inherit; }
-    .pairing-card { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 18px; margin: 12px 0; border: 1px solid var(--edge); border-radius: 16px; background: var(--surface-raised); font-size: clamp(16px, 2vw, 22px); }
-    .pairing-table { color: var(--accent-soft); font-weight: 800; font-size: 15px; text-align: center; white-space: nowrap; }
-    #pairingsCurrentRound { color: var(--accent-soft); font-size: clamp(19px, 2.5vw, 28px); font-weight: 800; margin: 0 0 16px; }
-    .pairing-player { min-width: 0; overflow-wrap: anywhere; }
-    .pairing-player:last-child { text-align: right; }
-    .pairing-player small { display: block; margin-top: 6px; color: var(--muted); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
-    .pairing-player small strong { color: var(--accent-soft); }
-    #pairingsStatus { color: var(--muted); line-height: 1.5; }
-    #pairingsStatus:empty { display: none; }
-    #pairingsStaffLink { position: fixed; z-index: 15; top: 12px; right: 12px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
-    #pairingsStaffLink[hidden] { display: none; }
     .staff-top-actions { position: fixed; z-index: 15; top: 12px; right: 12px; display: flex; align-items: center; gap: 8px; }
-    #staffPairingsLink, #exitStaffRoom { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
+    #staffTournamentLink, #exitStaffRoom { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--surface-raised); color: var(--text); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; }
     #exitStaffRoom { border-color: var(--accent); background: var(--accent); color: #fff; }
-    #staffPairingsLink[hidden] { display: none; }
-    @media (max-width: 600px) { #pairingsView { padding-top: 76px; } }
-    @media (max-width: 580px) { .pairing-card { gap: 8px; padding: 14px; } .pairing-table { font-size: 13px; } }
+    #staffTournamentLink[hidden] { display: none; }
     body.no-room .container { display: none; }
     #roomWelcome { display: none; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; text-align: center; background: #f4f6fa; color: #17223b; }
     body.no-room #roomWelcome { display: flex; }
@@ -335,11 +313,11 @@
     .control-bar #resetButton { color: var(--accent-soft); background: var(--accent-dark); border-color: var(--accent); }
     #roomWelcome, #judgeView { background: var(--surface); color: var(--text); }
     #judgeTimer { color: var(--text); }
-    #roomWelcome, .container, #judgeView, #pairingsView { opacity: 1; transition: opacity 180ms ease; }
+    #roomWelcome, .container, #judgeView { opacity: 1; transition: opacity 180ms ease; }
     body.palette-fade #roomWelcome, body.palette-fade .container,
-    body.palette-fade #judgeView, body.palette-fade #pairingsView { opacity: 0; }
+    body.palette-fade #judgeView { opacity: 0; }
     @media (prefers-reduced-motion: reduce) {
-      #roomWelcome, .container, #judgeView, #pairingsView { transition: none; }
+      #roomWelcome, .container, #judgeView { transition: none; }
     }
     #controlSync { border: 2px solid var(--accent); }
     #controlSync.collapsed { border: 0; }
@@ -509,7 +487,6 @@
     body:not(.no-room) #modal .modal-content .palette-swatches { display: flex; width: 100%; min-width: 0; max-width: 58px; height: 30px; border-radius: 8px; }
     body:not(.no-room) #modal .modal-content .settings-hint { margin: 8px 0; color: var(--muted); font-size: 12px; }
     body:not(.no-room) #modal .modal-content #qrStatus,
-    body:not(.no-room) #modal .modal-content #tdfStatus { color: var(--muted); font-size: 12px; line-height: 1.5; }
     @media (max-width: 600px) {
       body:not(.no-room) #modal .modal-content { padding: 18px; }
       body:not(.no-room) #modal .modal-content .editor-actions { bottom: -18px; margin: 18px -18px -18px; padding: 11px 18px; }
@@ -549,7 +526,7 @@
     /* Compatibilidad con navegadores de TV: fallback de viewport y reloj en pantallas bajas. */
     @supports not (height: 100dvh) {
       .container { min-height: 100vh; }
-      #roomWelcome, #judgeView, #pairingsView { min-height: 100vh; }
+      #roomWelcome, #judgeView { min-height: 100vh; }
     }
     @media (min-width: 801px) and (max-height: 720px) {
       .container { min-height: 100vh; min-height: 100dvh; }
@@ -561,23 +538,6 @@
       #timerStatus { padding: 8px 18px; }
       .control-bar { min-height: 72px; padding: 8px 32px; }
     }
-      .staff-result-list { display: grid; gap: 10px; margin-top: 10px; }
-    .staff-result-card { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--edge, #4d5968); border-radius: 12px; background: var(--surface, #1e2734); text-align: left; }
-    .staff-result-meta { color: var(--muted, #bac2ce); font-size: 12px; }
-    .staff-result-players { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; font-weight: 700; }
-    .staff-result-players span:last-child { text-align: right; }
-    .staff-result-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .staff-result-actions button { min-height: 38px; padding: 8px 12px; border: 1px solid var(--edge, #4d5968); border-radius: 9px; background: var(--surface-raised, #293446); color: var(--text, #fff); font: inherit; cursor: pointer; }
-    .staff-result-actions button:disabled { opacity: .5; cursor: not-allowed; }
-    #staffResultsModule, #adminStaffResults { width: min(760px, 100%); }
-    #staffResultRound, #adminResultRound { min-width: 120px; padding: 8px; border-radius: 8px; }
-      #adminResultsPanel { position: fixed; top: 68px; right: 14px; z-index: 29; width: min(680px, calc(100vw - 28px)); max-height: calc(100dvh - 84px); overflow: auto; padding: 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--surface-raised); color: var(--text); box-shadow: 0 18px 50px #0009; }
-    #adminResultsPanel[hidden] { display: none !important; }
-    #adminResultsClose { min-height: 36px; padding: 0 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .staff-result-card.has-winner { border-color: var(--accent, #a78bfa); background: rgba(139, 92, 246, .18); box-shadow: inset 4px 0 0 var(--accent, #a78bfa); }
-    .staff-result-card.is-draw { border-color: #d6a84f; background: rgba(214, 168, 79, .12); box-shadow: inset 4px 0 0 #d6a84f; }
-    .staff-result-players .is-winning-player { color: var(--accent, #c4b5fd); font-weight: 800; }
-    .staff-result-players .is-winning-player::after { content: ' · GANADOR'; display: inline-block; margin-left: 5px; color: var(--accent, #c4b5fd); font-size: 10px; letter-spacing: .07em; vertical-align: middle; }
   </style>
 </head>
 <body data-palette="graphite" data-timer-font="system">
@@ -610,7 +570,6 @@
         <h1>La ronda avanza.<br><em>Todos ven el mismo tiempo.</em></h1>
         <p>Controla el temporizador desde tu sala, proyéctalo en pantalla y comparte una vista sincronizada con tu staff.</p>
         <div class="welcome-features"><span>Sincronizado en vivo</span><span>Temporizador para staff</span><span>Pareos del torneo</span></div>
-        <a class="agenda-entry" href="/jugador/">Buscar mis mesas como jugador <span aria-hidden="true">→</span></a>
         <a class="agenda-entry" href="/torneos/">Ver torneos y pareos <span aria-hidden="true">→</span></a>
         <a id="agendaPublicLink" class="agenda-entry" href="/eventos/" hidden>Ver agenda de Temuco <span aria-hidden="true">→</span></a>
         <a id="agendaAdminLink" class="agenda-entry" href="/eventos/?admin=1" hidden>Administrar agenda <span aria-hidden="true">→</span></a>
@@ -643,16 +602,8 @@
       </div>
     </div>
   </section>
-  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffPairingsLink" hidden>Ver pareos</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffResultsModule" class="staff-timer-module" aria-labelledby="staffResultsTitle" hidden><h2 id="staffResultsTitle">Resultados de mesas</h2><label for="staffResultRound">Ronda<select id="staffResultRound"><option value="latest">Última ronda</option></select></label><p id="staffResultStatus" role="status" aria-live="polite"></p><div id="staffResultList" class="staff-result-list"></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con OT</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><div id="staffChatMentionSuggestions" class="room-chat-mention-suggestions" role="listbox" aria-label="Sugerencias de mención" hidden></div><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
+  <div id="judgeView" aria-label="Temporizador para staff"><nav class="staff-top-actions" aria-label="Navegación de Staff"><a id="staffTournamentLink" hidden>Ver torneo</a><a id="exitStaffRoom" href="/staff/">Salir de la sala</a></nav><section class="staff-timer-module" aria-labelledby="roundTimerTitle"><h2 id="roundTimerTitle">Tiempo de ronda</h2><div id="judgeTimer" role="timer">02:00</div></section><section class="staff-timer-module" aria-labelledby="callStopwatchTitle"><h2 id="callStopwatchTitle">Cronómetro de llamada</h2><div id="callStopwatch" role="timer" aria-live="off">00:00</div><p id="callStopwatchStatus" role="status" aria-live="polite">Listo para iniciar</p><div class="staff-call-actions"><button id="callStopwatchToggle" type="button">Iniciar llamada</button><button id="callStopwatchReset" type="button" disabled>Reiniciar</button></div></section><section id="staffChatModule" class="staff-timer-module" aria-labelledby="staffChatTitle" hidden><h2 id="staffChatTitle">Mensajes con OT</h2><p id="staffChatStatus" role="status" aria-live="polite"></p><ol id="staffChatMessages" aria-label="Mensajes de la sala"></ol><form id="staffChatForm" hidden><label class="visually-hidden" for="staffChatInput">Escribe un mensaje</label><textarea id="staffChatInput" maxlength="500" placeholder="Escribe un mensaje para administración" required></textarea><div id="staffChatMentionSuggestions" class="room-chat-mention-suggestions" role="listbox" aria-label="Sugerencias de mención" hidden></div><button type="submit">Enviar</button></form></section><div id="judgeStatus" role="status"></div></div>
   <button id="enableSound" type="button" aria-pressed="false" hidden>🔔 Activar sonido</button>
-  <section id="pairingsView" aria-label="Pareos del torneo"><a id="pairingsStaffLink" href="/staff/" hidden>← Volver a Staff</a><div class="pairings-shell">
-    <span class="pairings-eyebrow">Pareos del torneo</span><h1 id="pairingsTitle">Pareos</h1>
-    <p id="pairingsCurrentRound"></p>
-    <p id="pairingsStatus" role="status">Conectando…</p>
-    <button id="privatePairingsLogin" class="editor-button editor-button-primary" type="button" hidden>Iniciar sesión con Google para ver esta prueba</button>
-    <div class="pairings-filters"><label for="pairingsRound">Ronda<select id="pairingsRound"></select></label><label for="pairingsDivision">Categoría del jugador<select id="pairingsDivision"><option value="all">Todas</option><option value="JR">Junior (JR)</option><option value="SR">Senior (SR)</option><option value="MA">Máster (MA)</option></select></label></div>
-    <div id="pairingsList"></div>
-  </div></section>
   <div class="container">
     <div id="timerBackgroundLayer" aria-hidden="true"></div>
     <div id="leftPanel" class="panel">
@@ -663,7 +614,6 @@
   <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
   <button id="adminStaffManagerOpen" class="room-chat-open-button" type="button" aria-label="Gestionar Staff" title="Gestionar Staff" aria-controls="adminStaffManager" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg></button>
-  <button id="adminResultsOpen" class="room-chat-open-button" type="button" aria-label="Resultados de mesas" title="Resultados de mesas" aria-controls="adminResultsPanel" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
     <summary aria-label="Acciones de sala" title="Acciones de sala">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -692,7 +642,6 @@
     <button id="createRoom" type="button" hidden>Ir al control de mi sala</button>
     <div class="room-actions" aria-label="Enlaces de sala">
       <button id="copyStaffLink" class="share-view-button" type="button"><span>Staff</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"></path></svg></button>
-      <button id="copyPairingsLink" class="share-view-button" type="button" hidden><span>Pareos</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 0 0 0 2 2h3"></path></svg></button>
     </div>
     <div id="copyLinkFeedback" class="copy-link-feedback" role="status" aria-live="polite" hidden></div>
 
@@ -713,10 +662,6 @@
         <div class="staff-manager-section"><h4>Admitidos</h4><div id="admittedStaffList" class="staff-manager-list"></div></div>
         <div class="staff-manager-section"><h4>Expulsados</h4><div id="kickedStaffList" class="staff-manager-list"></div></div>
         </section>
-      <section id="adminResultsPanel" aria-labelledby="adminResultsTitle" hidden>
-        <div class="staff-manager-heading"><h3 id="adminResultsTitle">Resultados de mesas</h3><button id="adminResultsClose" type="button" aria-label="Cerrar resultados">Cerrar</button></div>
-        <div id="adminStaffResults" class="staff-manager-section" hidden><label for="adminResultRound">Ronda<select id="adminResultRound"><option value="latest">Última ronda</option></select></label><p id="adminResultStatus" role="status" aria-live="polite"></p><div id="adminResultList" class="staff-result-list"></div></div>
-      </section>
       <input type="file" accept="image/*" id="logoInput" style="display:none;">
       <div class="timer-stage">
         <img id="logo" src="" alt="Logo" style="display:none;">
@@ -841,8 +786,6 @@
           <option value="qr">Generar QR desde un enlace</option>
           <option value="tournament">Pareos públicos de un torneo</option>
           <option value="upload">Subir una imagen</option>
-          <option value="tdf">Subir TDF y generar QR de pareos</option>
-          <option value="html-pairings" hidden>Sincronizar pareos desde HTML (prueba privada)</option>
         </select>
         <div id="tournamentControls" hidden>
           <label for="timerTournamentSelect">Torneo administrado por ti:</label>
@@ -858,19 +801,6 @@
           <label for="tournamentImageInput">Imagen para el panel izquierdo (máximo 2 MB):</label>
           <input type="file" accept="image/*" id="tournamentImageInput">
           <button id="removeUploadedImageButton" class="editor-button editor-button-secondary" type="button" onclick="removeUploadedImage()" hidden>Quitar imagen</button>
-        </div>
-        <div id="tdfControls" hidden>
-          <label for="tdfInput">Archivo .tdf exportado del torneo (máximo 2 MB)</label>
-          <input id="tdfInput" type="file" accept=".tdf,.xml,text/xml,application/xml">
-          <button id="publishPairings" class="editor-button editor-button-secondary" type="button">Publicar pareos y generar QR</button>
-          <p id="tdfStatus" role="status" aria-live="polite">Selecciona un TDF para publicar sus pareos en esta sala.</p>
-        </div>
-        <div id="htmlPairingsControls" hidden>
-          <p>Prueba privada: el HTML se lee en este computador y se sincroniza solo con tu cuenta. El QR también requiere tu sesión de Google.</p>
-          <p>En Mac, cuando se abra el selector, pulsa ⇧⌘G, pega la ruta de la carpeta donde está el HTML y selecciónalo.</p>
-          <button id="selectPairingsHtml" class="editor-button editor-button-secondary" type="button">Seleccionar HTML y comenzar sincronización</button>
-          <button id="stopPairingsHtml" class="editor-button editor-button-secondary" type="button" hidden>Detener sincronización</button>
-          <p id="htmlPairingsStatus" role="status" aria-live="polite">Disponible solo para la cuenta administradora.</p>
         </div>
         </div>
         <p id="qrStatus" role="status" aria-live="polite"></p>
@@ -2162,164 +2092,6 @@ module.exports = QRCode;
 })();
 </script>
   <script>
-    window.TDF_UPLOAD_ENABLED = true;
-    const tdfModeOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
-    const tdfFileInput = document.getElementById('tdfInput');
-    const tdfPublishButton = document.getElementById('publishPairings');
-    if (tdfModeOption) { tdfModeOption.disabled = !window.TDF_UPLOAD_ENABLED; tdfModeOption.hidden = !window.TDF_UPLOAD_ENABLED; }
-    if (tdfFileInput) tdfFileInput.disabled = !window.TDF_UPLOAD_ENABLED;
-    if (tdfPublishButton) tdfPublishButton.disabled = !window.TDF_UPLOAD_ENABLED;
-    const htmlPairingsModeOption = document.querySelector('#leftVisualModeSelect option[value="html-pairings"]');
-    const htmlPairingsControls = document.getElementById('htmlPairingsControls');
-    const PILOT_EMAIL = 'quidel.dsgn@gmail.com';
-    const isPilotUser = user => !!user?.emailVerified
-      && user.email?.toLowerCase() === PILOT_EMAIL
-      && user.providerData?.some(provider => provider.providerId === 'google.com');
-    window.isPilotUser = isPilotUser;
-    function setHtmlPairingsAccess(user) {
-      const allowed = isPilotUser(user);
-      if (htmlPairingsModeOption) htmlPairingsModeOption.hidden = !allowed;
-      const mode = document.getElementById('leftVisualModeSelect').value;
-      if (!allowed && mode === 'html-pairings') {
-        document.getElementById('leftVisualModeSelect').value = 'qr';
-        switchLeftVisualMode();
-      }
-      if (allowed && mode === 'html-pairings') switchLeftVisualMode();
-      return allowed;
-    }
-    window.setHtmlPairingsAccess = setHtmlPairingsAccess;
-    let privatePairingsHandle = null;
-    let privatePairingsTimer = 0;
-    let lastPrivatePairingsPayload = '';
-    function openHandleStore() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open('cronoapp-private-pairings', 1);
-        request.onupgradeneeded = () => request.result.createObjectStore('handles');
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-    async function storePairingsHandle(handle) {
-      const db = await openHandleStore();
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction('handles', 'readwrite');
-        tx.objectStore('handles').put(handle, 'selected-html');
-        tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
-      });
-      db.close();
-    }
-    async function loadPairingsHandle() {
-      const db = await openHandleStore();
-      const handle = await new Promise((resolve, reject) => {
-        const request = db.transaction('handles').objectStore('handles').get('selected-html');
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-      });
-      db.close();
-      return handle;
-    }
-    function stopPrivatePairingsSync(message = 'Sincronización detenida.') {
-      clearInterval(privatePairingsTimer); privatePairingsTimer = 0;
-      document.getElementById('stopPairingsHtml').hidden = true;
-      document.getElementById('htmlPairingsStatus').textContent = message;
-    }
-    async function syncPrivatePairingsFile(context, askPermission = false) {
-      const status = document.getElementById('htmlPairingsStatus');
-      if (!privatePairingsHandle || !context?.allowed || !context?.canControl) return;
-      try {
-        let permission = await privatePairingsHandle.queryPermission({ mode: 'read' });
-        if (permission !== 'granted' && askPermission)
-          permission = await privatePairingsHandle.requestPermission({ mode: 'read' });
-        if (permission !== 'granted') {
-          status.textContent = 'El navegador necesita permiso para volver a leer el archivo. Pulsa Seleccionar HTML para reanudar.';
-          return;
-        }
-        const file = await privatePairingsHandle.getFile();
-        const pairings = window.parsePairingsHtml(await file.text());
-        const payload = JSON.stringify(pairings);
-        if (payload.length > 900000) throw new Error('Los pareos superan el límite permitido.');
-        if (payload !== lastPrivatePairingsPayload) {
-          const ref = context.dbModule.ref(context.db, 'privatePairings/' + context.user.uid + '/' + context.roomId);
-          await context.dbModule.set(ref, payload);
-          lastPrivatePairingsPayload = payload;
-          window.pairingsPublished();
-          status.textContent = 'Sincronizado: ronda ' + pairings.categories[0].rounds.at(-1).number + '. Revisión cada 5 segundos.';
-        } else {
-          status.textContent = 'Vigilando ' + file.name + '; sin cambios. Revisión cada 5 segundos.';
-        }
-      } catch (error) {
-        status.textContent = error?.message || 'No se pudo leer el HTML. Selecciónalo otra vez.';
-      }
-    }
-    let privatePairingsContext = null;
-    let privatePairingsReadStop = null;
-    let privatePairingsReadKey = '';
-    let privatePairingsData = null;
-    async function beginPrivatePairingsSync(context, chooseNew = false) {
-      if (!context?.allowed || !context?.canControl) {
-        document.getElementById('htmlPairingsStatus').textContent = 'Inicia sesión con la cuenta administradora y abre tu propia sala.';
-        return;
-      }
-      if (!window.showOpenFilePicker) {
-        document.getElementById('htmlPairingsStatus').textContent = 'La sincronización automática requiere Chrome o Edge en computador.';
-        return;
-      }
-      try {
-        if (chooseNew || !privatePairingsHandle) {
-          [privatePairingsHandle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: 'Reporte de pareos HTML', accept: { 'text/html': ['.html', '.htm'] } }] });
-          await storePairingsHandle(privatePairingsHandle);
-          lastPrivatePairingsPayload = '';
-        }
-        privatePairingsContext = context;
-        await syncPrivatePairingsFile(context, true);
-        clearInterval(privatePairingsTimer);
-        privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
-        document.getElementById('stopPairingsHtml').hidden = false;
-      } catch (error) {
-        if (error?.name !== 'AbortError') document.getElementById('htmlPairingsStatus').textContent = error?.message || 'No se pudo abrir el archivo.';
-      }
-    }
-    window.configurePairingsPilot = async context => {
-      const user = context?.user;
-      const allowed = isPilotUser(user);
-      setHtmlPairingsAccess(user);
-      if (!allowed || !context?.canControl || !context?.roomId) {
-        if (privatePairingsTimer) stopPrivatePairingsSync('Inicia sesión con la cuenta administradora para continuar.');
-        privatePairingsContext = null;
-        if (privatePairingsReadStop) { privatePairingsReadStop(); privatePairingsReadStop = null; privatePairingsReadKey = ''; }
-        return;
-      }
-      privatePairingsContext = { ...context, allowed, canControl: true };
-      const readKey = user.uid + ':' + context.roomId;
-      if (privatePairingsReadKey !== readKey) {
-        if (privatePairingsReadStop) privatePairingsReadStop();
-        const ref = context.dbModule.ref(context.db, 'privatePairings/' + user.uid + '/' + context.roomId);
-        privatePairingsReadStop = context.dbModule.onValue(ref, snap => {
-          try {
-            privatePairingsData = snap.exists() ? JSON.parse(snap.val()) : null;
-            if (document.getElementById('leftVisualModeSelect').value === 'html-pairings') {
-              if (privatePairingsData) { window.setPairings(privatePairingsData); window.pairingsPublished(); }
-              else { window.setPairings(null); window.pairingsCleared(); }
-            }
-          } catch (_) {}
-        });
-        privatePairingsReadKey = readKey;
-      }
-      if (!privatePairingsHandle) {
-        try { privatePairingsHandle = await loadPairingsHandle(); } catch (_) {}
-      }
-      if (privatePairingsHandle && !privatePairingsTimer) {
-        const permission = await privatePairingsHandle.queryPermission({ mode: 'read' }).catch(() => 'denied');
-        if (permission === 'granted') {
-          await syncPrivatePairingsFile(privatePairingsContext);
-          privatePairingsTimer = setInterval(() => syncPrivatePairingsFile(privatePairingsContext), 5000);
-          document.getElementById('stopPairingsHtml').hidden = false;
-        }
-      }
-    };
-    document.getElementById('selectPairingsHtml').addEventListener('click', () => beginPrivatePairingsSync(privatePairingsContext, true));
-    document.getElementById('stopPairingsHtml').addEventListener('click', () => stopPrivatePairingsSync());
-
     function openModal() {
       const modal = document.getElementById('modal');
       const editButton = document.getElementById('editToggle');
@@ -2416,17 +2188,11 @@ module.exports = QRCode;
     async function saveSettings() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const leftPanelEnabled = document.getElementById('leftPanelEnabled').checked;
-      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
-      if (mode === 'html-pairings' && !window.isPilotUser(window.cronoCurrentUser)) return;
       if (leftPanelEnabled && ['qr', 'tournament'].includes(mode) && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
       if (leftPanelEnabled && mode === 'tournament' && !document.getElementById('timerTournamentSelect').value) { document.getElementById('qrStatus').textContent = 'Selecciona uno de tus torneos antes de guardar.'; return; }
       if (leftPanelEnabled && mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
         renderLeftVisual();
-      }
-      if (leftPanelEnabled && ['tdf', 'html-pairings'].includes(mode) && (!pairingsAvailable || !generatePairingsQR())) {
-        document.getElementById('qrStatus').textContent = 'Publica pareos antes de guardar esta opción.';
-        return;
       }
       const minutes = Number(document.getElementById('timerInput').value);
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
@@ -2506,14 +2272,13 @@ module.exports = QRCode;
         const tournamentSelect = document.getElementById('timerTournamentSelect');
         if (images.tournamentId && tournamentSelect) { tournamentSelect.dataset.savedId = images.tournamentId; window.selectTimerTournament?.(images.tournamentId, false); }
         const requestedMode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
-        const mode = requestedMode === 'tdf' && !window.TDF_UPLOAD_ENABLED
-          ? (images.qrUrl ? 'qr' : uploadedImageSrc ? 'upload' : 'qr')
+        const mode = ['tdf', 'html-pairings'].includes(requestedMode)
+          ? (images.tournamentId ? 'tournament' : images.qrUrl ? 'qr' : uploadedImageSrc ? 'upload' : 'qr')
           : requestedMode;
         document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
         else if (images.tournamentId) window.selectTimerTournament?.(images.tournamentId);
         else qrImageSrc = '';
-        if (mode === 'tdf' || mode === 'html-pairings') generatePairingsQR();
         switchLeftVisualMode();
       }
       const minutes = Number(settings.minutes ?? settings.text?.minutes);
@@ -2839,56 +2604,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
     });
     document.getElementById('timerBackgroundOpacity').addEventListener('input', event => { timerBackgroundOpacity = Number(event.target.value); applyTimerBackground(); });
-    let pairingsQrSrc = '';
-    let pairingsAvailable = false;
-    window.pairingsPublished = () => {
-      pairingsAvailable = true;
-      generatePairingsQR();
-      renderLeftVisual();
-      window.updateStaffPairingsLink?.(true);
-    };
-    window.pairingsCleared = () => {
-      pairingsAvailable = false;
-      pairingsQrSrc = '';
-      renderLeftVisual();
-      window.updateStaffPairingsLink?.(false);
-    };
-
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
-      const src = ['qr', 'tournament'].includes(mode) ? qrImageSrc : ['tdf', 'html-pairings'].includes(mode) ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
+      const src = ['qr', 'tournament'].includes(mode) ? qrImageSrc : mode === 'upload' ? uploadedImageSrc : '';
       if (src) {
         image.src = src;
-        image.alt = mode === 'tournament' ? 'Código QR para consultar el torneo' : mode === 'qr' ? 'Código QR del enlace del torneo' : ['tdf', 'html-pairings'].includes(mode) ? 'Código QR privado para ver los pareos' : 'Imagen del torneo';
+        image.alt = mode === 'tournament' ? 'Código QR para consultar el torneo' : mode === 'qr' ? 'Código QR del enlace' : 'Imagen del torneo';
         image.style.display = 'block';
       } else {
         image.removeAttribute('src');
         image.style.display = 'none';
       }
-    }
-
-    function switchLeftVisualMode() {
-      const selector = document.getElementById('leftVisualModeSelect');
-      let mode = selector.value;
-      if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) {
-        mode = document.getElementById('qrUrl').value.trim() ? 'qr' : uploadedImageSrc ? 'upload' : 'qr';
-        selector.value = mode;
-      }
-      document.getElementById('qrControls').hidden = mode !== 'qr';
-      document.getElementById('tournamentControls').hidden = mode !== 'tournament';
-      document.getElementById('imageControls').hidden = mode !== 'upload';
-      document.getElementById('tdfControls').hidden = mode !== 'tdf';
-      htmlPairingsControls.hidden = mode !== 'html-pairings' || !window.isPilotUser(window.cronoCurrentUser);
-      if (mode === 'html-pairings' && window.isPilotUser(window.cronoCurrentUser)) {
-        if (privatePairingsData) { window.setPairings(privatePairingsData); window.pairingsPublished(); }
-        else { window.setPairings(null); window.pairingsCleared(); }
-      }
-      const copyPairingsButton = document.getElementById('copyPairingsLink');
-      const roomQuery = new URLSearchParams(location.search);
-      if (copyPairingsButton) copyPairingsButton.hidden = !(roomQuery.has('sala') || roomQuery.has('s')) || (mode !== 'html-pairings' && !window.TDF_UPLOAD_ENABLED);
-      document.getElementById('qrStatus').textContent = '';
-      renderLeftVisual();
     }
 
     document.getElementById('tournamentImageInput').addEventListener('change', event => {
@@ -2911,17 +2638,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       };
       reader.readAsDataURL(file);
     });
-
-    function generatePairingsQR() {
-      const query = new URLSearchParams(location.search);
-      if (!query.get('sala') && !query.get('s')) return false;
-      const target = new URL(location.href);
-      if (window.currentShortCode) { target.searchParams.delete('sala'); target.searchParams.set('s', window.currentShortCode); }
-      target.searchParams.set('view', 'pareos');
-      if (document.getElementById('leftVisualModeSelect').value === 'html-pairings') target.searchParams.set('privado', '1');
-      else target.searchParams.delete('privado');
-      return Boolean(pairingsQrSrc = qrDataUrl(target.href));
-    }
 
     window.selectTimerTournament = function(id, generate = true) {
       const select = document.getElementById('timerTournamentSelect');
@@ -2992,206 +2708,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         return canvas.toDataURL('image/png');
       } catch { return ''; }
     }
-
-    function directChild(parent, tag) {
-      return Array.from(parent?.children || []).find(child => child.localName === tag) || null;
-    }
-    function directChildren(parent, tag) {
-      return Array.from(parent?.children || []).filter(child => child.localName === tag);
-    }
-    function parseTdf(source) {
-      if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error('El TDF contiene declaraciones XML no admitidas.');
-      const xml = new DOMParser().parseFromString(source, 'application/xml');
-      if (xml.querySelector('parsererror') || xml.documentElement.localName !== 'tournament')
-        throw new Error('El archivo no tiene un formato TDF/XML válido.');
-      const label = node => (node?.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 120);
-      const startDate = label(directChild(directChild(xml.documentElement, 'data'), 'startdate'));
-      const parts = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(startDate);
-      if (!parts) throw new Error('El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.');
-      const month = Number(parts[1]), day = Number(parts[2]), year = Number(parts[3]);
-      const validDate = new Date(Date.UTC(year, month - 1, day));
-      if (validDate.getUTCFullYear() !== year || validDate.getUTCMonth() !== month - 1 || validDate.getUTCDate() !== day)
-        throw new Error('La fecha del torneo en el TDF no es válida.');
-      const season = year + (month >= 9 ? 1 : 0);
-      const divisionFor = value => {
-        const birthYear = Number(/^(?:\d{1,2}\/){2}(\d{4})$/.exec(value)?.[1]);
-        if (!birthYear || birthYear > year || birthYear < 1900) return '';
-        return birthYear >= season - 12 ? 'JR' : birthYear >= season - 16 ? 'SR' : 'MA';
-      };
-      const players = new Map(directChildren(directChild(xml.documentElement, 'players'), 'player').map(player => [
-        player.getAttribute('userid'),
-        { name: [label(directChild(player, 'firstname')), label(directChild(player, 'lastname'))].filter(Boolean).join(' '),
-          division: divisionFor(label(directChild(player, 'birthdate'))) }
-      ]));
-      if (!players.size) throw new Error('No se encontraron jugadores en el TDF.');
-      const categories = directChildren(directChild(xml.documentElement, 'pods'), 'pod').map((pod, index) => {
-        const rounds = directChildren(directChild(pod, 'rounds'), 'round').map(round => {
-          const number = Number(round.getAttribute('number'));
-          if (!Number.isInteger(number) || number < 1) return null;
-          const matches = directChildren(directChild(round, 'matches'), 'match').map(match => {
-            const first = directChild(match, 'player1') || directChild(match, 'player');
-            const second = directChild(match, 'player2');
-            const firstPlayer = players.get(first?.getAttribute('userid'));
-            const secondPlayer = second ? players.get(second.getAttribute('userid')) : null;
-            const table = Number(label(directChild(match, 'tablenumber')));
-            if (!firstPlayer?.name || (second && !secondPlayer?.name)) return null;
-            return { table: Number.isInteger(table) && table > 0 ? table : 0,
-              first: firstPlayer.name, second: second ? secondPlayer.name : 'BYE',
-              firstPlayerId: first?.getAttribute('userid') || '', secondPlayerId: second?.getAttribute('userid') || '',
-              firstDivision: firstPlayer.division, secondDivision: secondPlayer?.division || '',
-              outcome: match.getAttribute('outcome') || '',
-              _firstId: first?.getAttribute('userid') || '', _secondId: second?.getAttribute('userid') || '' };
-          }).filter(Boolean).sort((a, b) => a.table - b.table);
-          return { number, matches };
-        }).filter(Boolean).sort((a, b) => a.number - b.number);
-        const code = (pod.getAttribute('category') || '').trim().toUpperCase();
-        const categoryNames = { '0': 'Junior (JR)', '1': 'Senior (SR)', '2': 'Máster (MA)', '8': 'Junior / Senior (JR/SR)', JR: 'Junior (JR)', SR: 'Senior (SR)', MA: 'Máster (MA)' };
-        return { name: categoryNames[code] || `Categoría ${code || index + 1}`, rounds };
-      }).filter(category => category.rounds.some(round => round.matches.length));
-      if (!categories.length) throw new Error('No se encontraron pareos con jugadores en el TDF.');
-      // Each round's published record is the standing entering that round.
-      // Player IDs remain local while records are calculated and are removed before publishing.
-      const records = new Map();
-      const getRecord = id => {
-        if (!records.has(id)) records.set(id, { wins: 0, losses: 0, ties: 0 });
-        return records.get(id);
-      };
-      const snapshot = id => {
-        const { wins, losses, ties } = getRecord(id);
-        return { wins, losses, ties, points: 3 * wins + ties };
-      };
-      const allRounds = categories.flatMap(category => category.rounds).sort((a, b) => a.number - b.number);
-      for (const round of allRounds) for (const match of round.matches) {
-        match.firstRecord = snapshot(match._firstId);
-        if (match._secondId) match.secondRecord = snapshot(match._secondId);
-        const first = getRecord(match._firstId);
-        const second = match._secondId ? getRecord(match._secondId) : null;
-        if (match.outcome === '1') { first.wins++; if (second) second.losses++; }
-        else if (match.outcome === '2' && second) { first.losses++; second.wins++; }
-        else if (match.outcome === '3' && second) { first.ties++; second.ties++; }
-        else if (match.outcome === '5') first.wins++;
-        delete match._firstId;
-        delete match._secondId;
-      }
-      return { version: 4, season, title: label(directChild(directChild(xml.documentElement, 'data'), 'name')) || 'Torneo', categories };
-    }
-    window.parseTdf = parseTdf;
-    window.parsePairingsHtml = function(source) {
-      if (typeof source !== 'string' || source.length > 5_000_000) throw new Error('El HTML está vacío o supera los 5 MB.');
-      const doc = new DOMParser().parseFromString(source, 'text/html');
-      const roundHeading = [...doc.querySelectorAll('h1,h2,h3,h4')].map(node => node.textContent.trim())
-        .find(text => /(?:pairings|pareos|emparejamientos)\s*[-–:]?\s*(?:round|ronda)\s*\d+/i.test(text)
-          || /(?:round|ronda)\s*\d+/i.test(text));
-      const roundMatch = /(?:round|ronda)\s*(\d+)/i.exec(roundHeading || doc.title);
-      const roundNumber = Number(roundMatch?.[1]);
-      if (!Number.isInteger(roundNumber) || roundNumber < 1) throw new Error('No se pudo identificar la ronda en el HTML.');
-      const reportName = [...doc.querySelectorAll('body > b, body > strong')].map(node => node.textContent.trim()).find(Boolean);
-      const title = (reportName || doc.title.replace(/^pairings\s*[-–:]?\s*/i, '').replace(/\s+-\s+\d{1,2}\/\d{1,2}\/\d{4}.*/, '') || 'Pareos').slice(0, 120);
-      const clean = value => (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
-      function player(value) {
-        const match = /^(.*?)\s*\((\d+)\/(\d+)\/(\d+)\s*\((\d+)\)\s*-\s*(JR|SR|MA)\)\s*$/i.exec(clean(value));
-        if (!match) return { name: clean(value), division: '', record: null };
-        const wins = Number(match[2]), losses = Number(match[3]), ties = Number(match[4]);
-        return { name: clean(match[1]), division: match[6].toUpperCase(),
-          record: { wins, losses, ties, points: Number(match[5]) } };
-      }
-      const found = new Map();
-      for (const table of doc.querySelectorAll('table')) for (const row of table.querySelectorAll('tr')) {
-        const cells = [...row.querySelectorAll(':scope > td')];
-        if (cells.length < 4 || !/^\d+$/.test(clean(cells[0].textContent))) continue;
-        const tableNumber = Number(clean(cells[0].textContent));
-        const first = player(cells[1].textContent);
-        const second = player(cells[3].textContent);
-        if (!first.name || !second.name) continue;
-        const key = [tableNumber, ...[first.name, second.name].sort((a,b) => a.localeCompare(b))].join('|').toLocaleLowerCase();
-        if (found.has(key)) continue;
-        found.set(key, { table: tableNumber, first: first.name, second: second.name,
-          firstDivision: first.division, secondDivision: second.division,
-          firstRecord: first.record, secondRecord: second.record });
-      }
-      const matches = [...found.values()].sort((a,b) => a.table - b.table);
-      if (!matches.length) throw new Error('No se encontraron pareos en las tablas del HTML.');
-      return { version: 4, title, categories: [{ name: 'Todas', rounds: [{ number: roundNumber, matches }] }] };
-    };
-    let pairingsData = null;
-    window.getPairingsData = () => pairingsData;
-    function renderPairings() {
-      const roundChoice = document.getElementById('pairingsRound').value;
-      const division = document.getElementById('pairingsDivision').value;
-      const list = document.getElementById('pairingsList');
-      list.replaceChildren();
-      document.getElementById('pairingsCurrentRound').textContent = '';
-      if (!pairingsData?.categories?.length) return;
-      if (pairingsData.version < 4) {
-        document.getElementById('pairingsStatus').textContent = 'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.';
-        return;
-      }
-      let count = 0;
-      const shownRounds = new Set();
-      pairingsData.categories.forEach(category => {
-        const round = roundChoice === 'latest' ? category.rounds.at(-1)
-          : category.rounds.find(item => String(item.number) === roundChoice);
-        if (!round) return;
-        for (const match of round.matches) {
-          if (division !== 'all' && match.firstDivision !== division && match.secondDivision !== division) continue;
-          count++;
-          shownRounds.add(round.number);
-          const card = document.createElement('article');
-          card.className = 'pairing-card';
-          const playerElement = (name, playerDivision, record) => {
-            const container = document.createElement('span');
-            container.className = 'pairing-player';
-            const displayName = document.createElement('span');
-            displayName.textContent = name + (playerDivision ? ` (${playerDivision})` : '');
-            container.append(displayName);
-            if (record) {
-              const details = document.createElement('small');
-              details.textContent = `(${record.wins}/${record.losses}/${record.ties}) `;
-              const points = document.createElement('strong');
-              points.textContent = `${record.points} pts`;
-              details.append(points);
-              container.append(details);
-            }
-            return container;
-          };
-          card.append(playerElement(match.first, match.firstDivision, match.firstRecord));
-          const table = document.createElement('span');
-          table.className = 'pairing-table';
-          table.textContent = match.second === 'BYE' ? 'BYE' : match.table ? `Mesa ${match.table}` : 'BYE';
-          card.append(table, playerElement(match.second === 'BYE' ? '' : match.second, match.secondDivision, match.secondRecord));
-          list.append(card);
-        }
-      });
-      const numbers = [...shownRounds].sort((a, b) => a - b);
-      document.getElementById('pairingsCurrentRound').textContent = numbers.length
-        ? `${numbers.length === 1 ? 'Ronda' : 'Rondas'} ${numbers.join(' y ')}` : '';
-      document.getElementById('pairingsStatus').textContent = count ? '' : 'No hay pareos para esta selección.';
-    }
-    function setPairings(value) {
-      pairingsData = value;
-      window.dispatchEvent(new Event('crono:pairings-updated'));
-      const list = document.getElementById('pairingsList');
-      list.replaceChildren();
-      if (!value?.categories?.length) {
-        document.getElementById('pairingsStatus').textContent = 'Aún no se han publicado pareos para esta sala.';
-        return;
-      }
-      document.getElementById('pairingsTitle').textContent = value.title;
-      updateRounds();
-    }
-    function updateRounds() {
-      const selector = document.getElementById('pairingsRound');
-      const previousRound = selector.value;
-      selector.replaceChildren();
-      selector.add(new Option('Última de cada grupo', 'latest'));
-      const numbers = [...new Set((pairingsData?.categories || []).flatMap(category => category.rounds.map(round => round.number)))].sort((a, b) => a - b);
-      numbers.forEach(number => selector.add(new Option(`Ronda ${number}`, String(number))));
-      selector.value = previousRound && (previousRound === 'latest' || numbers.includes(Number(previousRound))) ? previousRound : 'latest';
-      renderPairings();
-    }
-    document.getElementById('pairingsRound').addEventListener('change', renderPairings);
-    document.getElementById('pairingsDivision').addEventListener('change', renderPairings);
-    window.setPairings = setPairings;
 
     document.getElementById('qrUrl').addEventListener('change', generateQR);
 
@@ -3340,13 +2856,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const validRoom = (!rawRoom || /^[A-Za-z0-9_-]{8,64}$/.test(rawRoom))
       && (!rawCode || /^[A-HJ-NP-Z2-9]{6}$/.test(rawCode)) && !(rawRoom && rawCode);
     let roomId = rawRoom;
-    const isJudge = ['staff', 'juez'].includes(params.get('view')); // Legacy links remain valid.
-    const isPairings = params.get('view') === 'pareos';
-    const isPrivatePairings = isPairings && params.get('privado') === '1';
+    if (params.get('view') === 'pareos') location.replace('/torneos/');
+    const isJudge = ['staff', 'juez'].includes(params.get('view'));
     const isProjection = params.get('view') === 'pantalla' || (Boolean(rawCode) && !params.get('view'));
-    const isReadOnly = isJudge || isPairings || isProjection;
+    const isReadOnly = isJudge || isProjection;
     if (isJudge) document.body.classList.add('viewer-mode');
-    else if (isPairings) document.body.classList.add('pairings-mode');
     else if (isProjection) document.body.classList.add('projection-mode');
     else if (!hasRoomLink) document.body.classList.add('no-room');
     const judgeStatus = document.getElementById('judgeStatus');
@@ -3448,14 +2962,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       homeAccountActions.hidden = false;
       googleButton.hidden = false;
     }
-    const staffPairingsLink = document.getElementById('staffPairingsLink');
-    const pairingsStaffLink = document.getElementById('pairingsStaffLink');
+    const staffTournamentLink = document.getElementById('staffTournamentLink');
     const copyLinkFeedback = document.getElementById('copyLinkFeedback');
     function makeRoomViewURL(view) {
       const url = new URL(location.href);
       const code = window.currentShortCode || rawCode;
-      if (view === 'staff' || view === 'pantalla' || view === 'pareos')
-        url.pathname = view === 'staff' ? '/staff/' : view === 'pantalla' ? '/tv/' : '/';
+      if (view === 'staff' || view === 'pantalla')
+        url.pathname = view === 'staff' ? '/staff/' : '/tv/';
       url.searchParams.delete('view');
       url.searchParams.delete('entry');
       if (code) {
@@ -3466,14 +2979,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         url.searchParams.set('sala', roomId);
       }
       url.searchParams.set('view', view);
-      if (view === 'pareos' && document.getElementById('leftVisualModeSelect').value === 'html-pairings')
-        url.searchParams.set('privado', '1');
-      else url.searchParams.delete('privado');
       return url.href;
-    }
-    if (isPairings && isPrivatePairings && hasRoomLink) {
-      pairingsStaffLink.href = makeRoomViewURL('staff');
-      pairingsStaffLink.hidden = false;
     }
     async function copyRoomView(view, label) {
       const value = makeRoomViewURL(view);
@@ -3501,21 +3007,16 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       copyLinkFeedback.hideTimer = window.setTimeout(() => { copyLinkFeedback.hidden = true; }, 3200);
     }
     document.getElementById('tvCodeCard').hidden = !hasRoomLink;
-    [
-      [document.getElementById('copyStaffLink'), 'staff', 'Staff'],
-      [document.getElementById('copyPairingsLink'), 'pareos', 'Pareos']
-    ].forEach(([button, view, label]) => {
-      button.hidden = !hasRoomLink || (view === 'pareos' && !window.TDF_UPLOAD_ENABLED && document.getElementById('leftVisualModeSelect').value !== 'html-pairings');
-      button.addEventListener('click', () => copyRoomView(view, label));
-    });
-    staffPairingsLink.hidden = true;
+    const copyStaffLink = document.getElementById('copyStaffLink');
+    copyStaffLink.hidden = !hasRoomLink;
+    copyStaffLink.addEventListener('click', () => copyRoomView('staff', 'Staff'));
+    staffTournamentLink.hidden = true;
     let currentState = null;
     let roomOwner = null;
     let currentUser = null;
     let serverOffset = 0;
     let canControl = false;
     let currentRoomSettings = {};
-    let staffPairingsAvailable = false;
     let lastSecond = null;
     let lastAlarmStartedAt = null;
     let stateRef, roomRef, settingsRef, auth, dbModule, authModule;
@@ -3526,44 +3027,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const roomDurationControl = document.getElementById('roomDurationControl');
     const roomDurationStatus = document.getElementById('roomDurationStatus');
 
-    function updateStaffPairingsLink(pairingsExist = staffPairingsAvailable) {
-      staffPairingsAvailable = Boolean(pairingsExist);
-      staffPairingsLink.removeAttribute('target');
-      staffPairingsLink.removeAttribute('rel');
-      if (!isJudge || !hasRoomLink) {
-        staffPairingsLink.hidden = true;
-        return;
-      }
+    function updateStaffTournamentLink() {
+      if (!isJudge || !hasRoomLink) { staffTournamentLink.hidden = true; return; }
       const images = currentRoomSettings.images || {};
-      const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
-      if (mode === 'tournament' && images.tournamentId) {
-        staffPairingsLink.href = new URL('/torneos/?id=' + encodeURIComponent(images.tournamentId), location.origin).href;
-        staffPairingsLink.target = '_blank';
-        staffPairingsLink.rel = 'noopener noreferrer';
-        staffPairingsLink.hidden = false;
-        return;
-      }
-      if (mode === 'tdf') {
-        staffPairingsLink.hidden = !window.TDF_UPLOAD_ENABLED || !staffPairingsAvailable;
-        if (!staffPairingsLink.hidden) staffPairingsLink.href = makeRoomViewURL('pareos');
-        return;
-      }
-      if (mode === 'qr' && images.qrUrl) {
-        try {
-          const externalLink = new URL(images.qrUrl);
-          if (['http:', 'https:'].includes(externalLink.protocol)) {
-            staffPairingsLink.href = externalLink.href;
-            staffPairingsLink.target = '_blank';
-            staffPairingsLink.rel = 'noopener noreferrer';
-            staffPairingsLink.hidden = false;
-            return;
-          }
-        } catch (_) {}
-      }
-      staffPairingsLink.hidden = true;
+      if (images.leftVisualMode === 'tournament' && images.tournamentId) {
+        staffTournamentLink.href = new URL('/torneos/?id=' + encodeURIComponent(images.tournamentId), location.origin).href;
+        staffTournamentLink.target = '_blank';
+        staffTournamentLink.rel = 'noopener noreferrer';
+        staffTournamentLink.hidden = false;
+      } else staffTournamentLink.hidden = true;
     }
-    window.updateStaffPairingsLink = updateStaffPairingsLink;
-    updateStaffPairingsLink(false);
+    updateStaffTournamentLink();
+
     startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = true;
 
     function formatTime(seconds) {
@@ -3584,14 +3059,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const label = formatTime(seconds);
       document.getElementById('judgeTimer').textContent = label;
       if (isJudge) judgeStatus.textContent = seconds <= 0 ? 'TIEMPO TERMINADO' : 'Sincronizado';
-      if (!isJudge && !isPairings) {
+      if (!isJudge && !isProjection) {
         const display = document.getElementById('timer');
         display.textContent = label;
         display.style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
         document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
         window.renderTimerState(seconds, currentState.running);
       }
-      if (!isPairings && currentState.running && seconds <= 0 && currentState.startedAt) {
+      if (currentState.running && seconds <= 0 && currentState.startedAt) {
         const runId = currentState.startedAt;
         const endedAt = runId + currentState.remainingMs;
         const lateness = Date.now() + serverOffset - endedAt;
@@ -3624,13 +3099,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     let stopStaffMembersRead = null;
     let stopRoomChatAdminNameRead = null;
     let stopStaffMembershipRead = null;
-    let roomResultsRef = null;
-    let roomResultsData = {};
-    let playerReportsData = {};
-    let stopPlayerReportsRead = null;
-    let playerReportsEventId = '';
     let adminStaffManagerOpen = false;
-    let adminResultsOpen = false;
     let staffChatName = (params.get('nombre') || '').trim().slice(0, 60);
     function unlockRoomChatAudio() {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -3786,17 +3255,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const chatButton = document.getElementById('adminStaffChatOpen');
       const managerButton = document.getElementById('adminStaffManagerOpen');
       const managerPanel = document.getElementById('adminStaffManager');
-      const resultsButton = document.getElementById('adminResultsOpen');
-      const resultsPanel = document.getElementById('adminResultsPanel');
-      if (!isRoomAdmin) { adminStaffManagerOpen = false; adminResultsOpen = false; }
+      if (!isRoomAdmin) adminStaffManagerOpen = false;
       chatButton.hidden = !isRoomAdmin;
       chatButton.setAttribute('aria-expanded', String(isRoomAdmin && adminChatOpen));
       managerButton.hidden = !isRoomAdmin;
       managerButton.setAttribute('aria-expanded', String(isRoomAdmin && adminStaffManagerOpen));
       managerPanel.hidden = !isRoomAdmin || !adminStaffManagerOpen;
-      resultsButton.hidden = !isRoomAdmin || !window.TDF_UPLOAD_ENABLED;
-      resultsButton.setAttribute('aria-expanded', String(isRoomAdmin && adminResultsOpen));
-      resultsPanel.hidden = !isRoomAdmin || !adminResultsOpen || !window.TDF_UPLOAD_ENABLED;
       adminPanel.hidden = !isRoomAdmin || !adminChatOpen;
       staffPanel.hidden = !isJudge || !roomChatEnabled;
       if (isRoomAdmin) {
@@ -4124,95 +3588,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       });
       input.addEventListener('blur', () => setTimeout(close, 120));
     }
-    function resultLabel(r) { return r?.winnerName || (r?.winner === 'draw' ? 'Empate' : 'Ganador'); }
-    function syncResultRounds() {
-      const data = window.getPairingsData?.();
-      const numbers = [...new Set((data?.categories || []).flatMap(c => (c.rounds || []).map(r => Number(r.number))))].filter(Number.isFinite).sort((a,b)=>a-b);
-      ['staffResultRound','adminResultRound'].forEach(id => {
-        const select = document.getElementById(id); if (!select) return;
-        const old = select.value || 'latest'; select.replaceChildren(new Option('Última ronda','latest'));
-        numbers.forEach(n => select.add(new Option('Ronda '+n,String(n))));
-        select.value = old === 'latest' || numbers.includes(Number(old)) ? old : 'latest';
-      });
-    }
-    function resultEntries(choice) {
-      const data = window.getPairingsData?.(), out = [];
-      (data?.categories || []).forEach((c, ci) => {
-        const rounds = c.rounds || [], round = choice === 'latest' ? rounds.at(-1) : rounds.find(r => String(r.number) === String(choice));
-        (round?.matches || []).forEach(m => {
-          if (!Number(m.table) || !m.first || !m.second || m.second === 'BYE') return;
-          const eventId = data.eventId || 'legacy';
-          out.push({ key: 'e'+eventId+'_c'+ci+'_r'+round.number+'_t'+m.table, category:c.name || 'Categoría', round:Number(round.number), match:m });
-        });
-      });
-      return out;
-    }
-    function resultAction(label, callback) {
-      const b=document.createElement('button'); b.type='button'; b.textContent=label; b.addEventListener('click',callback); return b;
-    }
-    function renderResultsList(listId,statusId,roundId,isAdmin) {
-      const list=document.getElementById(listId), status=document.getElementById(statusId);
-      if(!list||!status)return; syncResultRounds(); list.replaceChildren();
-      if(!window.getPairingsData?.()?.categories?.length){status.textContent='Aún no hay pareos publicados para esta sala.';return;}
-      const entries=resultEntries(document.getElementById(roundId)?.value || 'latest');
-      if(!entries.length){status.textContent='No hay mesas en esta ronda.';return;} status.textContent='';
-      entries.forEach(e=>{
-        const r=roomResultsData[e.key], card=document.createElement('article'); card.className='staff-result-card'; if(r)card.classList.add('has-result'); if(r&&r.winner!=='draw')card.classList.add('has-winner'); if(r?.winner==='draw')card.classList.add('is-draw');
-        const meta=document.createElement('div');meta.className='staff-result-meta';meta.textContent='Ronda '+e.round+' · '+e.category+' · Mesa '+e.match.table;
-        const players=document.createElement('div');players.className='staff-result-players';
-        [e.match.first,'vs.',e.match.second].forEach((name,i)=>{const span=document.createElement('span');span.textContent=name;if(r&&((i===0&&r.winner==='first')||(i===2&&r.winner==='second')))span.classList.add('is-winning-player');players.append(span)});
-        const actions=document.createElement('div');actions.className='staff-result-actions'; card.append(meta,players,actions);
-        if(!r){
-          const votes=playerReportsData[e.key]||{};
-          if(votes.first&&votes.second){const p=document.createElement('span');p.className='staff-result-meta';const confirmedWinner=votes.first.winner==='first'?e.match.first:votes.first.winner==='second'?e.match.second:'Empate';p.textContent=votes.first.winner===votes.second.winner?'Confirmado por ambos jugadores · '+confirmedWinner:'Los jugadores reportaron resultados distintos · Requiere revisión de Staff';actions.append(p)}
-          else if(votes.first||votes.second){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Resultado informado por un jugador · Esperando al oponente';actions.append(p)}
-          else if(isAdmin){const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Esperando reporte de Staff o de los jugadores';actions.append(p)}
-          if(!isAdmin&&!(votes.first&&votes.second&&votes.first.winner===votes.second.winner))actions.append(resultAction('Gana '+e.match.first,()=>submitTableResult(e,'first')),resultAction('Gana '+e.match.second,()=>submitTableResult(e,'second')),resultAction('Empate',()=>submitTableResult(e,'draw')));
-          else actions.append(resultAction('Confirmar '+e.match.first,()=>overrideTableResult(e,null,'first')),resultAction('Confirmar '+e.match.second,()=>overrideTableResult(e,null,'second')),resultAction('Confirmar empate',()=>overrideTableResult(e,null,'draw')));
-        } else {
-          const p=document.createElement('span');p.className='staff-result-meta';p.textContent='Resultado: '+resultLabel(r)+' · '+(r.updatedAt?'Corregido por administración':'Reportó '+(r.reporterName||'Staff')+' · Mesa bloqueada');actions.append(p);
-          if(isAdmin) actions.append(resultAction('Corregir '+e.match.first,()=>overrideTableResult(e,r,'first')),resultAction('Corregir '+e.match.second,()=>overrideTableResult(e,r,'second')),resultAction('Corregir empate',()=>overrideTableResult(e,r,'draw')));
-        }
-        list.append(card);
-      });
-    }
-    function renderRoomResults() {
-      const enabled = window.TDF_UPLOAD_ENABLED === true;
-      const section=document.getElementById('staffResultsModule');
-      const adminSection=document.getElementById('adminStaffResults');
-      if(section)section.hidden=!enabled || !isJudge;
-      if(adminSection)adminSection.hidden=!enabled;
-      if(!enabled)return;
-      renderResultsList('staffResultList','staffResultStatus','staffResultRound',false);
-      renderResultsList('adminResultList','adminResultStatus','adminResultRound',true);
-    }
-    async function submitTableResult(e,winner) {
-      const user=auth?.currentUser;
-      if(!isJudge||!staffChatName||!user||!roomResultsRef)return;
-      if(!window.confirm('¿Confirmas el resultado de la mesa '+e.match.table+'? Después quedará bloqueado para Staff.'))return;
-      const winnerName=winner==='first'?e.match.first:winner==='second'?e.match.second:'Empate';
-      const ref=dbModule.child(roomResultsRef,e.key);
-      const payload={round:e.round,category:e.category,table:Number(e.match.table),first:e.match.first,second:e.match.second,winner,winnerName,status:'locked',reportedBy:user.uid,reporterName:staffChatName,reportedAt:Date.now()};
-      try { const tx=await dbModule.runTransaction(ref,current=>current===null?payload:undefined); if(!tx.committed)document.getElementById('staffResultStatus').textContent='Esta mesa ya fue reportada.'; }
-      catch(error){console.error('CronoApp table report failed:',error);document.getElementById('staffResultStatus').textContent='No se pudo guardar. Revisa las reglas de Firebase.'}
-    }
-    async function overrideTableResult(e,current,winner) {
-      if(!canControl||!roomResultsRef||!auth?.currentUser||(current&&winner===current.winner))return;
-      const reason=window.prompt(current?'Motivo de la corrección:':'Motivo para confirmar el resultado:'); if(!reason?.trim())return;
-      const user=auth.currentUser, winnerName=winner==='first'?e.match.first:winner==='second'?e.match.second:'Empate';
-      try {
-        const tx=await dbModule.runTransaction(dbModule.child(roomResultsRef,e.key),saved=>{
-          if(!saved)return {round:e.round,category:e.category,table:Number(e.match.table),first:e.match.first,second:e.match.second,winner,winnerName,status:'locked',reportedBy:user.uid,reporterName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',reportedAt:Date.now(),updatedBy:user.uid,updatedName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',updatedAt:Date.now()};
-          const history=Array.isArray(saved.history)?saved.history.slice():Object.values(saved.history||{});
-          history.push({winner:saved.winner,winnerName:saved.winnerName,changedBy:user.uid,changedByName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',changedAt:Date.now(),reason:reason.trim().slice(0,200)});
-          return {...saved,winner,winnerName,updatedBy:user.uid,updatedName:user.displayName?.trim()||user.email?.split('@')[0]||'Administración',updatedAt:Date.now(),history};
-        });
-        if(!tx.committed)document.getElementById('adminResultStatus').textContent='No se pudo corregir el resultado.';
-      } catch(error){console.error('CronoApp result correction failed:',error);document.getElementById('adminResultStatus').textContent='No se pudo corregir. Revisa las reglas de Firebase.'}
-    }
-    document.getElementById('staffResultRound')?.addEventListener('change',renderRoomResults);
-    document.getElementById('adminResultRound')?.addEventListener('change',renderRoomResults);
-    window.addEventListener('crono:pairings-updated',renderRoomResults);
     async function sendRoomChatMessage(event, role) {
       event.preventDefault();
       const isAdmin = role === 'admin';
@@ -4311,11 +3686,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       controlSync.hidden = false;
       syncStatus.textContent = 'Falta configurar el nuevo proyecto Firebase.';
       if (isJudge) judgeStatus.textContent = 'Falta configurar Firebase.';
-      if (isPairings) document.getElementById('pairingsStatus').textContent = 'Falta configurar Firebase.';
       if (isProjection) document.getElementById('timerStatus').textContent = 'FALTA CONFIGURAR FIREBASE';
     } else if (!validRoom || (isReadOnly && !hasRoomLink)) {
       if (isJudge) judgeStatus.textContent = 'Enlace de sala inválido.';
-      if (isPairings) document.getElementById('pairingsStatus').textContent = 'Enlace de sala inválido.';
       if (isProjection) document.getElementById('timerStatus').textContent = 'ENLACE DE SALA INVÁLIDO';
       if (!isReadOnly) { controlSync.hidden = false; syncStatus.textContent = 'Enlace de sala inválido.'; }
     } else {
@@ -4325,7 +3698,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
         const [{ initializeApp }, database, authentication] = await Promise.all([
           import(base + 'firebase-app.js'), import(base + 'firebase-database.js'),
-          isReadOnly && !isPrivatePairings && !isJudge ? Promise.resolve(null) : import(base + 'firebase-auth.js')
+          isReadOnly && !isJudge ? Promise.resolve(null) : import(base + 'firebase-auth.js')
         ]);
         dbModule = database;
         authModule = authentication;
@@ -4343,7 +3716,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           else if (document.getElementById('leftVisualModeSelect').value === 'tournament') { document.getElementById('qrUrl').value = ''; qrImageSrc = ''; window.renderLeftVisual(); }
         }
         dbModule.onValue(dbModule.ref(db, 'onlineTournaments'), snap => { onlineTournamentData = snap.val() || {}; refreshTimerTournamentOptions(); });
-        if (isPrivatePairings || isJudge) auth = authModule.getAuth(app);
+        if (isJudge) auth = authModule.getAuth(app);
         if (rawCode) {
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
           roomId = alias.val();
@@ -4367,17 +3740,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         staffRequestsRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/requests') : null;
         staffMembersRef = roomId ? dbModule.ref(db, 'roomStaff/' + roomId + '/members') : null;
         roomChatAdminNameRef = roomId ? dbModule.ref(db, 'roomMessages/' + roomId + '/adminName') : null;
-        roomResultsRef = roomId && window.TDF_UPLOAD_ENABLED === true ? dbModule.ref(db, 'roomResults/' + roomId + '/tables') : null;
         startStaffRosterSubscriptions();
-        if (roomResultsRef) dbModule.onValue(roomResultsRef, snapshot => {
-          roomResultsData = snapshot.val() || {};
-          renderRoomResults();
-        }, () => {
-          const errorText = 'No se pudieron cargar los resultados. Publica las reglas de Firebase.';
-          document.getElementById('staffResultStatus').textContent = errorText;
-          document.getElementById('adminResultStatus').textContent = errorText;
-        });
-        const pairingsRef = roomId && !isPrivatePairings ? dbModule.ref(db, 'rooms/' + roomId + '/pairings') : null;
         if (roomChatEnabledRef) dbModule.onValue(roomChatEnabledRef, snap => {
           roomChatHasSetting = snap.exists();
           roomChatEnabled = snap.val() === true;
@@ -4389,11 +3752,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         function showShortCode(code) {
           window.currentShortCode = code;
           document.getElementById('tvShortCode').textContent = code;
-          updateStaffPairingsLink();
-          if (document.getElementById('leftVisualModeSelect').value === 'tdf') {
-            window.generatePairingsQR();
-            window.renderLeftVisual();
-          }
+          updateStaffTournamentLink();
         }
         async function ensureShortCode(existingCode) {
           if (existingCode && /^[A-HJ-NP-Z2-9]{6}$/.test(existingCode)) {
@@ -4422,95 +3781,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           await shortCodePromise;
         }
 
-        if (pairingsRef) {
-          dbModule.onValue(pairingsRef, snap => {
-            updateStaffPairingsLink(snap.exists());
-            try {
-              const currentPairings = snap.exists() ? JSON.parse(snap.val()) : null;
-              window.setPairings(currentPairings);
-              const nextEventId = currentPairings?.eventId || '';
-              if (nextEventId !== playerReportsEventId) {
-                if (stopPlayerReportsRead) stopPlayerReportsRead();
-                playerReportsEventId = nextEventId;
-                playerReportsData = {};
-                if (nextEventId) stopPlayerReportsRead = dbModule.onValue(dbModule.ref(db, 'playerReports/' + roomId + '/' + nextEventId + '/tables'), snapshot => {
-                  playerReportsData = snapshot.val() || {};
-                  renderRoomResults();
-                }, () => {});
-              }
-              if (snap.exists()) window.pairingsPublished();
-              else window.pairingsCleared();
-            }
-            catch { document.getElementById('pairingsStatus').textContent = 'No se pudieron leer los pareos.'; }
-          }, () => { document.getElementById('pairingsStatus').textContent = 'No se pudo acceder a los pareos.'; });
-          if (!isReadOnly) document.getElementById('publishPairings').addEventListener('click', async () => {
-            if (!window.TDF_UPLOAD_ENABLED) return;
-            const status = document.getElementById('tdfStatus');
-            const file = document.getElementById('tdfInput').files[0];
-            if (!canControl) { status.textContent = 'Disponible solo para administración de la sala.'; return; }
-            if (!file) { status.textContent = 'Selecciona un archivo TDF.'; return; }
-            if (file.size > 2_000_000) { status.textContent = 'El archivo supera los 2 MB.'; return; }
-            const button = document.getElementById('publishPairings');
-            button.disabled = true; status.textContent = 'Leyendo el TDF…';
-            try {
-              const pairings = window.parseTdf(await file.text());
-              const players = new Set(pairings.categories.flatMap(category => category.rounds.flatMap(round => round.matches.flatMap(match => [match.first, match.second]).filter(name => name && name !== 'BYE'))));
-              const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(pairings)));
-              pairings.eventId = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
-              const payload = JSON.stringify(pairings);
-              if (payload.length > 900_000) throw new Error('Los pareos superan el límite permitido.');
-              await dbModule.set(pairingsRef, payload);
-              const saved = await dbModule.get(pairingsRef);
-              if (!saved.exists() || saved.val() !== payload) throw new Error('Firebase no confirmó el TDF cargado. Los pareos anteriores pueden seguir visibles.');
-              const total = pairings.categories.reduce((sum, category) => sum + category.rounds.length, 0);
-              window.pairingsPublished();
-              status.textContent = `TDF «${pairings.title}» confirmado: ${players.size} jugadores, ${total} rondas en ${pairings.categories.length} categoría(s).`;
-            } catch (error) { status.textContent = (error?.message || 'No se pudo publicar el TDF.') + ' La sala puede seguir mostrando los pareos anteriores; revisa las reglas de Firebase.'; }
-            finally { button.disabled = false; }
-          });
-        }
-        if (isPrivatePairings) {
-          const login = document.getElementById('privatePairingsLogin');
-          login.hidden = false;
-          login.addEventListener('click', async () => {
-            try {
-              if (auth.currentUser) await authModule.signOut(auth);
-              await authModule.signInWithPopup(auth, new authModule.GoogleAuthProvider());
-            } catch (error) {
-              document.getElementById('pairingsStatus').textContent = 'No se pudo iniciar sesión (' + error.code + ').';
-            }
-          });
-          let stopPrivateRead = null;
-          authModule.onAuthStateChanged(auth, user => {
-            if (stopPrivateRead) { stopPrivateRead(); stopPrivateRead = null; }
-            if (!user) {
-              login.hidden = false;
-              login.textContent = 'Iniciar sesión con Google para ver esta prueba';
-              document.getElementById('pairingsStatus').textContent = 'Esta prueba es privada. Inicia sesión con la cuenta administradora para continuar.';
-              document.getElementById('pairingsList').replaceChildren();
-              return;
-            }
-            if (!window.isPilotUser(user)) {
-              login.hidden = false;
-              login.textContent = 'Cambiar cuenta de Google';
-              document.getElementById('pairingsStatus').textContent = 'Esta vista de prueba solo está disponible para la cuenta autorizada.';
-              document.getElementById('pairingsList').replaceChildren();
-              return;
-            }
-            login.hidden = true;
-            const privateRef = dbModule.ref(db, 'privatePairings/' + user.uid + '/' + roomId);
-            stopPrivateRead = dbModule.onValue(privateRef, snap => {
-              try {
-                if (!snap.exists()) {
-                  window.setPairings(null);
-                  document.getElementById('pairingsStatus').textContent = 'Aún no se ha sincronizado un reporte HTML.';
-                  return;
-                }
-                window.setPairings(JSON.parse(snap.val()));
-              } catch (_) { document.getElementById('pairingsStatus').textContent = 'No se pudieron leer los pareos privados.'; }
-            }, () => { document.getElementById('pairingsStatus').textContent = 'No se pudo acceder a los pareos privados.'; });
-          });
-        }
         if (settingsRef) {
           if (!isReadOnly) window.saveRoomSettings = async settings => {
             if (!canControl) {
@@ -4536,8 +3806,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             try {
               const settings = JSON.parse(snap.val());
               currentRoomSettings = settings && typeof settings === 'object' ? settings : {};
-              updateStaffPairingsLink();
-              if (isJudge || isPairings) {
+              updateStaffTournamentLink();
+              if (isJudge || isProjection) {
                 window.applyPalette(currentRoomSettings.palette, true);
                 if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
               } else window.loadSettings(currentRoomSettings);
@@ -4552,7 +3822,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           if (!roomOwner && isJudge) judgeStatus.textContent = 'Sala no encontrada.';
           updateAccess();
           refreshTimerTournamentOptions();
-          window.configurePairingsPilot?.({ user: currentUser, dbModule, db, roomId, canControl });
           if (canControl) ensureShortCode(snap.val()?.shortCode);
         }, () => { if (isJudge) judgeStatus.textContent = 'No se pudo acceder a la sala.'; });
         if (stateRef) dbModule.onValue(stateRef, snap => {
@@ -4580,7 +3849,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('adminStaffChatOpen').addEventListener('click', () => {
           if (!canControl) return;
           adminStaffManagerOpen = false;
-          adminResultsOpen = false;
           adminChatOpen = !adminChatOpen;
           updateRoomChatAccess();
           if (adminChatOpen && roomChatEnabled) document.getElementById('adminStaffChatInput').focus();
@@ -4588,24 +3856,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         document.getElementById('adminStaffManagerOpen').addEventListener('click', () => {
           if (!canControl) return;
           adminChatOpen = false;
-          adminResultsOpen = false;
           adminStaffManagerOpen = !adminStaffManagerOpen;
           updateRoomChatAccess();
           if (adminStaffManagerOpen) startStaffRosterSubscriptions();
         });
         document.getElementById('staffManagerClose').addEventListener('click', () => {
           adminStaffManagerOpen = false;
-          updateRoomChatAccess();
-        });
-        document.getElementById('adminResultsOpen').addEventListener('click', () => {
-          if (!canControl || !window.TDF_UPLOAD_ENABLED) return;
-          adminChatOpen = false;
-          adminStaffManagerOpen = false;
-          adminResultsOpen = !adminResultsOpen;
-          updateRoomChatAccess();
-        });
-        document.getElementById('adminResultsClose').addEventListener('click', () => {
-          adminResultsOpen = false;
           updateRoomChatAccess();
         });
         document.getElementById('adminStaffChatForm').addEventListener('submit', event => sendRoomChatMessage(event, 'admin'));
@@ -4659,9 +3915,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             window.cronoCurrentUser = user;
-            window.setHtmlPairingsAccess(user);
-            window.configurePairingsPilot?.({ user, dbModule, db, roomId, canControl });
-            if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
+                if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
             const flyerSessionMessage = document.getElementById('landingFlyerSessionMessage');
             const flyerAccessLink = document.getElementById('landingFlyerLink');
             flyerSessionMessage.hidden = !!user;
@@ -4734,7 +3988,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       } catch (error) {
         if (error?.code !== 'CRONO_STAFF_ACCESS_PENDING') {
           if (isJudge) judgeStatus.textContent = error.message || 'No se pudo conectar al servicio.';
-          else if (isPairings) document.getElementById('pairingsStatus').textContent = error.message || 'No se pudo conectar al servicio.';
           else if (isProjection) document.getElementById('timerStatus').textContent = error.message || 'No se pudo conectar al servicio.';
           else syncStatus.textContent = error.message || 'No se pudo conectar al servicio.';
         }
@@ -5001,7 +4254,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       function translateText(node, language) {
         const parent = node.parentElement;
         const currentText = node.nodeValue.trim();
-        if (parent?.closest('#pairingsTitle') && !['Pareos', 'Pairings', 'Emparceiramentos'].includes(currentText)) return;
         if (parent?.closest('.pairing-player') && !/^\d+ pts$/.test(currentText)) return;
         const current = node.nodeValue;
         const last = rendered.get(node);
@@ -5024,12 +4276,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         const pointsMatch = key.match(/^(\d+) pts$/);
         if (pointsMatch && language === 'en') value = `${pointsMatch[1]} pts`;
         if (pointsMatch && language === 'pt') value = `${pointsMatch[1]} pts`;
-        const copyMatch = key.match(/^Enlace de (Staff|Pareos) copiado correctamente\.$/);
-        if (copyMatch && language === 'en') value = `The ${copyMatch[1] === 'Staff' ? 'staff' : 'pairings'} link was copied.`;
-        if (copyMatch && language === 'pt') value = `Link de ${copyMatch[1] === 'Staff' ? 'equipe' : 'emparceiramentos'} copiado.`;
-        const publishMatch = key.match(/^Pareos publicados: (\d+) rondas en (\d+) categoría\(s\)\./);
-        if (publishMatch && language === 'en') value = `Pairings published: ${publishMatch[1]} rounds in ${publishMatch[2]} categor${publishMatch[2] === '1' ? 'y' : 'ies'}. Select Save to show the QR code.`;
-        if (publishMatch && language === 'pt') value = `Emparceiramentos publicados: ${publishMatch[1]} rodadas em ${publishMatch[2]} categoria(s). Selecione Salvar para exibir o QR.`;
+        const copyMatch = key.match(/^Enlace de Staff copiado correctamente\.$/);
+        if (copyMatch && language === 'en') value = 'The staff link was copied.';
+        if (copyMatch && language === 'pt') value = 'Link da equipe copiado.';
         const loginMatch = key.match(/^No se pudo ingresar con Google \((.+)\)\.$/);
         if (loginMatch && language === 'en') value = `Could not sign in with Google (${loginMatch[1]}).`;
         if (loginMatch && language === 'pt') value = `Não foi possível entrar com o Google (${loginMatch[1]}).`;
