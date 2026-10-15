@@ -343,11 +343,12 @@
         },
         "players": {
           "$player": {
-            ".validate": "newData.hasChildren(['name','category','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && newData.child('category').isString() && (newData.child('category').val() === 'MA' || newData.child('category').val() === 'SR' || newData.child('category').val() === 'JR') && newData.child('status').val() === 'active' && newData.child('addedAt').isNumber()",
+            ".validate": "newData.hasChildren(['name','category','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && newData.child('category').isString() && (newData.child('category').val() === 'MA' || newData.child('category').val() === 'SR' || newData.child('category').val() === 'JR') && (newData.child('status').val() === 'active' || newData.child('status').val() === 'dropped') && newData.child('addedAt').isNumber()",
             "name": {".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"},
             "category": {".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"},
             "status": {".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dropped')"},
             "addedAt": {".validate": "newData.isNumber()"},
+            "droppedAt": {".validate": "newData.isNumber()"},
             "registrationUid": {".validate": "newData.isString()"},
             "$other": {".validate": false}
           }
