@@ -615,7 +615,7 @@
   <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
   <button id="adminStaffManagerOpen" class="room-chat-open-button" type="button" aria-label="Gestionar Staff" title="Gestionar Staff" aria-controls="adminStaffManager" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
-    <summary aria-label="Acciones de sala" title="Acciones de sala">
+    <summary aria-label="Menu" title="Menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
     </summary>
     <div class="room-actions-menu-content">
@@ -651,6 +651,7 @@
       <button id="editToggle" class="edit-button customizable-button" type="button" aria-controls="modal" aria-expanded="false" onclick="openModal()">Editar</button>
       <button id="syncLogout" class="logout-button" type="button" hidden>Cerrar sesión</button>
           <a class="flyer-menu-link" href="/flyer/">Generador de flyers</a>
+          <a class="flyer-menu-link" href="/torneos/">Dashboard de torneos</a>
     </div>
   </details>
       </div>
@@ -2849,6 +2850,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       measurementId: "G-ZR98354B0G"
     };
     const params = new URLSearchParams(location.search);
+    let openChatOnLoad = params.get('openChat') === '1';
     const rawRoom = params.get('sala');
     const rawCode = params.get('s');
     const entryMode = ['tv', 'staff'].includes(params.get('entry')) ? params.get('entry') : '';
@@ -3251,6 +3253,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const adminPanel = document.getElementById('adminStaffChat');
       const staffPanel = document.getElementById('staffChatModule');
       const isRoomAdmin = !isReadOnly && canControl;
+      if (isRoomAdmin && openChatOnLoad) {
+        adminChatOpen = true;
+        openChatOnLoad = false;
+        const cleanUrl = new URL(location.href);
+        cleanUrl.searchParams.delete('openChat');
+        history.replaceState(null, '', cleanUrl.href);
+      }
       if (!isRoomAdmin) adminChatOpen = false;
       const chatButton = document.getElementById('adminStaffChatOpen');
       const managerButton = document.getElementById('adminStaffManagerOpen');
