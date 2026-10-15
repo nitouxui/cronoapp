@@ -63,7 +63,7 @@
     const box=$('publicResults');if(!event){box.replaceChildren();return}
     const rounds=Object.values(obj(event.rounds)).sort((a,b)=>a.number-b.number),latest=rounds.at(-1),currentNumber=latest?.number||0;
     const playerStats=Object.fromEntries(standings(event).map(p=>[p.id,p]));
-    const playerLine=id=>{const p=playerStats[id];return p?`<small class="pairing-record">W/L/T ${p.wins}/${p.losses}/${p.draws} · ${p.points} pts</small>`:''};
+    const playerLine=id=>{const p=playerStats[id];return p?`<small class="pairing-record">${p.wins}/${p.losses}/${p.draws} · ${p.points} pts</small>`:''};
     // Keep the live/public view on the newest round whenever Firebase publishes an update.
     publicRoundView=currentNumber;
     const standingsPanel=event.status==='finished'?(()=>{const list=standings(event);return `<section class="panel public-final"><h3>Standing final</h3>${list.length?`<div class="table-wrap"><table><thead><tr><th>#</th><th>Jugador</th><th>Cat.</th><th>Estado</th><th>Pts</th><th>W/L/T</th><th>Op Win %</th><th>Op Op Win %</th></tr></thead><tbody>${list.map((p,i)=>`<tr><td>${p.place||i+1}</td><td>${esc(p.name)}</td><td>${esc(p.category)}</td><td>${p.status==='dropped'?'Retirado':'Activo'}</td><td><strong>${p.points}</strong></td><td>${p.wins}/${p.losses}/${p.draws}</td><td>${(p.omw*100).toFixed(2)}%</td><td>${(p.oow*100).toFixed(2)}%</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No hay resultados para mostrar.</div>'}</section>`})():'';
@@ -81,7 +81,7 @@
     const host=$('eventAdmin');host.classList.remove('hidden');$('managerDashboard').classList.add('hidden');
     const players=obj(event.players),rounds=Object.values(obj(event.rounds)).sort((a,b)=>a.number-b.number),current=rounds.at(-1);
     const activeCount=Object.values(players).filter(p=>p.status==='active').length,stand=standings(event),statsById=Object.fromEntries(stand.map(p=>[p.id,p])),plannedRounds=event.roundsPlanned||recommendedRounds(activeCount);
-    const pairingRecord=id=>{const p=statsById[id];return p?`<small class="pairing-record">W/L/T ${p.wins}/${p.losses}/${p.draws} · ${p.points} pts</small>`:''};
+    const pairingRecord=id=>{const p=statsById[id];return p?`<small class="pairing-record">${p.wins}/${p.losses}/${p.draws} · ${p.points} pts</small>`:''};
     const canGenerate=event.status!=='finished'&&activeCount>=2&&(!current||(!current.needsRepair&&fullResults(event)))&&(!rounds.length||rounds.length<(event.roundsPlanned||0));
     const nextRound=rounds.length+1;
     const roundNumbers=rounds.map(r=>r.number);if(!roundNumbers.includes(activeRoundView))activeRoundView=current?.number||roundNumbers[0]||1;
