@@ -326,28 +326,6 @@
           ".validate": false
         }
       }
-    },
-    "publicTournamentThemes": {
-      ".read": true,
-      "$event": {
-        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
-        ".validate": "newData.hasChildren(['palette','backgroundSrc','backgroundOpacity','updatedAt'])",
-        "palette": {
-          ".validate": "newData.isString() && newData.val().length <= 32"
-        },
-        "backgroundSrc": {
-          ".validate": "newData.isString() && newData.val().length <= 5800000"
-        },
-        "backgroundOpacity": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
-        },
-        "updatedAt": {
-          ".validate": "newData.isNumber()"
-        },
-        "$other": {
-          ".validate": false
-        }
-      }
     }
   }
 }
