@@ -839,10 +839,16 @@
         <label for="leftVisualModeSelect">Contenido del panel izquierdo</label>
         <select id="leftVisualModeSelect" class="editor-select" onchange="switchLeftVisualMode()">
           <option value="qr">Generar QR desde un enlace</option>
+          <option value="tournament">Pareos públicos de un torneo</option>
           <option value="upload">Subir una imagen</option>
           <option value="tdf">Subir TDF y generar QR de pareos</option>
           <option value="html-pairings" hidden>Sincronizar pareos desde HTML (prueba privada)</option>
         </select>
+        <div id="tournamentControls" hidden>
+          <label for="timerTournamentSelect">Torneo administrado por ti:</label>
+          <select id="timerTournamentSelect" class="editor-select"><option value="">Cargando tus torneos…</option></select>
+          <p class="hint">El QR abre los pareos y resultados públicos del torneo seleccionado.</p>
+        </div>
         <div id="qrControls">
           <label for="qrUrl">Enlace de destino del QR:</label>
           <input type="url" id="qrUrl" placeholder="https://ejemplo.com/torneo" inputmode="url" autocomplete="url">
@@ -2412,7 +2418,8 @@ module.exports = QRCode;
       const leftPanelEnabled = document.getElementById('leftPanelEnabled').checked;
       if (mode === 'tdf' && !window.TDF_UPLOAD_ENABLED) return;
       if (mode === 'html-pairings' && !window.isPilotUser(window.cronoCurrentUser)) return;
-      if (leftPanelEnabled && mode === 'qr' && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
+      if (leftPanelEnabled && ['qr', 'tournament'].includes(mode) && document.getElementById('qrUrl').value.trim() && !generateQR()) return;
+      if (leftPanelEnabled && mode === 'tournament' && !document.getElementById('timerTournamentSelect').value) { document.getElementById('qrStatus').textContent = 'Selecciona uno de tus torneos antes de guardar.'; return; }
       if (leftPanelEnabled && mode === 'qr' && !document.getElementById('qrUrl').value.trim()) {
         qrImageSrc = '';
         renderLeftVisual();
@@ -2431,6 +2438,7 @@ module.exports = QRCode;
           logoSrc: document.getElementById('logo').getAttribute('src') || '',
           leftPanelEnabled,
           leftVisualMode: mode,
+          tournamentId: mode === 'tournament' ? document.getElementById('timerTournamentSelect').value : '',
           uploadedImageSrc,
           qrUrl: document.getElementById('qrUrl').value.trim(),
           timerBackgroundSrc,
@@ -2495,12 +2503,15 @@ module.exports = QRCode;
         uploadedImageSrc = images.uploadedImageSrc || '';
         updateUploadedImageRemoveButton();
         document.getElementById('qrUrl').value = images.qrUrl || '';
+        const tournamentSelect = document.getElementById('timerTournamentSelect');
+        if (images.tournamentId && tournamentSelect) { tournamentSelect.dataset.savedId = images.tournamentId; window.selectTimerTournament?.(images.tournamentId, false); }
         const requestedMode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
         const mode = requestedMode === 'tdf' && !window.TDF_UPLOAD_ENABLED
           ? (images.qrUrl ? 'qr' : uploadedImageSrc ? 'upload' : 'qr')
           : requestedMode;
         document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
+        else if (images.tournamentId) window.selectTimerTournament?.(images.tournamentId);
         else qrImageSrc = '';
         if (mode === 'tdf' || mode === 'html-pairings') generatePairingsQR();
         switchLeftVisualMode();
@@ -2846,10 +2857,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
-      const src = mode === 'qr' ? qrImageSrc : ['tdf', 'html-pairings'].includes(mode) ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
+      const src = ['qr', 'tournament'].includes(mode) ? qrImageSrc : ['tdf', 'html-pairings'].includes(mode) ? pairingsQrSrc : mode === 'upload' ? uploadedImageSrc : '';
       if (src) {
         image.src = src;
-        image.alt = mode === 'qr' ? 'Código QR del enlace del torneo' : ['tdf', 'html-pairings'].includes(mode) ? 'Código QR privado para ver los pareos' : 'Imagen del torneo';
+        image.alt = mode === 'tournament' ? 'Código QR para consultar el torneo' : mode === 'qr' ? 'Código QR del enlace del torneo' : ['tdf', 'html-pairings'].includes(mode) ? 'Código QR privado para ver los pareos' : 'Imagen del torneo';
         image.style.display = 'block';
       } else {
         image.removeAttribute('src');
@@ -2865,6 +2876,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         selector.value = mode;
       }
       document.getElementById('qrControls').hidden = mode !== 'qr';
+      document.getElementById('tournamentControls').hidden = mode !== 'tournament';
       document.getElementById('imageControls').hidden = mode !== 'upload';
       document.getElementById('tdfControls').hidden = mode !== 'tdf';
       htmlPairingsControls.hidden = mode !== 'html-pairings' || !window.isPilotUser(window.cronoCurrentUser);
@@ -2910,6 +2922,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       else target.searchParams.delete('privado');
       return Boolean(pairingsQrSrc = qrDataUrl(target.href));
     }
+
+    window.selectTimerTournament = function(id, generate = true) {
+      const select = document.getElementById('timerTournamentSelect');
+      if (!select) return;
+      select.value = id || '';
+      if (!id) return;
+      const target = new URL('/torneos/', location.origin);
+      target.searchParams.set('id', id);
+      document.getElementById('qrUrl').value = target.href;
+      if (generate) generateQR();
+    };
+    document.getElementById('timerTournamentSelect')?.addEventListener('change', event => window.selectTimerTournament(event.target.value));
 
     function generateQR() {
       const input = document.getElementById('qrUrl');
@@ -3512,6 +3536,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       const images = currentRoomSettings.images || {};
       const mode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
+      if (mode === 'tournament' && images.tournamentId) {
+        staffPairingsLink.href = new URL('/torneos/?id=' + encodeURIComponent(images.tournamentId), location.origin).href;
+        staffPairingsLink.target = '_blank';
+        staffPairingsLink.rel = 'noopener noreferrer';
+        staffPairingsLink.hidden = false;
+        return;
+      }
       if (mode === 'tdf') {
         staffPairingsLink.hidden = !window.TDF_UPLOAD_ENABLED || !staffPairingsAvailable;
         if (!staffPairingsLink.hidden) staffPairingsLink.href = makeRoomViewURL('pareos');
@@ -4300,6 +4331,18 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
+        let onlineTournamentData = {};
+        function refreshTimerTournamentOptions() {
+          const select = document.getElementById('timerTournamentSelect');
+          if (!select) return;
+          const savedId = currentRoomSettings.images?.tournamentId || select.dataset.savedId || '';
+          const owned = Object.entries(onlineTournamentData).filter(([, event]) => event?.ownerUid === currentUser?.uid);
+          select.replaceChildren(new Option(owned.length ? 'Selecciona un torneo' : 'No tienes torneos propios', ''));
+          owned.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0)).forEach(([id, event]) => select.add(new Option(`${event.title || 'Torneo'} · ${event.status === 'finished' ? 'Finalizado' : event.status === 'active' ? 'En curso' : 'Preparación'}`, id)));
+          if (owned.some(([id]) => id === savedId)) window.selectTimerTournament?.(savedId, document.getElementById('leftVisualModeSelect').value === 'tournament');
+          else if (document.getElementById('leftVisualModeSelect').value === 'tournament') { document.getElementById('qrUrl').value = ''; qrImageSrc = ''; window.renderLeftVisual(); }
+        }
+        dbModule.onValue(dbModule.ref(db, 'onlineTournaments'), snap => { onlineTournamentData = snap.val() || {}; refreshTimerTournamentOptions(); });
         if (isPrivatePairings || isJudge) auth = authModule.getAuth(app);
         if (rawCode) {
           const alias = await dbModule.get(dbModule.ref(db, 'shortRooms/' + rawCode));
@@ -4508,6 +4551,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           roomOwner = snap.val()?.ownerUid || null;
           if (!roomOwner && isJudge) judgeStatus.textContent = 'Sala no encontrada.';
           updateAccess();
+          refreshTimerTournamentOptions();
           window.configurePairingsPilot?.({ user: currentUser, dbModule, db, roomId, canControl });
           if (canControl) ensureShortCode(snap.val()?.shortCode);
         }, () => { if (isJudge) judgeStatus.textContent = 'No se pudo acceder a la sala.'; });
@@ -4627,6 +4671,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             document.getElementById('agendaPublicLink').hidden = !canManageAgenda;
             document.getElementById('agendaAdminLink').hidden = !canManageAgenda;
             updateAccess();
+            refreshTimerTournamentOptions();
             if (user?.emailVerified && openOwnRoomOnLoad) {
               openOwnRoomOnLoad = false;
               const next = new URL(location.href);
