@@ -3848,9 +3848,17 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               document.getElementById('qrStatus').textContent = 'Inicia sesión como propietario de esta sala para guardar.';
               return false;
             }
+            const previousTournamentId = currentRoomSettings.images?.leftVisualMode === 'tournament' ? currentRoomSettings.images.tournamentId : '';
+            const nextTournamentId = settings.images?.leftVisualMode === 'tournament' ? settings.images.tournamentId : '';
             try {
               await dbModule.set(settingsRef, JSON.stringify(settings));
               currentRoomSettings = settings;
+              if (previousTournamentId && previousTournamentId !== nextTournamentId) {
+                await dbModule.update(dbModule.ref(db, `onlineTournaments/${previousTournamentId}`), { timerPalette: null });
+              }
+              if (nextTournamentId) {
+                await dbModule.update(dbModule.ref(db, `onlineTournaments/${nextTournamentId}`), { timerPalette: settings.palette });
+              }
               syncStatus.textContent = 'Ajustes guardados en esta sala.';
               return true;
             } catch (error) {
