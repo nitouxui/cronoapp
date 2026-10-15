@@ -35,9 +35,9 @@
 <script type="module">
   const config={apiKey:"AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8",authDomain:"cronoapp-97aa6.firebaseapp.com",databaseURL:"https://cronoapp-97aa6-default-rtdb.firebaseio.com",projectId:"cronoapp-97aa6",storageBucket:"cronoapp-97aa6.firebasestorage.app",messagingSenderId:"482155443294",appId:"1:482155443294:web:b62c46a3ae16ca551630cf"};
   const base='https://www.gstatic.com/firebasejs/12.19.0/';
-  const [{initializeApp},{getDatabase,ref,get,set,update,onValue,push,runTransaction},{getAuth,GoogleAuthProvider,signInWithPopup,signOut,signInAnonymously}]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-database.js'),import(base+'firebase-auth.js')]);
+  const [{initializeApp},{getDatabase,ref,get,set,update,onValue,push,runTransaction},{getAuth,GoogleAuthProvider,signInWithPopup,signOut}]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-database.js'),import(base+'firebase-auth.js')]);
   const app=initializeApp(config),db=getDatabase(app),auth=getAuth(app),$=id=>document.getElementById(id);
-  let user=null,selectedId='',selectedEvent=null,stopMine=null,stopDirectory=null,stopRegistrations=null,stopSelected=null;
+  let user=null,selectedId='',selectedEvent=null,stopMine=null,stopDirectory=null,stopSelected=null;
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const obj=x=>x&&typeof x==='object'?x:{};const eventRef=id=>ref(db,`onlineTournaments/${id}`);
   const route=new URLSearchParams(location.search),manageRouteId=route.get('manage'),publicRouteId=route.get('id');
