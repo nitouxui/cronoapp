@@ -2194,6 +2194,24 @@ module.exports = QRCode;
       document.getElementById('leftPanelSettings').hidden = !enabled;
       document.body.classList.toggle('left-panel-hidden', !enabled);
     }
+    function switchLeftVisualMode() {
+      const mode = document.getElementById('leftVisualModeSelect').value;
+      const tournamentControls = document.getElementById('tournamentControls');
+      const qrControls = document.getElementById('qrControls');
+      const imageControls = document.getElementById('imageControls');
+      tournamentControls.hidden = mode !== 'tournament';
+      qrControls.hidden = mode !== 'qr';
+      imageControls.hidden = mode !== 'upload';
+      if (mode === 'tournament') {
+        const tournamentId = document.getElementById('timerTournamentSelect').value;
+        if (tournamentId) window.selectTimerTournament(tournamentId);
+        else { qrImageSrc = ''; renderLeftVisual(); }
+      } else if (mode === 'qr') {
+        if (document.getElementById('qrUrl').value.trim()) generateQR();
+        else { qrImageSrc = ''; renderLeftVisual(); }
+      } else renderLeftVisual();
+    }
+    window.switchLeftVisualMode = switchLeftVisualMode;
     const timerFonts = Object.freeze({
       system: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       classic: 'Georgia, "Times New Roman", serif'
