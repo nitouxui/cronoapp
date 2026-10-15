@@ -343,6 +343,7 @@
     .home-account-actions #syncLogout { margin: 0; }
     .home-account-actions button:hover { border-color: var(--accent); filter: brightness(1.08); }
     body.no-room.home-public:not(.code-entry-mode) .home-account-actions { position: static; justify-content: center; margin: 28px 0 0; }
+    html.crono-route-pending::before { content: attr(data-route-loading); position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; background: #11131a; color: #f7f7fb; font: 700 17px/1.4 system-ui, sans-serif; }
     body.no-room.home-public #roomWelcome .welcome-shell { grid-template-columns: minmax(0, 760px); justify-content: center; }
     body.no-room.home-public .welcome-copy { text-align: center; }
     body.no-room.home-public .welcome-copy > p { margin-left: auto; margin-right: auto; }
@@ -562,6 +563,15 @@
       .control-bar { min-height: 72px; padding: 8px 32px; }
     }
   </style>
+  <script>
+    const startupParams = new URLSearchParams(location.search);
+    const openingRoom = startupParams.get('openOwnRoom') === '1';
+    const returningToFlyers = startupParams.get('returnTo') === '/flyer/';
+    if (openingRoom || returningToFlyers || startupParams.get('resume') === '1') {
+      document.documentElement.dataset.routeLoading = openingRoom ? 'Abriendo tu sala…' : returningToFlyers ? 'Abriendo el Generador de flyers…' : 'Cargando CronoApp…';
+      document.documentElement.classList.add('crono-route-pending');
+    }
+  </script>
 </head>
 <body data-palette="graphite" data-timer-font="system">
   <div id="languageControl">
@@ -624,7 +634,7 @@
     <section id="loggedInDashboard" hidden aria-labelledby="moduleDashboardTitle">
       <header class="module-dashboard-heading"><span class="welcome-eyebrow">CRONOAPP</span><h1 id="moduleDashboardTitle">Hola, <span id="dashboardUserName">organizador</span></h1><p>Elige el módulo que quieres usar.</p></header>
       <div class="module-cards" aria-label="Módulos de CronoApp">
-        <a class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
+        <a id="timerModuleLink" class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
         <a class="module-card" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
         <a class="module-card" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
       </div>
@@ -640,7 +650,7 @@
     </div>
     <div id="rightPanel" class="panel">
       <div class="top-actions">
-  <a class="room-home-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
+  <a class="room-home-link" href="/?resume=1" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a>
   <button id="adminStaffChatOpen" class="room-chat-open-button" type="button" aria-label="Mensajes con Staff" title="Mensajes con Staff" aria-controls="adminStaffChat" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></button>
   <button id="adminStaffManagerOpen" class="room-chat-open-button" type="button" aria-label="Gestionar Staff" title="Gestionar Staff" aria-controls="adminStaffManager" aria-expanded="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="10" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg></button>
   <details id="roomActionsMenu" class="room-actions-menu">
@@ -2299,15 +2309,13 @@ module.exports = QRCode;
         uploadedImageSrc = images.uploadedImageSrc || '';
         updateUploadedImageRemoveButton();
         document.getElementById('qrUrl').value = images.qrUrl || '';
-        const tournamentSelect = document.getElementById('timerTournamentSelect');
-        if (images.tournamentId && tournamentSelect) { tournamentSelect.dataset.savedId = images.tournamentId; window.selectTimerTournament?.(images.tournamentId, false); }
         const requestedMode = images.leftVisualMode || (images.qrUrl ? 'qr' : 'upload');
-        const mode = ['tdf', 'html-pairings'].includes(requestedMode)
-          ? (images.tournamentId ? 'tournament' : images.qrUrl ? 'qr' : uploadedImageSrc ? 'upload' : 'qr')
-          : requestedMode;
+        const mode = ['qr', 'tournament', 'upload'].includes(requestedMode) ? requestedMode : 'qr';
+        const tournamentSelect = document.getElementById('timerTournamentSelect');
+        if (mode === 'tournament' && images.tournamentId && tournamentSelect) tournamentSelect.dataset.savedId = images.tournamentId;
         document.getElementById('leftVisualModeSelect').value = mode;
         if (images.qrUrl) generateQR();
-        else if (images.tournamentId) window.selectTimerTournament?.(images.tournamentId);
+        else if (mode === 'tournament' && images.tournamentId) window.selectTimerTournament?.(images.tournamentId);
         else qrImageSrc = '';
         switchLeftVisualMode();
       }
@@ -2887,8 +2895,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
     const validRoom = (!rawRoom || /^[A-Za-z0-9_-]{8,64}$/.test(rawRoom))
       && (!rawCode || /^[A-HJ-NP-Z2-9]{6}$/.test(rawCode)) && !(rawRoom && rawCode);
     let roomId = rawRoom;
-    if (params.get('view') === 'pareos') location.replace('/torneos/');
-    const isJudge = ['staff', 'juez'].includes(params.get('view'));
+    const isJudge = params.get('view') === 'staff';
     const isProjection = params.get('view') === 'pantalla' || (Boolean(rawCode) && !params.get('view'));
     const isReadOnly = isJudge || isProjection;
     if (isJudge) document.body.classList.add('viewer-mode');
@@ -3671,8 +3678,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = !canControl;
       roomDurationControl.hidden = !canControl;
-      googleButton.hidden = !!currentUser;
-      logoutButton.hidden = !currentUser;
+      const hasGoogleAccount = !!currentUser?.providerData?.some(provider => provider.providerId === 'google.com');
+      googleButton.hidden = hasGoogleAccount;
+      logoutButton.hidden = !hasGoogleAccount;
       createButton.hidden = !verified || canControl;
       if (!isReadOnly) {
         syncStatus.textContent = !currentUser ? ''
@@ -3926,26 +3934,59 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           async function openOwnRoom(user) {
             if (hasRoomLink) syncStatus.textContent = 'Buscando tu sala…';
             try {
-              const owned = dbModule.query(dbModule.ref(db, 'rooms'),
-                dbModule.orderByChild('ownerUid'), dbModule.equalTo(user.uid), dbModule.limitToFirst(1));
-              const found = await dbModule.get(owned);
+              const cacheKey = `cronoapp-room-id:${user.uid}`;
+              let id = '';
+              try { id = localStorage.getItem(cacheKey) || ''; } catch (_) {}
+              let ownRoomSnapshot = null;
+              if (/^[A-Za-z0-9_-]{8,64}$/.test(id)) {
+                ownRoomSnapshot = await dbModule.get(dbModule.ref(db, 'rooms/' + id));
+                if (ownRoomSnapshot.val()?.ownerUid !== user.uid) { id = ''; ownRoomSnapshot = null; }
+              }
+              if (!id) {
+                const owned = dbModule.query(dbModule.ref(db, 'rooms'),
+                  dbModule.orderByChild('ownerUid'), dbModule.equalTo(user.uid), dbModule.limitToFirst(1));
+                const found = await dbModule.get(owned);
+                id = found.exists() ? Object.keys(found.val())[0] : user.uid;
+                if (found.exists()) ownRoomSnapshot = await dbModule.get(dbModule.ref(db, 'rooms/' + id));
+              }
               if (auth.currentUser?.uid !== user.uid) return;
-              let id = found.exists() ? Object.keys(found.val())[0] : user.uid;
-              if (!found.exists()) {
+              if (!ownRoomSnapshot?.exists()) {
                 const minutes = Math.max(1, Number(document.getElementById('timerInput').value) || 2);
                 const ownRef = dbModule.ref(db, 'rooms/' + id);
-                const existing = await dbModule.get(ownRef);
+                const existing = ownRoomSnapshot || await dbModule.get(ownRef);
                 if (!existing.exists()) await dbModule.set(ownRef, {
                   ownerUid: user.uid,
                   state: { running: false, remainingMs: minutes * 60000, startedAt: 0 }
                 });
               }
               if (auth.currentUser?.uid !== user.uid) return;
+              try { localStorage.setItem(cacheKey, id); } catch (_) {}
               const next = new URL(location.href);
               next.searchParams.set('sala', id);
               next.searchParams.delete('view');
+              next.searchParams.delete('openOwnRoom');
+              next.searchParams.delete('resume');
               location.assign(next.href);
-            } catch (error) { showError(error); }
+            } catch (error) { document.documentElement.classList.remove('crono-route-pending'); showError(error); }
+          }
+          async function primeOwnRoomNavigation(user) {
+            if (!user?.emailVerified) return;
+            const key = `cronoapp-room-id:${user.uid}`;
+            let roomId = '';
+            try { roomId = localStorage.getItem(key) || ''; } catch (_) {}
+            if (!/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) {
+              try {
+                const owned = dbModule.query(dbModule.ref(db, 'rooms'), dbModule.orderByChild('ownerUid'), dbModule.equalTo(user.uid), dbModule.limitToFirst(1));
+                const found = await dbModule.get(owned);
+                if (auth.currentUser?.uid !== user.uid || !found.exists()) return;
+                roomId = Object.keys(found.val())[0];
+                if (!/^[A-Za-z0-9_-]{8,64}$/.test(roomId)) return;
+                localStorage.setItem(key, roomId);
+              } catch (_) { return; }
+            }
+            if (auth.currentUser?.uid !== user.uid) return;
+            const timerLink = document.getElementById('timerModuleLink');
+            if (timerLink) timerLink.href = `/?sala=${encodeURIComponent(roomId)}`;
           }
           const returnTo = new URLSearchParams(location.search).get('returnTo');
           let openOwnRoomOnLoad = new URLSearchParams(location.search).get('openOwnRoom') === '1';
@@ -3953,18 +3994,24 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             window.cronoCurrentUser = user;
-            document.body.classList.toggle('home-authenticated', !!user);
-            document.body.classList.toggle('home-public', !user);
+            const hasGoogleAccount = !!user?.providerData?.some(provider => provider.providerId === 'google.com');
+            document.body.classList.toggle('home-authenticated', hasGoogleAccount);
+            document.body.classList.toggle('home-public', !hasGoogleAccount);
             const homeAccountActions = document.getElementById('homeAccountActions');
             const roomWelcome = document.getElementById('roomWelcome');
             const welcomeCopy = document.querySelector('.welcome-copy');
             const welcomeShell = document.querySelector('.welcome-shell');
-            if (user) roomWelcome.insertBefore(homeAccountActions, welcomeShell);
+            if (hasGoogleAccount) roomWelcome.insertBefore(homeAccountActions, welcomeShell);
             else welcomeCopy.append(homeAccountActions);
             const dashboard = document.getElementById('loggedInDashboard');
-            dashboard.hidden = !user;
+            dashboard.hidden = !hasGoogleAccount;
             document.getElementById('dashboardUserName').textContent = user?.displayName?.trim().split(/\s+/)[0] || 'organizador';
-                if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
+            if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
+            if (!(user?.emailVerified && openOwnRoomOnLoad)) document.documentElement.classList.remove('crono-route-pending');
+            if (params.has('resume')) {
+              params.delete('resume');
+              history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
+            }
             const flyerSessionMessage = document.getElementById('landingFlyerSessionMessage');
             const flyerAccessLink = document.getElementById('landingFlyerLink');
             flyerSessionMessage.hidden = !!user;
@@ -3974,6 +4021,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             document.getElementById('personalAgendaCard').hidden = !canManageAgenda;
             updateAccess();
             refreshTimerTournamentOptions();
+            if (user?.emailVerified && !openOwnRoomOnLoad) primeOwnRoomNavigation(user);
             if (user?.emailVerified && openOwnRoomOnLoad) {
               openOwnRoomOnLoad = false;
               const next = new URL(location.href);
@@ -4064,14 +4112,14 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Ya tienes sesión iniciada. Entra a tu sala cuando quieras.': 'You are signed in. Open your room whenever you are ready.',
           'PANTALLA TV': 'TV DISPLAY', 'Ver temporizador': 'View timer',
           'Para ver el temporizador en una TV o pantalla, ingresa el código de sala.': 'To view the timer on a TV or screen, enter the room code.',
-          'Código de sala': 'Room code', 'Ver TV': 'View TV', 'Ver pareos': 'View pairings',
+          'Código de sala': 'Room code', 'Ver TV': 'View TV',
           'INGRESO A SALA': 'ROOM ACCESS', 'VISTA STAFF': 'STAFF VIEW', 'TEMPORIZADOR PARA TV': 'TV TIMER',
           'Ingresa el código de sala': 'Enter room code', 'Acceder a vista Staff': 'Open Staff view',
           'Ingresa el código de sala para abrir las herramientas de Staff.': 'Enter the room code to open Staff tools.',
           'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Enter the room code to display the timer on a screen.',
           'Continuar': 'Continue', 'Ingresar a Staff': 'Open Staff', 'Volver al inicio': 'Back to home', '← Volver a Staff': '← Back to Staff',
           'Configurando…': 'Setting up…', 'Conectando…': 'Connecting…', 'Conectando': 'Connecting',
-          'Ronda': 'Round', 'Categoría del jugador': 'Player category', 'Todas': 'All',
+          'Ronda': 'Round',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
           'Junior / Senior (JR/SR)': 'Junior / Senior (JR/SR)', '⚙': '⚙', 'Control Sala': 'Room Control',
           'Generando…': 'Generating…', 'Duración del temporizador': 'Timer duration', 'Guardar tiempo': 'Save time',
@@ -4095,19 +4143,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Tipografía del reloj': 'Timer font', 'Moderna': 'Modern', 'Clásica': 'Classic', 'Sonido de la alarma': 'Alarm sound', 'Campana': 'Bell', 'Digital': 'Digital', 'Campana extendida': 'Extended bell', 'Digital extendido': 'Extended digital', 'Progresivo': 'Progressive', 'Probar': 'Preview', 'Reproduciendo sonido de prueba.': 'Playing sound preview.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Could not activate sound. Try again.', 'Logo': 'Logo',
           'Subir logo': 'Upload logo', 'Quitar logo': 'Remove logo', 'Mostrar panel izquierdo': 'Show left panel', 'Contenido del panel izquierdo': 'Left panel content',
           'Generar QR desde un enlace': 'Create a QR code from a link', 'Subir una imagen': 'Upload an image',
-          'Subir TDF y generar QR de pareos': 'Upload TDF and create a pairings QR code',
-          'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'TDF uploads are temporarily disabled while I check their use with Play! Pokémon.',
           'Enlace de destino del QR:': 'QR destination link:', 'Generar QR': 'Create QR code',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Image for the left panel (max. 2 MB):',
-          'Quitar imagen': 'Remove image', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Tournament .tdf file (max. 2 MB)',
-          'Guardar TDF privado': 'Save TDF privately',
-          'Subir TDF (solo mi perfil)': 'Upload TDF (my profile only)',
-          'El TDF y sus pareos se guardan solo en el espacio privado de tu perfil autorizado.': 'The TDF and its pairings are stored only in your authorized profile’s private space.',
-          'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Uploading a new TDF replaces the published pairings.',
+          'Quitar imagen': 'Remove image',
           'Guardar cambios': 'Save changes', 'Ej. 7KQ2BD': 'e.g. 7KQ2BD', 'Cerrar control de sala': 'Close room control',
           'Código para abrir la vista TV': 'Code to open the TV view', 'Enlaces de sala': 'Room links',
           'Cerrar edición': 'Close editor', 'Contenido visual del torneo': 'Tournament display content',
-          'Publica un TDF antes de guardar esta opción.': 'Publish a TDF before saving this option.',
           'Ingresa una duración de 1 a 1440 minutos.': 'Enter a duration from 1 to 1440 minutes.',
           'Espera a que se conecte la sala para guardar.': 'Wait for the room to connect before saving.',
           'TIEMPO TERMINADO': 'TIME IS UP', 'EN CURSO': 'IN PROGRESS',
@@ -4116,22 +4157,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Elige una imagen válida de hasta 2 MB.': 'Choose a valid image up to 2 MB.',
           'Logo cargado. Presiona Guardar cambios para conservarlo.': 'Logo uploaded. Select Save changes to keep it.',
           'No se pudo leer el logo.': 'Could not read the logo.', 'Código QR del enlace del torneo': 'QR code for the tournament link',
-          'Código QR para ver los pareos': 'QR code to view pairings', 'Imagen del torneo': 'Tournament image',
           'Imagen cargada. Presiona Guardar cambios para conservarla.': 'Image uploaded. Select Save changes to keep it.',
           'No se pudo leer la imagen.': 'Could not read the image.', 'Ingresa un enlace para generar el código QR.': 'Enter a link to create the QR code.',
           'Protocolo inválido': 'Invalid protocol', 'Ingresa un enlace válido que comience con https:// o http://.': 'Enter a valid link beginning with https:// or http://.',
           'QR no generado': 'QR code not created', 'Código QR generado. Presiona Guardar para conservar el enlace.': 'QR code created. Select Save to keep the link.',
           'No fue posible generar el QR. Prueba con un enlace más corto.': 'Could not create the QR code. Try a shorter link.',
-          'El TDF contiene declaraciones XML no admitidas.': 'The TDF contains unsupported XML declarations.',
-          'El archivo no tiene un formato TDF/XML válido.': 'The file is not in a valid TDF/XML format.',
-          'El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.': 'The TDF does not contain a valid tournament date to determine JR, SR, and MA.',
-          'La fecha del torneo en el TDF no es válida.': 'The tournament date in the TDF is invalid.',
-          'No se encontraron jugadores en el TDF.': 'No players were found in the TDF.',
-          'No se encontraron pareos con jugadores en el TDF.': 'No player pairings were found in the TDF.',
-          'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.': 'Upload the TDF again to show wins, losses, draws, and points.',
-          'No hay pareos para esta selección.': 'There are no pairings for this selection.',
-          'Aún no se han publicado pareos para esta sala.': 'No pairings have been published for this room yet.',
-          'Última de cada grupo': 'Last player in each group', 'Ingresa un código válido de 6 caracteres.': 'Enter a valid 6-character code.',
           '🔔 Activar sonido': '🔔 Enable sound', '🔔 Toca para activar sonido': '🔔 Tap to enable sound',
           'Sincronizado': 'Synchronized',
           'Cronómetro de llamada': 'Call stopwatch', 'Listo para iniciar': 'Ready to start',
@@ -4151,11 +4181,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'No se pudo reservar un código corto.': 'Could not reserve a short code.',
           'Actualiza las reglas de Firebase para generar el enlace corto.': 'Update the Firebase rules to create the short link.',
           'No se pudo generar el enlace corto. Prueba recargando la sala.': 'Could not create the short link. Try reloading the room.',
-          'No se pudieron leer los pareos.': 'Could not load pairings.', 'No se pudo acceder a los pareos.': 'Could not access pairings.',
           'Ingresa como propietario de la sala para publicar.': 'Sign in as the room owner to publish.',
-          'Selecciona un archivo TDF.': 'Select a TDF file.', 'El archivo supera los 2 MB.': 'The file exceeds 2 MB.',
-          'Leyendo el TDF…': 'Reading the TDF…', 'Los pareos superan el límite permitido.': 'The pairings exceed the allowed limit.',
-          'No se pudo publicar el TDF. Revisa las reglas de Firebase.': 'Could not publish the TDF. Check the Firebase rules.',
           'Inicia sesión como propietario de esta sala para guardar.': 'Sign in as the room owner to save.',
           'Ajustes guardados en esta sala.': 'Settings saved for this room.',
           'No se pudieron guardar los ajustes. Revisa las reglas de Firebase.': 'Could not save the settings. Check the Firebase rules.',
@@ -4192,7 +4218,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Ingresa el código de sala para mostrar el temporizador en una pantalla.': 'Digite o código da sala para exibir o temporizador em uma tela.',
           'Continuar': 'Continuar', 'Ingresar a Staff': 'Acessar Staff', 'Volver al inicio': 'Voltar ao início', '← Volver a Staff': '← Voltar para Staff',
           'Configurando…': 'Configurando…', 'Conectando…': 'Conectando…', 'Conectando': 'Conectando',
-          'Ronda': 'Rodada', 'Categoría del jugador': 'Categoria do jogador', 'Todas': 'Todas',
+          'Ronda': 'Rodada',
           'Junior (JR)': 'Junior (JR)', 'Senior (SR)': 'Senior (SR)', 'Máster (MA)': 'Master (MA)',
           'Junior / Senior (JR/SR)': 'Junior / Senior (JR/SR)', '⚙': '⚙', 'Control Sala': 'Controle da sala',
           'Generando…': 'Gerando…', 'Duración del temporizador': 'Duração do temporizador', 'Guardar tiempo': 'Salvar tempo',
@@ -4216,19 +4242,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Tipografía del reloj': 'Fonte do relógio', 'Moderna': 'Moderna', 'Clásica': 'Clássica', 'Sonido de la alarma': 'Som do alarme', 'Campana': 'Sino', 'Digital': 'Digital', 'Campana extendida': 'Sino prolongado', 'Digital extendido': 'Digital prolongado', 'Progresivo': 'Progressivo', 'Probar': 'Testar', 'Reproduciendo sonido de prueba.': 'Reproduzindo som de teste.', 'No se pudo activar el sonido. Intenta nuevamente.': 'Não foi possível ativar o som. Tente novamente.', 'Logo': 'Logotipo',
           'Subir logo': 'Enviar logotipo', 'Quitar logo': 'Remover logotipo', 'Mostrar panel izquierdo': 'Mostrar painel esquerdo', 'Contenido del panel izquierdo': 'Conteúdo do painel esquerdo',
           'Generar QR desde un enlace': 'Gerar QR a partir de um link', 'Subir una imagen': 'Enviar uma imagem',
-          'Subir TDF y generar QR de pareos': 'Enviar TDF e gerar QR dos emparceiramentos',
-          'La carga de TDF está temporalmente desactivada mientras consulto su uso con Play! Pokémon.': 'O envio de TDF está temporariamente desativado enquanto consulto seu uso com o Play! Pokémon.',
           'Enlace de destino del QR:': 'Link de destino do QR:', 'Generar QR': 'Gerar QR',
           'Imagen para el panel izquierdo (máximo 2 MB):': 'Imagem para o painel esquerdo (máximo 2 MB):',
-          'Quitar imagen': 'Remover imagem', 'Archivo .tdf exportado del torneo (máximo 2 MB)': 'Arquivo .tdf exportado do torneio (máximo 2 MB)',
-          'Guardar TDF privado': 'Salvar TDF em privado',
-          'Subir TDF (solo mi perfil)': 'Enviar TDF (apenas meu perfil)',
-          'El TDF y sus pareos se guardan solo en el espacio privado de tu perfil autorizado.': 'O TDF e seus emparceiramentos ficam apenas no espaço privado do seu perfil autorizado.',
-          'Al subir un nuevo TDF, se reemplazan los pareos publicados.': 'Ao enviar um novo TDF, os emparceiramentos publicados serão substituídos.',
+          'Quitar imagen': 'Remover imagem',
           'Guardar cambios': 'Salvar alterações', 'Ej. 7KQ2BD': 'Ex.: 7KQ2BD', 'Cerrar control de sala': 'Fechar controle da sala',
           'Código para abrir la vista TV': 'Código para abrir a visualização da TV', 'Enlaces de sala': 'Links da sala',
           'Cerrar edición': 'Fechar edição', 'Contenido visual del torneo': 'Conteúdo visual do torneio',
-          'Publica un TDF antes de guardar esta opción.': 'Publique um TDF antes de salvar esta opção.',
           'Ingresa una duración de 1 a 1440 minutos.': 'Digite uma duração entre 1 e 1440 minutos.',
           'Espera a que se conecte la sala para guardar.': 'Aguarde a conexão da sala para salvar.',
           'TIEMPO TERMINADO': 'TEMPO ESGOTADO', 'EN CURSO': 'EM ANDAMENTO',
@@ -4237,22 +4256,11 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'Elige una imagen válida de hasta 2 MB.': 'Escolha uma imagem válida de até 2 MB.',
           'Logo cargado. Presiona Guardar cambios para conservarlo.': 'Logotipo enviado. Selecione Salvar alterações para mantê-lo.',
           'No se pudo leer el logo.': 'Não foi possível ler o logotipo.', 'Código QR del enlace del torneo': 'QR do link do torneio',
-          'Código QR para ver los pareos': 'QR para ver os emparceiramentos', 'Imagen del torneo': 'Imagem do torneio',
           'Imagen cargada. Presiona Guardar cambios para conservarla.': 'Imagem enviada. Selecione Salvar alterações para mantê-la.',
           'No se pudo leer la imagen.': 'Não foi possível ler a imagem.', 'Ingresa un enlace para generar el código QR.': 'Digite um link para gerar o QR.',
           'Protocolo inválido': 'Protocolo inválido', 'Ingresa un enlace válido que comience con https:// o http://.': 'Digite um link válido que comece com https:// ou http://.',
           'QR no generado': 'QR não gerado', 'Código QR generado. Presiona Guardar para conservar el enlace.': 'QR gerado. Selecione Salvar para manter o link.',
           'No fue posible generar el QR. Prueba con un enlace más corto.': 'Não foi possível gerar o QR. Tente um link mais curto.',
-          'El TDF contiene declaraciones XML no admitidas.': 'O TDF contém declarações XML não compatíveis.',
-          'El archivo no tiene un formato TDF/XML válido.': 'O arquivo não está em um formato TDF/XML válido.',
-          'El TDF no indica una fecha de torneo válida para determinar JR, SR y MA.': 'O TDF não contém uma data válida do torneio para determinar JR, SR e MA.',
-          'La fecha del torneo en el TDF no es válida.': 'A data do torneio no TDF é inválida.',
-          'No se encontraron jugadores en el TDF.': 'Nenhum jogador foi encontrado no TDF.',
-          'No se encontraron pareos con jugadores en el TDF.': 'Nenhum emparceiramento com jogadores foi encontrado no TDF.',
-          'Sube nuevamente el TDF para mostrar el historial de victorias, derrotas, empates y puntos.': 'Envie o TDF novamente para exibir o histórico de vitórias, derrotas, empates e pontos.',
-          'No hay pareos para esta selección.': 'Não há emparceiramentos para esta seleção.',
-          'Aún no se han publicado pareos para esta sala.': 'Ainda não há emparceiramentos publicados para esta sala.',
-          'Última de cada grupo': 'Último de cada grupo', 'Ingresa un código válido de 6 caracteres.': 'Digite um código válido de 6 caracteres.',
           '🔔 Activar sonido': '🔔 Ativar som', '🔔 Toca para activar sonido': '🔔 Toque para ativar o som',
           'Sincronizado': 'Sincronizado',
           'Cronómetro de llamada': 'Cronômetro da chamada', 'Listo para iniciar': 'Pronto para iniciar',
@@ -4272,11 +4280,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           'No se pudo reservar un código corto.': 'Não foi possível reservar um código curto.',
           'Actualiza las reglas de Firebase para generar el enlace corto.': 'Atualize as regras do Firebase para gerar o link curto.',
           'No se pudo generar el enlace corto. Prueba recargando la sala.': 'Não foi possível gerar o link curto. Tente recarregar a sala.',
-          'No se pudieron leer los pareos.': 'Não foi possível carregar os emparceiramentos.', 'No se pudo acceder a los pareos.': 'Não foi possível acessar os emparceiramentos.',
           'Ingresa como propietario de la sala para publicar.': 'Entre como proprietário da sala para publicar.',
-          'Selecciona un archivo TDF.': 'Selecione um arquivo TDF.', 'El archivo supera los 2 MB.': 'O arquivo excede 2 MB.',
-          'Leyendo el TDF…': 'Lendo o TDF…', 'Los pareos superan el límite permitido.': 'Os emparceiramentos excedem o limite permitido.',
-          'No se pudo publicar el TDF. Revisa las reglas de Firebase.': 'Não foi possível publicar o TDF. Verifique as regras do Firebase.',
           'Inicia sesión como propietario de esta sala para guardar.': 'Entre como proprietário da sala para salvar.',
           'Ajustes guardados en esta sala.': 'Configurações salvas nesta sala.',
           'No se pudieron guardar los ajustes. Revisa las reglas de Firebase.': 'Não foi possível salvar as configurações. Verifique as regras do Firebase.',

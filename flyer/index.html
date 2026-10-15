@@ -106,7 +106,7 @@
   <section id="authLoading" class="login-panel" role="status" aria-live="polite"><span class="eyebrow">CRONOAPP</span><h1>Preparando tu generador</h1><p>Estamos comprobando tu sesión…</p></section>
   <section id="loginPanel" class="login-panel" hidden><span class="eyebrow">ACCESO A CRONOAPP</span><h1>Generador de flyers</h1><p>Inicia sesión con Google para crear y guardar tus diseños.</p><button id="googleLogin" type="button">Continuar con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
   <main class="shell" id="flyerShell" hidden>
-    <header><a class="brand" href="/">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><a class="home-icon-link" href="/" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a><a class="chat-icon-link" href="/?openOwnRoom=1&amp;openChat=1" aria-label="Abrir chat del Timer" title="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></a><details class="flyer-actions-menu"><summary aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></summary><div class="flyer-actions-menu-content"><a class="back" id="timerLink" href="/?openOwnRoom=1">Ir al Timer</a><a class="back" href="/torneos/">Dashboard de torneos</a><button id="logoutButton" type="button">Cerrar sesión</button></div></details></div></header>
+    <header><a class="brand" href="/?resume=1">Cronoapp</a><div class="account"><span id="accountEmail" hidden></span><a class="home-icon-link" href="/?resume=1" aria-label="Ir al inicio" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-6h6v6"></path></svg></a><a class="chat-icon-link" href="/?openOwnRoom=1&amp;openChat=1" aria-label="Abrir chat del Timer" title="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"></path></svg></a><details class="flyer-actions-menu"><summary aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></summary><div class="flyer-actions-menu-content"><a class="back" id="timerLink" href="/?openOwnRoom=1">Ir al Timer</a><a class="back" href="/torneos/">Dashboard de torneos</a><button id="logoutButton" type="button">Cerrar sesión</button></div></details></div></header>
     <section class="intro"><span class="eyebrow">HERRAMIENTA DE DISEÑO</span><h1>Generador de flyers</h1><p>Completa los datos y mira el diseño actualizarse en vivo.</p></section>
     <div class="workspace">
       <form class="controls" id="flyerForm">
@@ -535,11 +535,13 @@
           timerLink.textContent='Abriendo tu sala…';
           try{
             let roomId=isValidRoomId(returnToRoom)?returnToRoom:null;
+            try{if(!roomId&&currentUser?.uid)roomId=localStorage.getItem('cronoapp-room-id:'+currentUser.uid)}catch{}
             if(!roomId&&currentUser?.uid){
               const owned=databaseModule.query(databaseModule.ref(db,'rooms'),databaseModule.orderByChild('ownerUid'),databaseModule.equalTo(currentUser.uid),databaseModule.limitToFirst(1));
               const found=await databaseModule.get(owned);
               if(found.exists())roomId=Object.keys(found.val())[0];
             }
+            if(roomId&&currentUser?.uid)try{localStorage.setItem('cronoapp-room-id:'+currentUser.uid,roomId)}catch{}
             location.assign(roomId&&isValidRoomId(roomId)?'/?sala='+encodeURIComponent(roomId):'/?openOwnRoom=1');
           }catch(error){location.assign('/?openOwnRoom=1');}
         });
