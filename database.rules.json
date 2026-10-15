@@ -253,6 +253,9 @@
             "addedAt": {
               ".validate": "newData.isNumber()"
             },
+            "lateEntryMissedRounds": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+            },
             "droppedAt": {
               ".validate": "newData.isNumber()"
             },
