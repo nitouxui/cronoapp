@@ -342,6 +342,7 @@
     .home-account-actions #googleLogin { width: auto; background: var(--accent); color: #fff; }
     .home-account-actions #syncLogout { margin: 0; }
     .home-account-actions button:hover { border-color: var(--accent); filter: brightness(1.08); }
+    body.no-room.home-public:not(.code-entry-mode) .home-account-actions { position: static; justify-content: center; margin: 28px 0 0; }
     body.no-room.home-public #roomWelcome .welcome-shell { grid-template-columns: minmax(0, 760px); justify-content: center; }
     body.no-room.home-public .welcome-copy { text-align: center; }
     body.no-room.home-public .welcome-copy > p { margin-left: auto; margin-right: auto; }
@@ -585,16 +586,13 @@
     </div>
   </section>
   <section id="roomWelcome">
-    <div id="homeAccountActions" class="home-account-actions" aria-label="Acceso a la cuenta" hidden></div>
     <div class="welcome-shell">
       <div class="welcome-copy">
         <span class="welcome-eyebrow">CRONOAPP</span>
         <h1>Todo tu torneo.<br><em>En un solo lugar.</em></h1>
         <p>CronoApp conecta el temporizador, la organización de torneos y la creación de flyers para que puedas gestionar tus eventos desde una sola plataforma.</p>
         <div class="welcome-features"><span>Timer sincronizado</span><span>Gestión de torneos</span><span>Diseño de flyers</span></div>
-        <a class="agenda-entry" href="/torneos/">Ver torneos y pareos <span aria-hidden="true">→</span></a>
-        <a id="agendaPublicLink" class="agenda-entry" href="/eventos/" hidden>Ver agenda de Temuco <span aria-hidden="true">→</span></a>
-        <a id="agendaAdminLink" class="agenda-entry" href="/eventos/?admin=1" hidden>Administrar agenda <span aria-hidden="true">→</span></a>
+        <div id="homeAccountActions" class="home-account-actions" aria-label="Acceso a la cuenta" hidden></div>
       </div>
       <div id="landingLogin" class="landing-login">
         <section class="landing-control-entry" aria-labelledby="landingControlTitle">
@@ -3957,6 +3955,12 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             window.cronoCurrentUser = user;
             document.body.classList.toggle('home-authenticated', !!user);
             document.body.classList.toggle('home-public', !user);
+            const homeAccountActions = document.getElementById('homeAccountActions');
+            const roomWelcome = document.getElementById('roomWelcome');
+            const welcomeCopy = document.querySelector('.welcome-copy');
+            const welcomeShell = document.querySelector('.welcome-shell');
+            if (user) roomWelcome.insertBefore(homeAccountActions, welcomeShell);
+            else welcomeCopy.append(homeAccountActions);
             const dashboard = document.getElementById('loggedInDashboard');
             dashboard.hidden = !user;
             document.getElementById('dashboardUserName').textContent = user?.displayName?.trim().split(/\s+/)[0] || 'organizador';
@@ -3967,8 +3971,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             flyerSessionMessage.textContent = user ? '' : 'Inicia sesión desde el botón superior para acceder al generador de flyers.';
             flyerAccessLink.hidden = !user;
             const canManageAgenda = user?.emailVerified && user.email?.toLowerCase() === 'quidel.dsgn@gmail.com' && user.providerData.some(provider => provider.providerId === 'google.com');
-            document.getElementById('agendaPublicLink').hidden = !canManageAgenda;
-            document.getElementById('agendaAdminLink').hidden = !canManageAgenda;
             document.getElementById('personalAgendaCard').hidden = !canManageAgenda;
             updateAccess();
             refreshTimerTournamentOptions();
