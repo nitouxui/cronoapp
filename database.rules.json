@@ -358,6 +358,9 @@
             ".validate": "newData.hasChildren(['number','createdAt','matches']) && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('number').val() <= 10 && newData.child('createdAt').isNumber()",
             "number": {".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"},
             "createdAt": {".validate": "newData.isNumber()"},
+            "needsRepair": {".validate": "newData.isBoolean()"},
+            "repairSourceRound": {".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"},
+            "repairedAt": {".validate": "newData.isNumber()"},
             "matches": {
               "$match": {
                 ".validate": "newData.hasChildren(['firstId','first','secondId','second','winner','table']) && newData.child('firstId').isString() && newData.child('first').isString() && newData.child('secondId').isString() && newData.child('second').isString() && newData.child('winner').isString() && (newData.child('winner').val() === '' || newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('table').isNumber()",
