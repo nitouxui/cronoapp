@@ -19,11 +19,10 @@
       <div class="panel row spread"><div><strong id="organizerName"></strong><p class="hint">Tus torneos se guardan con tu cuenta.</p></div><button id="logoutBtn" class="secondary">Cerrar sesión</button></div>
       <div class="panel"><h2>Crear torneo</h2><form id="createForm" class="form grid">
         <label>Nombre del torneo<input name="title" maxlength="100" placeholder="Ej. Liga Pokémon de octubre" required></label>
-        <label>Tipo de torneo<div class="card">Torneo Casual · rondas suizas</div></label>
         <label>Juego<select name="game"><option value="tcg">Pokémon TCG</option><option value="vgc">Pokémon VGC</option><option value="go">Pokémon GO</option></select></label>
         <label>Fecha<input name="date" type="date" required></label><label>Ciudad / tienda<input name="venue" maxlength="100" placeholder="Temuco"></label>
                 <label class="wide">Descripción (opcional)<input name="description" maxlength="240" placeholder="Formato, premios, información para jugadores"></label>
-        <p class="hint wide">Las rondas suizas se calculan automáticamente con el total de jugadores activos, sumando todas las categorías: 4–8: 3; 9–16: 4; 17–32: 5; 33–64: 6; 65–128: 7; 129–256: 8; 257–512: 9; 513 o más: 10. Con 2 o 3 jugadores se usarán 3 rondas. El conteo se fija al cerrar inscripciones e iniciar la Ronda 1.</p>
+        <p class="hint wide"><strong>Formato:</strong> Torneo Casual. Las rondas suizas se calculan automáticamente con el total de jugadores activos, sumando todas las categorías, y se fijan al cerrar inscripciones e iniciar la Ronda 1.</p>
         <button class="wide">Crear y publicar inscripción</button></form><p id="createStatus" class="status" role="status"></p></div>
       <div class="panel"><h2>Mis torneos</h2><div id="myTournaments" class="cards"><div class="empty">Aún no tienes torneos.</div></div></div>
       <div id="eventAdmin" class="hidden"></div>
