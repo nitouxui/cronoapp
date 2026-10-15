@@ -319,6 +319,9 @@
             }
           }
         },
+        "timerPalette": {
+          ".validate": "newData.isString() && newData.val().length <= 32"
+        },
         "$other": {
           ".validate": false
         }
