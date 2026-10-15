@@ -41,7 +41,7 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const obj=x=>x&&typeof x==='object'?x:{};const eventRef=id=>ref(db,`onlineTournaments/${id}`);
   const route=new URLSearchParams(location.search),manageRouteId=route.get('manage'),publicRouteId=route.get('id');
-  function show(view){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));['directory','manager'].forEach(v=>$(v).classList.toggle('on',v===view));if(view==='publicTournament'){$('directory').classList.remove('on');$('manager').classList.remove('on');$('publicTournament').classList.add('on')}else $('publicTournament').classList.remove('on')}
+  function show(view){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));['directory','manager'].forEach(v=>$(v).classList.toggle('on',v===view));if(view==='publicTournament'){$('directory').classList.remove('on');$('manager').classList.remove('on');$('publicTournament').classList.remove('hidden');$('publicTournament').classList.add('on')}else $('publicTournament').classList.remove('on')}
   document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
   function recommendedRounds(n){if(!Number.isFinite(n)||n<2)return 0;if(n<=8)return 3;if(n<=16)return 4;if(n<=32)return 5;if(n<=64)return 6;if(n<=128)return 7;if(n<=256)return 8;if(n<=512)return 9;return 10}
   function escapeId(s){return encodeURIComponent(s)}
