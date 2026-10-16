@@ -153,6 +153,8 @@
     #leftImage { width: auto; max-width: min(100%, 62vh); max-height: min(62vh, 650px); background: #fff; padding: clamp(10px, 1.5vw, 22px); border-radius: 12px; box-shadow: 0 16px 45px #0005; margin: 0 auto; }
     #rightPanel { position: relative; isolation: isolate; padding: 38px clamp(24px, 3.5vw, 70px) 118px; background: radial-gradient(circle at 70% 35%, color-mix(in srgb, #202127 74%, transparent), color-mix(in srgb, #111216 84%, transparent) 75%); }
     #timerBackgroundLayer { position: absolute; inset: 0; z-index: -1; background-position: center; background-size: cover; background-repeat: no-repeat; pointer-events: none; }
+    .container > #timerBackgroundLayer { z-index: 0; }
+    .container > .panel { z-index: 1; }
     .timer-stage { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; flex: 1; }
     #logo { width: 150px; max-width: min(100%, 300px) !important; max-height: 82px; object-fit: contain; margin-bottom: 8px; }
     #timer { font-size: clamp(100px, 13vw, var(--timer-size, 290px)); font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.055em; white-space: nowrap; }
@@ -2664,6 +2666,38 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
     });
     document.getElementById('timerBackgroundOpacity').addEventListener('input', event => { timerBackgroundOpacity = Number(event.target.value); applyTimerBackground(); });
+    function applyProjectionRoomVisuals(settings) {
+      const images = settings?.images || {};
+      timerBackgroundSrc = images.timerBackgroundSrc || '';
+      timerBackgroundOpacity = Number.isFinite(Number(images.timerBackgroundOpacity))
+        ? Math.max(0, Math.min(100, Number(images.timerBackgroundOpacity))) : 35;
+      applyTimerBackground();
+      logoScale = Number.isFinite(Number(images.logoScale)) ? Math.max(50, Math.min(200, Number(images.logoScale))) : 100;
+      applyLogoScale();
+      setLeftPanelEnabled(images.leftPanelEnabled !== false);
+
+      const logo = document.getElementById('logo');
+      if (images.logoSrc) {
+        logo.src = images.logoSrc;
+        logo.style.display = 'block';
+      } else {
+        logo.removeAttribute('src');
+        logo.style.display = 'none';
+      }
+
+      uploadedImageSrc = images.uploadedImageSrc || '';
+      const mode = ['qr', 'tournament', 'upload'].includes(images.leftVisualMode)
+        ? images.leftVisualMode : (images.qrUrl ? 'qr' : 'upload');
+      document.getElementById('leftVisualModeSelect').value = mode;
+      const qrUrl = images.qrUrl || (images.tournamentId
+        ? new URL('/torneos/?id=' + encodeURIComponent(images.tournamentId), location.origin).href
+        : '');
+      document.getElementById('qrUrl').value = qrUrl;
+      qrImageSrc = '';
+      if (['qr', 'tournament'].includes(mode) && qrUrl) generateQR();
+      else renderLeftVisual();
+    }
+
     function renderLeftVisual() {
       const mode = document.getElementById('leftVisualModeSelect').value;
       const image = document.getElementById('leftImage');
@@ -3888,6 +3922,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               if (isJudge || isProjection) {
                 window.applyPalette(currentRoomSettings.palette, true);
                 if (isJudge) window.applyTimerFont(currentRoomSettings.timerFont);
+                if (isProjection) applyProjectionRoomVisuals(currentRoomSettings);
               } else window.loadSettings(currentRoomSettings);
             } catch { syncStatus.textContent = 'No se pudieron leer los ajustes de la sala.'; }
           }, () => { syncStatus.textContent = 'No se pudieron cargar los ajustes de la sala.'; });
