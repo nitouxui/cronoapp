@@ -3119,11 +3119,13 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       const label = formatTime(seconds);
       document.getElementById('judgeTimer').textContent = label;
       if (isJudge) judgeStatus.textContent = seconds <= 0 ? 'TIEMPO TERMINADO' : 'Sincronizado';
-      if (!isJudge && !isProjection) {
+      if (!isJudge) {
         const display = document.getElementById('timer');
         display.textContent = label;
         display.style.color = seconds < 0 ? 'var(--danger)' : 'var(--text)';
-        document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
+        if (!isProjection) {
+          document.getElementById('toggleButton').textContent = currentState.running ? 'Pausar' : 'Iniciar';
+        }
         window.renderTimerState(seconds, currentState.running);
       }
       if (currentState.running && seconds <= 0 && currentState.startedAt) {
