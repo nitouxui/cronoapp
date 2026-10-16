@@ -3990,7 +3990,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
                 });
               }
               if (auth.currentUser?.uid !== user.uid) return;
-              if (user.email) { try { await dbModule.set(dbModule.ref(db, 'roomOwnerEmails/' + user.uid), user.email); } catch (emailError) { console.warn('No se pudo guardar el correo propietario de la sala.', emailError); } }
               try { localStorage.setItem(cacheKey, id); } catch (_) {}
               const next = new URL(location.href);
               next.searchParams.set('sala', id);
@@ -4016,7 +4015,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               } catch (_) { return; }
             }
             if (auth.currentUser?.uid !== user.uid) return;
-            if (user.email) { try { await dbModule.set(dbModule.ref(db, 'roomOwnerEmails/' + user.uid), user.email); } catch (emailError) { console.warn('No se pudo guardar el correo propietario de la sala.', emailError); } }
             const timerLink = document.getElementById('timerModuleLink');
             if (timerLink) timerLink.href = `/?sala=${encodeURIComponent(roomId)}`;
           }
