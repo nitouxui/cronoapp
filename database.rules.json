@@ -1,7 +1,7 @@
 {
   "rules": {
     "rooms": {
-      ".read": "auth != null && auth.token.email_verified === true && query.orderByChild === 'ownerUid' && query.equalTo === auth.uid && query.limitToFirst === 1",
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && query.orderByChild === 'ownerUid' && query.equalTo === auth.uid && query.limitToFirst === 1)",
       ".indexOn": [
         "ownerUid"
       ],
