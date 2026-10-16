@@ -3804,7 +3804,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         let onlineTournamentData = {};
         function refreshTimerTournamentOptions() {
           const select = document.getElementById('timerTournamentSelect');
-          if (!select) return;
+          if (!select || isProjection) return;
           const savedId = currentRoomSettings.images?.tournamentId || select.dataset.savedId || '';
           const owned = Object.entries(onlineTournamentData).filter(([, event]) => event?.ownerUid === currentUser?.uid);
           select.replaceChildren(new Option(owned.length ? 'Selecciona un torneo' : 'No tienes torneos propios', ''));
