@@ -114,7 +114,7 @@
       <form id="eventForm" hidden>
         <div class="field"><label for="store" data-i18n="store">Tienda</label><select id="store" required><option value="trizano">Top8 Trizano</option><option value="neruda">Top8 Neruda</option><option value="bluecard">Bluecard</option></select></div>
         <div class="field"><label for="kind" data-i18n="kind">Actividad</label><select id="kind" required><option value="tournament" data-i18n="tournament">Torneo</option><option value="free" data-i18n="free">Juego libre</option></select></div>
-        <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option><option value="Abacaxi Showdown" data-neruda-only hidden disabled>Abacaxi Showdown</option></select></div>
+        <div class="field tournament-field"><label for="eventType" data-i18n="eventType">Tipo de torneo</label><select id="eventType"><option>Torneo Casual</option><option>League Challenge</option><option>League Cup</option><option value="Prelanzamiento">Prelanzamiento</option><option value="Abacaxi Showdown" data-neruda-only hidden disabled>Abacaxi Showdown</option></select></div>
         <div class="field tournament-field"><label for="format" data-i18n="format">Formato</label><select id="format"><option>Rondas Suizas Bo1</option><option>Rondas Suizas Bo3</option></select></div>
         <div class="field tournament-field"><label for="entryType" data-i18n="entryType">Costo de participación</label><select id="entryType" required><option value="amount" data-i18n="amountOption">Valor</option><option value="free" data-i18n="freeEntry">Gratis</option><option value="beverage" data-i18n="beverageEntry">Consumo de bebestible en tienda</option></select></div>
         <div id="valueField" class="field" hidden><label for="value" data-i18n="value">Valor (CLP)</label><input id="value" type="number" min="0" step="1" inputmode="numeric"></div>
@@ -173,7 +173,7 @@
         || (event.showTableAvailabilityNote !== undefined && typeof event.showTableAvailabilityNote !== 'boolean')) return false;
       const amountIsValid = Number.isSafeInteger(event.value) && event.value >= 0;
       if (event.kind === 'free') return (!event.endTime || /^\d{2}:\d{2}$/.test(event.endTime)) && (entryTypeFor(event) !== 'amount' || amountIsValid);
-      return (['Torneo Casual','League Challenge','League Cup'].includes(event.type) || (event.type === 'Abacaxi Showdown' && event.store === 'neruda'))
+      return (['Torneo Casual','League Challenge','League Cup','Prelanzamiento'].includes(event.type) || (event.type === 'Abacaxi Showdown' && event.store === 'neruda'))
         && ['Rondas Suizas Bo1','Rondas Suizas Bo3'].includes(event.format) && amountIsValid;
     }
     function element(tag, className, value) {
