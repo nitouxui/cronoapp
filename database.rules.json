@@ -351,6 +351,21 @@
           ".validate": false
         }
       }
+    },
+    "urlShortener": {
+      "links": {
+        "$code": {
+          ".read": true,
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && !data.exists()",
+          ".validate": "$code.matches(/^[A-HJ-NP-Z2-9]{8}$/) && newData.hasChildren(['url'])",
+          "url": {
+            ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }
