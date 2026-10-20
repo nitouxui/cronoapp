@@ -576,8 +576,9 @@
     const startupParams = new URLSearchParams(location.search);
     const openingRoom = startupParams.get('openOwnRoom') === '1';
     const returningToFlyers = startupParams.get('returnTo') === '/flyer/';
-    if (openingRoom || returningToFlyers || startupParams.get('resume') === '1') {
-      document.documentElement.dataset.routeLoading = openingRoom ? 'Abriendo tu sala…' : returningToFlyers ? 'Abriendo el Generador de flyers…' : 'Cargando CronoApp…';
+    const returningToShortener = startupParams.get('returnTo') === '/acortador/';
+    if (openingRoom || returningToFlyers || returningToShortener || startupParams.get('resume') === '1') {
+      document.documentElement.dataset.routeLoading = openingRoom ? 'Abriendo tu sala…' : returningToFlyers ? 'Abriendo el Generador de flyers…' : returningToShortener ? 'Abriendo el acortador de URL…' : 'Cargando CronoApp…';
       document.documentElement.classList.add('crono-route-pending');
     }
   </script>
@@ -646,6 +647,7 @@
         <a id="timerModuleLink" class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
         <a class="module-card" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
         <a class="module-card" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
+        <a class="module-card" href="/acortador/"><span class="module-card-icon" aria-hidden="true">↗</span><strong>Acortador de URL</strong><span>Crea enlaces cortos para compartir →</span></a>
         <a id="agendaModuleLink" class="module-card" href="/eventos/?admin=1" hidden><span class="module-card-icon" aria-hidden="true">▦</span><strong>Agenda</strong><span>Administra y publica los eventos de la agenda →</span></a>
       </div>
     </section>
@@ -4057,7 +4059,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           }
           const returnTo = new URLSearchParams(location.search).get('returnTo');
           let openOwnRoomOnLoad = new URLSearchParams(location.search).get('openOwnRoom') === '1';
-          let returnedToFlyer = false;
+          let returnedToModule = false;
           authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             window.cronoCurrentUser = user;
@@ -4073,7 +4075,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             const dashboard = document.getElementById('loggedInDashboard');
             dashboard.hidden = !hasGoogleAccount;
             document.getElementById('dashboardUserName').textContent = user?.displayName?.trim().split(/\s+/)[0] || 'organizador';
-            if (user && returnTo === '/flyer/' && !returnedToFlyer) { returnedToFlyer = true; location.replace('/flyer/'); return; }
+            if (user && ['/flyer/', '/acortador/'].includes(returnTo) && !returnedToModule) { returnedToModule = true; location.replace(returnTo); return; }
             if (!(user?.emailVerified && openOwnRoomOnLoad)) document.documentElement.classList.remove('crono-route-pending');
             if (params.has('resume')) {
               params.delete('resume');
