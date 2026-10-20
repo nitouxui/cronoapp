@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14171b">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Acortador de URL · CronoApp</title>
+  <style>
+    :root { color-scheme: dark; --bg:#14171b; --panel:#20252b; --raised:#293039; --edge:#46515d; --text:#f0f2f5; --muted:#bfc7d0; --accent:#a4b3c1; --focus:#dce7f2; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    [hidden] { display:none!important; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 8% 0%,#2b333b,var(--bg) 42%); color:var(--text); }
+    button,input { font:inherit; }
+    a { color:inherit; }
+    .shell { width:min(100%,1040px); margin:0 auto; padding:24px clamp(18px,3vw,42px) 60px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    .brand { color:var(--text); text-decoration:none; font-size:18px; font-weight:900; letter-spacing:-.035em; }
+    .nav { display:flex; align-items:center; gap:8px; }
+    .nav-icon,.menu summary { display:grid; place-items:center; width:42px; height:42px; border:1px solid var(--edge); border-radius:11px; background:var(--raised); color:var(--text); text-decoration:none; cursor:pointer; }
+    .nav-icon svg,.menu summary svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .nav-icon:hover,.menu summary:hover,.menu[open] summary { border-color:var(--focus); color:var(--focus); }
+    .menu { position:relative; }
+    .menu summary { list-style:none; }
+    .menu summary::-webkit-details-marker { display:none; }
+    .menu-list { position:absolute; top:calc(100% + 8px); right:0; z-index:5; display:grid; gap:4px; min-width:210px; padding:8px; border:1px solid var(--edge); border-radius:14px; background:var(--panel); box-shadow:0 18px 45px #0009; }
+    .menu-list a,.menu-list button { display:flex; align-items:center; min-height:42px; padding:0 12px; border:1px solid transparent; border-radius:9px; background:transparent; color:var(--text); font:inherit; font-size:14px; font-weight:700; text-decoration:none; text-align:left; cursor:pointer; }
+    .menu-list a:hover,.menu-list button:hover { border-color:var(--edge); background:var(--raised); }
+    .intro { margin:42px 0 24px; }
+    .eyebrow { color:var(--accent); font-size:12px; font-weight:900; letter-spacing:.16em; }
+    h1 { margin:8px 0; font-size:clamp(32px,5vw,48px); letter-spacing:-.05em; line-height:1.05; }
+    .intro p { margin:0; color:var(--muted); line-height:1.5; }
+    .panel { max-width:720px; padding:clamp(20px,4vw,32px); border:1px solid var(--edge); border-radius:18px; background:rgba(32,37,43,.92); box-shadow:0 16px 44px #0004; }
+    .field label { display:block; margin-bottom:8px; font-size:14px; font-weight:750; }
+    .field input { width:100%; min-height:48px; padding:11px 13px; border:1px solid var(--edge); border-radius:10px; background:#171b20; color:var(--text); }
+    .field input:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+    .help { margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; }
+    .primary,.secondary,.copy { min-height:44px; padding:0 16px; border:1px solid var(--edge); border-radius:10px; font-weight:800; cursor:pointer; }
+    .primary { border-color:transparent; background:var(--accent); color:#14171b; }
+    .secondary,.copy { background:var(--raised); color:var(--text); }
+    button:disabled { opacity:.55; cursor:wait; }
+    .status { min-height:24px; margin:14px 0 0; color:var(--muted); font-size:14px; line-height:1.45; }
+    .result { display:grid; gap:10px; margin-top:22px; padding:16px; border:1px solid var(--edge); border-radius:12px; background:#171b20; }
+    .result label { color:var(--muted); font-size:13px; font-weight:750; }
+    .result-row { display:flex; gap:8px; }
+    .result input { flex:1; min-width:0; min-height:44px; padding:9px 11px; border:1px solid var(--edge); border-radius:9px; background:#101316; color:var(--text); }
+    .login { width:min(100%,460px); margin:12vh auto; padding:28px; border:1px solid var(--edge); border-radius:18px; background:var(--panel); text-align:center; }
+    .login p { color:var(--muted); line-height:1.5; }
+    .login a { color:var(--focus); font-weight:800; }
+    .loading { color:var(--muted); text-align:center; padding:20vh 16px; }
+    @media (max-width:520px) { .shell { padding-top:16px; } .intro { margin-top:32px; } .result-row { flex-direction:column; } .copy { width:100%; } }
+  </style>
+</head>
+<body>
+  <section id="loading" class="loading" role="status">Comprobando tu sesión…</section>
+  <section id="loginPanel" class="login" hidden>
+    <span class="eyebrow">HERRAMIENTAS CRONOAPP</span>
+    <h1>Acortador de URL</h1>
+    <p>Inicia sesión con Google para crear enlaces cortos.</p>
+    <a href="/?returnTo=/acortador/">Continuar con Google</a>
+    <p id="loginStatus" role="status"></p>
+  </section>
+  <main id="app" class="shell" hidden>
+    <header>
+      <a class="brand" href="/?resume=1">CronoApp</a>
+      <nav class="nav" aria-label="Navegación de herramientas">
+        <a class="nav-icon" href="/?resume=1" aria-label="Inicio" title="Inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-6h6v6"/></svg></a>
+        <a class="nav-icon" href="/?openOwnRoom=1&amp;openChat=1" aria-label="Chat del Timer" title="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.98L3 21l1.98-5.5A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5Z"/></svg></a>
+        <details class="menu">
+          <summary aria-label="Menú" title="Menú"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></summary>
+          <div class="menu-list">
+            <a href="/?openOwnRoom=1">Ir al Timer</a>
+            <a href="/torneos/">Dashboard de torneos</a>
+            <a href="/flyer/">Generador de flyers</a>
+            <a id="agendaLink" href="/eventos/?admin=1" hidden>Administrar agenda</a>
+            <button id="logout" type="button">Cerrar sesión</button>
+          </div>
+        </details>
+      </nav>
+    </header>
+    <section class="intro">
+      <span class="eyebrow">HERRAMIENTA DE CRONOAPP</span>
+      <h1>Acortador de URL</h1>
+      <p>Crea un enlace corto de CronoApp para compartir una dirección web larga.</p>
+    </section>
+    <section class="panel" aria-labelledby="formTitle">
+      <h2 id="formTitle">Crear enlace corto</h2>
+      <form id="shortenForm">
+        <div class="field">
+          <label for="targetUrl">URL de destino</label>
+          <input id="targetUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://ejemplo.com/pagina" maxlength="2048" required>
+          <p class="help">Se aceptan enlaces que comiencen con http:// o https://.</p>
+        </div>
+        <div class="actions">
+          <button id="shortenButton" class="primary" type="submit">Acortar URL</button>
+        </div>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div id="result" class="result" hidden>
+        <label for="shortUrl">Enlace corto creado</label>
+        <div class="result-row">
+          <input id="shortUrl" type="url" readonly>
+          <button id="copyButton" class="copy" type="button">Copiar enlace</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module">
+    const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
+    const config = { apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8', authDomain:'cronoapp-97aa6.firebaseapp.com', databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com', projectId:'cronoapp-97aa6', appId:'1:482155443294:web:b62c46a3ae16ca551630cf' };
+    const codeAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const loading = document.getElementById('loading');
+    const loginPanel = document.getElementById('loginPanel');
+    const appShell = document.getElementById('app');
+    let auth, database, db, currentUser;
+    const allowedUser = user => Boolean(user?.emailVerified && user.providerData?.some(provider => provider.providerId === 'google.com'));
+    try {
+      const [appModule, authModule, dbModule] = await Promise.all([
+        import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-database.js')
+      ]);
+      const app = appModule.initializeApp(config);
+      auth = authModule.getAuth(app);
+      database = dbModule;
+      db = database.getDatabase(app);
+      authModule.onAuthStateChanged(auth, user => {
+        currentUser = user;
+        loading.hidden = true;
+        if (!allowedUser(user)) {
+          appShell.hidden = true;
+          loginPanel.hidden = false;
+          return;
+        }
+        loginPanel.hidden = true;
+        appShell.hidden = false;
+        const canManageAgenda = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
+        document.getElementById('agendaLink').hidden = !canManageAgenda;
+      });
+      document.getElementById('logout').addEventListener('click', async () => {
+        await authModule.signOut(auth);
+        location.assign('/');
+      });
+      document.getElementById('shortenForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!allowedUser(currentUser)) return;
+        const input = document.getElementById('targetUrl');
+        const status = document.getElementById('status');
+        const button = document.getElementById('shortenButton');
+        let target;
+        try {
+          target = new URL(input.value.trim());
+          if (!['http:', 'https:'].includes(target.protocol) || target.username || target.password) throw new Error('invalid');
+          target = target.href;
+        } catch (_) {
+          status.textContent = 'Ingresa una URL válida que comience con http:// o https://.';
+          return;
+        }
+        button.disabled = true;
+        status.textContent = 'Creando enlace corto…';
+        document.getElementById('result').hidden = true;
+        try {
+          let result = null;
+          for (let attempt = 0; attempt < 8; attempt++) {
+            const bytes = crypto.getRandomValues(new Uint8Array(8));
+            const code = Array.from(bytes, byte => codeAlphabet[byte & 31]).join('');
+            const linkRef = database.ref(db, 'urlShortener/links/' + code);
+            const transaction = await database.runTransaction(linkRef, current => current === null ? { url: target } : undefined, { applyLocally: false });
+            if (transaction.committed) { result = new URL('/go/?c=' + code, location.origin).href; break; }
+          }
+          if (!result) throw new Error('collision');
+          document.getElementById('shortUrl').value = result;
+          document.getElementById('result').hidden = false;
+          status.textContent = 'Enlace creado. Ya puedes copiarlo y compartirlo.';
+        } catch (error) {
+          status.textContent = error?.code === 'PERMISSION_DENIED'
+            ? 'No se pudo guardar. Actualiza las reglas de Firebase para habilitar el acortador.'
+            : 'No se pudo crear el enlace. Intenta nuevamente.';
+        } finally {
+          button.disabled = false;
+        }
+      });
+      document.getElementById('copyButton').addEventListener('click', async () => {
+        const value = document.getElementById('shortUrl').value;
+        try {
+          await navigator.clipboard.writeText(value);
+          document.getElementById('status').textContent = 'Enlace copiado.';
+        } catch (_) {
+          const input = document.getElementById('shortUrl');
+          input.select();
+          document.execCommand('copy');
+          document.getElementById('status').textContent = 'Enlace copiado.';
+        }
+      });
+    } catch (_) {
+      loading.hidden = true;
+      loginPanel.hidden = false;
+      document.getElementById('loginStatus').textContent = 'No se pudo conectar con CronoApp. Intenta recargar la página.';
+    }
+  </script>
+</body>
+</html>
