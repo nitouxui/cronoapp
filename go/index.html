@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#14171b">
+  <title>Abriendo enlace · CronoApp</title>
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { display:grid; min-height:100vh; margin:0; place-items:center; padding:24px; background:#14171b; color:#f0f2f5; }
+    main { width:min(100%,480px); padding:30px; border:1px solid #46515d; border-radius:18px; background:#20252b; text-align:center; }
+    .eyebrow { color:#a4b3c1; font-size:12px; font-weight:900; letter-spacing:.16em; }
+    h1 { margin:10px 0; font-size:28px; }
+    p { color:#bfc7d0; line-height:1.5; }
+    a { color:#dce7f2; font-weight:750; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="eyebrow">CRONOAPP</span>
+    <h1 id="title">Abriendo enlace</h1>
+    <p id="status" role="status" aria-live="polite">Estamos buscando el destino…</p>
+    <a id="home" href="/" hidden>Ir a CronoApp</a>
+  </main>
+  <script type="module">
+    const code = new URLSearchParams(location.search).get('c') || '';
+    const alphabet = /^[A-HJ-NP-Z2-9]{8}$/;
+    const status = document.getElementById('status');
+    const fail = message => {
+      document.getElementById('title').textContent = 'No se pudo abrir el enlace';
+      status.textContent = message;
+      document.getElementById('home').hidden = false;
+    };
+    if (!alphabet.test(code)) {
+      fail('El enlace corto no es válido.');
+    } else {
+      try {
+        const base = 'https://www.gstatic.com/firebasejs/12.19.0/';
+        const [appModule, database] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-database.js')]);
+        const app = appModule.initializeApp({ apiKey:'AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8', authDomain:'cronoapp-97aa6.firebaseapp.com', databaseURL:'https://cronoapp-97aa6-default-rtdb.firebaseio.com', projectId:'cronoapp-97aa6', appId:'1:482155443294:web:b62c46a3ae16ca551630cf' });
+        const db = database.getDatabase(app);
+        const snapshot = await database.get(database.ref(db, 'urlShortener/links/' + code));
+        const value = snapshot.val()?.url;
+        if (typeof value !== 'string') throw new Error('missing');
+        const destination = new URL(value);
+        if (!['http:', 'https:'].includes(destination.protocol)) throw new Error('invalid');
+        location.replace(destination.href);
+      } catch (_) {
+        fail('El enlace no existe o no está disponible.');
+      }
+    }
+  </script>
+</body>
+</html>
