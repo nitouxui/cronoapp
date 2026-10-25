@@ -390,7 +390,8 @@
         "$other": {
           ".validate": false
         }
-      }
+      },
+      ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com'"
     },
     "userDirectory": {
       ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com')",
