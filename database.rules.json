@@ -1,370 +1,412 @@
 {
-  "rules": {
-    "rooms": {
-      ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && query.orderByChild === 'ownerUid' && query.equalTo === auth.uid && query.limitToFirst === 1)",
-      ".indexOn": [
-        "ownerUid"
-      ],
-      "$room": {
-        ".read": "auth == null || (auth != null && (auth.token.firebase.sign_in_provider === 'anonymous' || (auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
-        ".write": "auth != null && auth.token.email_verified === true && ((!data.exists() && $room === auth.uid && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid))",
-        ".validate": "newData.hasChildren(['ownerUid', 'state']) && newData.child('state').hasChildren(['running', 'remainingMs', 'startedAt'])",
-        "ownerUid": {
-          ".validate": "newData.isString()"
+  "rooms": {
+    ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && query.orderByChild === 'ownerUid' && query.equalTo === auth.uid && query.limitToFirst === 1)",
+    ".indexOn": [
+      "ownerUid"
+    ],
+    "$room": {
+      ".read": "auth == null || (auth != null && (auth.token.firebase.sign_in_provider === 'anonymous' || (auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
+      ".write": "auth != null && auth.token.email_verified === true && ((!data.exists() && $room === auth.uid && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid) && (data.child('pairings').val() === newData.child('pairings').val() || ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tdf').val() === true))))",
+      ".validate": "newData.hasChildren(['ownerUid', 'state']) && newData.child('state').hasChildren(['running', 'remainingMs', 'startedAt'])",
+      "ownerUid": {
+        ".validate": "newData.isString()"
+      },
+      "state": {
+        "running": {
+          ".validate": "newData.isBoolean()"
         },
-        "state": {
-          "running": {
-            ".validate": "newData.isBoolean()"
+        "remainingMs": {
+          ".validate": "newData.isNumber() && newData.val() <= 86400000"
+        },
+        "startedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      },
+      "settings": {
+        ".validate": "newData.isString() && newData.val().length <= 6000000"
+      },
+      "$other": {
+        ".validate": false
+      },
+      "pairings": {
+        ".validate": "newData.isString() && newData.val().length <= 1000000"
+      },
+      "shortCode": {
+        ".validate": "newData.isString() && newData.val().matches(/^[A-HJ-NP-Z2-9]{6}$/) && (!data.exists() || data.val() === newData.val()) && root.child('shortRooms').child(newData.val()).val() === $room"
+      }
+    }
+  },
+  "shortRooms": {
+    "$code": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email_verified === true && !data.exists() && newData.isString() && root.child('rooms').child(newData.val()).child('ownerUid').val() === auth.uid",
+      ".validate": "newData.isString() && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/)"
+    }
+  },
+  "agenda": {
+    ".read": true,
+    "events": {
+      "$eventId": {
+        ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('agenda').val() === true))",
+        ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') && !newData.hasChild('value') && !newData.hasChild('entryType') : (!newData.hasChild('entryType') || newData.child('entryType').val() === 'free' || newData.child('entryType').val() === 'amount' || newData.child('entryType').val() === 'beverage') && newData.hasChildren(['type', 'format', 'value']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
+        "store": {
+          ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')"
+        },
+        "kind": {
+          ".validate": "newData.isString() && (newData.val() === 'tournament' || newData.val() === 'free')"
+        },
+        "date": {
+          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
+        },
+        "time": {
+          ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)"
+        },
+        "endTime": {
+          ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)"
+        },
+        "type": {
+          ".validate": "newData.isString() && (newData.val() === 'Torneo Casual' || newData.val() === 'League Challenge' || newData.val() === 'League Cup' || newData.val() === 'Prelanzamiento' || newData.val() === 'Pokéween' || newData.val() === 'Abacaxi Showdown')"
+        },
+        "format": {
+          ".validate": "newData.isString() && (newData.val() === 'Rondas Suizas Bo1' || newData.val() === 'Rondas Suizas Bo3')"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "value": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000"
+        },
+        "showTableAvailabilityNote": {
+          ".validate": "newData.isBoolean()"
+        },
+        "entryType": {
+          ".validate": "newData.isString() && (newData.val() === 'free' || newData.val() === 'amount' || newData.val() === 'beverage')"
+        }
+      }
+    }
+  },
+  "roomMessages": {
+    "$room": {
+      "enabled": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
+        ".validate": "newData.isBoolean()"
+      },
+      "messages": {
+        ".read": "root.child('roomMessages').child($room).child('enabled').val() === true && auth != null && ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
+        "$messageId": {
+          ".write": "!data.exists() && root.child('roomMessages').child($room).child('enabled').val() === true && auth != null && newData.child('uid').val() === auth.uid && ((newData.child('role').val() === 'admin' && (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)) || (newData.child('role').val() === 'staff' && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
+          ".validate": "newData.hasChildren(['uid', 'role', 'name', 'text', 'createdAt']) && newData.child('uid').isString() && newData.child('role').isString() && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500 && newData.child('createdAt').isNumber() && ((newData.child('role').val() === 'admin' && auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || (newData.child('role').val() === 'staff' && auth != null && newData.child('uid').val() === auth.uid && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
+          "uid": {
+            ".validate": "newData.isString()"
           },
-          "remainingMs": {
-            ".validate": "newData.isNumber() && newData.val() <= 86400000"
+          "role": {
+            ".validate": "newData.isString() && (newData.val() === 'admin' || newData.val() === 'staff')"
           },
-          "startedAt": {
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"
+          },
+          "createdAt": {
             ".validate": "newData.isNumber()"
           },
           "$other": {
             ".validate": false
           }
         },
-        "settings": {
-          ".validate": "newData.isString() && newData.val().length <= 6000000"
-        },
-        "$other": {
-          ".validate": false
-        },
-        "pairings": {
-          ".validate": "newData.isString() && newData.val().length <= 1000000"
-        },
-        "shortCode": {
-          ".validate": "newData.isString() && newData.val().matches(/^[A-HJ-NP-Z2-9]{6}$/) && (!data.exists() || data.val() === newData.val()) && root.child('shortRooms').child(newData.val()).val() === $room"
-        }
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid && !newData.exists()"
+      },
+      "adminName": {
+        ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
+        ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
       }
-    },
-    "shortRooms": {
-      "$code": {
-        ".read": true,
-        ".write": "auth != null && auth.token.email_verified === true && !data.exists() && newData.isString() && root.child('rooms').child(newData.val()).child('ownerUid').val() === auth.uid",
-        ".validate": "newData.isString() && $code.matches(/^[A-HJ-NP-Z2-9]{6}$/)"
-      }
-    },
-    "agenda": {
-      ".read": true,
-      "events": {
-        "$eventId": {
-          ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
-          ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') && !newData.hasChild('value') && !newData.hasChild('entryType') : (!newData.hasChild('entryType') || newData.child('entryType').val() === 'free' || newData.child('entryType').val() === 'amount' || newData.child('entryType').val() === 'beverage') && newData.hasChildren(['type', 'format', 'value']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
-          "store": {
-            ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')"
+    }
+  },
+  "roomStaff": {
+    "$room": {
+      "requests": {
+        ".read": "auth != null && (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid))",
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || (auth != null && auth.uid === $uid && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && (!data.exists() || data.child('status').val() === 'rejected') && newData.child('status').val() === 'pending')",
+          ".validate": "newData.hasChildren(['name', 'status', 'requestedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('status').isString() && (newData.child('status').val() === 'pending' || (newData.child('status').val() === 'rejected' && newData.hasChild('resolvedAt') && newData.child('resolvedAt').isNumber())) && newData.child('requestedAt').isNumber()",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
           },
-          "kind": {
-            ".validate": "newData.isString() && (newData.val() === 'tournament' || newData.val() === 'free')"
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'rejected')"
           },
-          "date": {
-            ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
+          "requestedAt": {
+            ".validate": "newData.isNumber()"
           },
-          "time": {
-            ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)"
-          },
-          "endTime": {
-            ".validate": "newData.isString() && newData.val().matches(/^([01]\\d|2[0-3]):[0-5]\\d$/)"
-          },
-          "type": {
-            ".validate": "newData.isString() && (newData.val() === 'Torneo Casual' || newData.val() === 'League Challenge' || newData.val() === 'League Cup' || newData.val() === 'Prelanzamiento' || newData.val() === 'Pokéween' || newData.val() === 'Abacaxi Showdown')"
-          },
-          "format": {
-            ".validate": "newData.isString() && (newData.val() === 'Rondas Suizas Bo1' || newData.val() === 'Rondas Suizas Bo3')"
+          "resolvedAt": {
+            ".validate": "newData.isNumber()"
           },
           "$other": {
             ".validate": false
+          }
+        }
+      },
+      "members": {
+        ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid))",
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['name', 'status']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('status').isString() && ((newData.child('status').val() === 'admitted' && newData.hasChild('admittedAt') && newData.child('admittedAt').isNumber()) || (newData.child('status').val() === 'kicked' && newData.hasChild('kickedAt') && newData.child('kickedAt').isNumber()))",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
           },
-          "value": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000"
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'admitted' || newData.val() === 'kicked')"
           },
-          "showTableAvailabilityNote": {
+          "admittedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "kickedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  },
+  "onlineTournaments": {
+    ".read": true,
+    "$event": {
+      ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tournaments').val() === true)) && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && (!newData.exists() || newData.child('ownerUid').val() === auth.uid)))",
+      ".validate": "newData.hasChildren(['title','type','game','date','venue','description','ownerUid','status','createdAt']) && newData.child('title').isString() && newData.child('title').val().length >= 1 && newData.child('title').val().length <= 100 && newData.child('type').isString() && newData.child('type').val() === 'casual' && newData.child('game').isString() && (newData.child('game').val() === 'tcg' || newData.child('game').val() === 'vgc' || newData.child('game').val() === 'go') && newData.child('date').isString() && newData.child('venue').isString() && newData.child('venue').val().length <= 100 && newData.child('description').isString() && newData.child('description').val().length <= 240 && newData.child('ownerUid').isString() && newData.child('status').isString() && (newData.child('status').val() === 'registration' || newData.child('status').val() === 'active' || newData.child('status').val() === 'finished') && newData.child('createdAt').isNumber()",
+      "title": {
+        ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+      },
+      "type": {
+        ".validate": "newData.isString() && newData.val() === 'casual'"
+      },
+      "game": {
+        ".validate": "newData.isString() && (newData.val() === 'tcg' || newData.val() === 'vgc' || newData.val() === 'go')"
+      },
+      "date": {
+        ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
+      },
+      "venue": {
+        ".validate": "newData.isString() && newData.val().length <= 100"
+      },
+      "description": {
+        ".validate": "newData.isString() && newData.val().length <= 240"
+      },
+      "ownerUid": {
+        ".validate": "newData.isString()"
+      },
+      "ownerName": {
+        ".validate": "newData.isString() && newData.val().length <= 120"
+      },
+      "status": {
+        ".validate": "newData.isString() && (newData.val() === 'registration' || newData.val() === 'active' || newData.val() === 'finished')"
+      },
+      "published": {
+        ".validate": "newData.isBoolean()"
+      },
+      "signupOpen": {
+        ".validate": "newData.isBoolean()"
+      },
+      "createdAt": {
+        ".validate": "newData.isNumber()"
+      },
+      "roundsPlanned": {
+        ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+      },
+      "finishedAt": {
+        ".validate": "newData.isNumber()"
+      },
+      "config": {
+        ".validate": "newData.hasChildren(['casualRounds','cutSize']) && newData.child('casualRounds').isNumber() && newData.child('casualRounds').val() >= 3 && newData.child('casualRounds').val() <= 8 && newData.child('cutSize').isNumber() && (newData.child('cutSize').val() === 0 || newData.child('cutSize').val() === 2 || newData.child('cutSize').val() === 4 || newData.child('cutSize').val() === 8)",
+        "casualRounds": {
+          ".validate": "newData.isNumber() && newData.val() >= 3 && newData.val() <= 8"
+        },
+        "cutSize": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 2 || newData.val() === 4 || newData.val() === 8)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      },
+      "players": {
+        "$player": {
+          ".validate": "newData.hasChildren(['name','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && (newData.child('status').val() === 'active' || newData.child('status').val() === 'dropped') && newData.child('addedAt').isNumber()",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+          },
+          "category": {
+            ".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dropped')"
+          },
+          "addedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "lateEntryMissedRounds": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+          },
+          "droppedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "registrationUid": {
+            ".validate": "newData.isString()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "rounds": {
+        "$round": {
+          ".validate": "newData.hasChildren(['number','createdAt','matches']) && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('number').val() <= 10 && newData.child('createdAt').isNumber()",
+          "number": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "needsRepair": {
             ".validate": "newData.isBoolean()"
           },
-          "entryType": {
-            ".validate": "newData.isString() && (newData.val() === 'free' || newData.val() === 'amount' || newData.val() === 'beverage')"
-          }
-        }
-      }
-    },
-    "roomMessages": {
-      "$room": {
-        "enabled": {
-          ".read": true,
-          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
-          ".validate": "newData.isBoolean()"
-        },
-        "messages": {
-          ".read": "root.child('roomMessages').child($room).child('enabled').val() === true && auth != null && ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
-          "$messageId": {
-            ".write": "!data.exists() && root.child('roomMessages').child($room).child('enabled').val() === true && auth != null && newData.child('uid').val() === auth.uid && ((newData.child('role').val() === 'admin' && (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)) || (newData.child('role').val() === 'staff' && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
-            ".validate": "newData.hasChildren(['uid', 'role', 'name', 'text', 'createdAt']) && newData.child('uid').isString() && newData.child('role').isString() && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500 && newData.child('createdAt').isNumber() && ((newData.child('role').val() === 'admin' && auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || (newData.child('role').val() === 'staff' && auth != null && newData.child('uid').val() === auth.uid && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
-            "uid": {
-              ".validate": "newData.isString()"
-            },
-            "role": {
-              ".validate": "newData.isString() && (newData.val() === 'admin' || newData.val() === 'staff')"
-            },
-            "name": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-            },
-            "text": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"
-            },
-            "createdAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "$other": {
-              ".validate": false
-            }
+          "repairSourceRound": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
           },
-          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid && !newData.exists()"
-        },
-        "adminName": {
-          ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
-          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid",
-          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-        }
-      }
-    },
-    "roomStaff": {
-      "$room": {
-        "requests": {
-          ".read": "auth != null && (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
-          "$uid": {
-            ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid))",
-            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || (auth != null && auth.uid === $uid && auth.uid !== root.child('rooms').child($room).child('ownerUid').val() && (!data.exists() || data.child('status').val() === 'rejected') && newData.child('status').val() === 'pending')",
-            ".validate": "newData.hasChildren(['name', 'status', 'requestedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('status').isString() && (newData.child('status').val() === 'pending' || (newData.child('status').val() === 'rejected' && newData.hasChild('resolvedAt') && newData.child('resolvedAt').isNumber())) && newData.child('requestedAt').isNumber()",
-            "name": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-            },
-            "status": {
-              ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'rejected')"
-            },
-            "requestedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "resolvedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "$other": {
-              ".validate": false
-            }
-          }
-        },
-        "members": {
-          ".read": "auth != null && ((auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted')",
-          "$uid": {
-            ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid))",
-            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
-            ".validate": "newData.hasChildren(['name', 'status']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60 && newData.child('status').isString() && ((newData.child('status').val() === 'admitted' && newData.hasChild('admittedAt') && newData.child('admittedAt').isNumber()) || (newData.child('status').val() === 'kicked' && newData.hasChild('kickedAt') && newData.child('kickedAt').isNumber()))",
-            "name": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
-            },
-            "status": {
-              ".validate": "newData.isString() && (newData.val() === 'admitted' || newData.val() === 'kicked')"
-            },
-            "admittedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "kickedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "$other": {
-              ".validate": false
-            }
-          }
-        }
-      }
-    },
-    "onlineTournaments": {
-      ".read": true,
-      "$event": {
-        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && (!newData.exists() || newData.child('ownerUid').val() === auth.uid)))",
-        ".validate": "newData.hasChildren(['title','type','game','date','venue','description','ownerUid','status','createdAt']) && newData.child('title').isString() && newData.child('title').val().length >= 1 && newData.child('title').val().length <= 100 && newData.child('type').isString() && newData.child('type').val() === 'casual' && newData.child('game').isString() && (newData.child('game').val() === 'tcg' || newData.child('game').val() === 'vgc' || newData.child('game').val() === 'go') && newData.child('date').isString() && newData.child('venue').isString() && newData.child('venue').val().length <= 100 && newData.child('description').isString() && newData.child('description').val().length <= 240 && newData.child('ownerUid').isString() && newData.child('status').isString() && (newData.child('status').val() === 'registration' || newData.child('status').val() === 'active' || newData.child('status').val() === 'finished') && newData.child('createdAt').isNumber()",
-        "title": {
-          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
-        },
-        "type": {
-          ".validate": "newData.isString() && newData.val() === 'casual'"
-        },
-        "game": {
-          ".validate": "newData.isString() && (newData.val() === 'tcg' || newData.val() === 'vgc' || newData.val() === 'go')"
-        },
-        "date": {
-          ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}$/)"
-        },
-        "venue": {
-          ".validate": "newData.isString() && newData.val().length <= 100"
-        },
-        "description": {
-          ".validate": "newData.isString() && newData.val().length <= 240"
-        },
-        "ownerUid": {
-          ".validate": "newData.isString()"
-        },
-        "ownerName": {
-          ".validate": "newData.isString() && newData.val().length <= 120"
-        },
-        "status": {
-          ".validate": "newData.isString() && (newData.val() === 'registration' || newData.val() === 'active' || newData.val() === 'finished')"
-        },
-        "published": {
-          ".validate": "newData.isBoolean()"
-        },
-        "signupOpen": {
-          ".validate": "newData.isBoolean()"
-        },
-        "createdAt": {
-          ".validate": "newData.isNumber()"
-        },
-        "roundsPlanned": {
-          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
-        },
-        "finishedAt": {
-          ".validate": "newData.isNumber()"
-        },
-        "config": {
-          ".validate": "newData.hasChildren(['casualRounds','cutSize']) && newData.child('casualRounds').isNumber() && newData.child('casualRounds').val() >= 3 && newData.child('casualRounds').val() <= 8 && newData.child('cutSize').isNumber() && (newData.child('cutSize').val() === 0 || newData.child('cutSize').val() === 2 || newData.child('cutSize').val() === 4 || newData.child('cutSize').val() === 8)",
-          "casualRounds": {
-            ".validate": "newData.isNumber() && newData.val() >= 3 && newData.val() <= 8"
+          "repairedAt": {
+            ".validate": "newData.isNumber()"
           },
-          "cutSize": {
-            ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 2 || newData.val() === 4 || newData.val() === 8)"
-          },
-          "$other": {
-            ".validate": false
-          }
-        },
-        "players": {
-          "$player": {
-            ".validate": "newData.hasChildren(['name','status','addedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 80 && (newData.child('status').val() === 'active' || newData.child('status').val() === 'dropped') && newData.child('addedAt').isNumber()",
-            "name": {
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
-            },
-            "category": {
-              ".validate": "newData.isString() && (newData.val() === 'MA' || newData.val() === 'SR' || newData.val() === 'JR')"
-            },
-            "status": {
-              ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dropped')"
-            },
-            "addedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "lateEntryMissedRounds": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
-            },
-            "droppedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "registrationUid": {
-              ".validate": "newData.isString()"
-            },
-            "$other": {
-              ".validate": false
-            }
-          }
-        },
-        "rounds": {
-          "$round": {
-            ".validate": "newData.hasChildren(['number','createdAt','matches']) && newData.child('number').isNumber() && newData.child('number').val() >= 1 && newData.child('number').val() <= 10 && newData.child('createdAt').isNumber()",
-            "number": {
-              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
-            },
-            "createdAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "needsRepair": {
-              ".validate": "newData.isBoolean()"
-            },
-            "repairSourceRound": {
-              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 10"
-            },
-            "repairedAt": {
-              ".validate": "newData.isNumber()"
-            },
-            "matches": {
-              "$match": {
-                ".validate": "newData.hasChildren(['firstId','first','secondId','second','winner','table']) && newData.child('firstId').isString() && newData.child('first').isString() && newData.child('secondId').isString() && newData.child('second').isString() && newData.child('winner').isString() && (newData.child('winner').val() === '' || newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('table').isNumber()",
-                "firstId": {
-                  ".validate": "newData.isString()"
-                },
-                "first": {
-                  ".validate": "newData.isString() && newData.val().length <= 80"
-                },
-                "secondId": {
-                  ".validate": "newData.isString()"
-                },
-                "second": {
-                  ".validate": "newData.isString() && newData.val().length <= 80"
-                },
-                "winner": {
-                  ".validate": "newData.isString() && (newData.val() === '' || newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
-                },
-                "table": {
-                  ".validate": "newData.isNumber() && newData.val() >= 1"
-                },
-                "bye": {
-                  ".validate": "newData.isBoolean()"
-                },
-                "reportedAt": {
-                  ".validate": "newData.isNumber()"
-                },
-                "$other": {
-                  ".validate": false
-                }
+          "matches": {
+            "$match": {
+              ".validate": "newData.hasChildren(['firstId','first','secondId','second','winner','table']) && newData.child('firstId').isString() && newData.child('first').isString() && newData.child('secondId').isString() && newData.child('second').isString() && newData.child('winner').isString() && (newData.child('winner').val() === '' || newData.child('winner').val() === 'first' || newData.child('winner').val() === 'second' || newData.child('winner').val() === 'draw') && newData.child('table').isNumber()",
+              "firstId": {
+                ".validate": "newData.isString()"
+              },
+              "first": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "secondId": {
+                ".validate": "newData.isString()"
+              },
+              "second": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "winner": {
+                ".validate": "newData.isString() && (newData.val() === '' || newData.val() === 'first' || newData.val() === 'second' || newData.val() === 'draw')"
+              },
+              "table": {
+                ".validate": "newData.isNumber() && newData.val() >= 1"
+              },
+              "bye": {
+                ".validate": "newData.isBoolean()"
+              },
+              "reportedAt": {
+                ".validate": "newData.isNumber()"
+              },
+              "$other": {
+                ".validate": false
               }
-            },
-            "$other": {
-              ".validate": false
             }
-          }
-        },
-        "timerPalette": {
-          ".validate": "newData.isString() && newData.val().length <= 32"
-        },
-        "$other": {
-          ".validate": false
-        }
-      }
-    },
-    "publicTournamentThemes": {
-      ".read": true,
-      "$event": {
-        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
-        ".validate": "newData.hasChildren(['palette','backgroundSrc','backgroundOpacity','updatedAt'])",
-        "palette": {
-          ".validate": "newData.isString() && newData.val().length <= 32"
-        },
-        "backgroundSrc": {
-          ".validate": "newData.isString() && newData.val().length <= 5800000"
-        },
-        "backgroundOpacity": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
-        },
-        "updatedAt": {
-          ".validate": "newData.isNumber()"
-        },
-        "$other": {
-          ".validate": false
-        }
-      }
-    },
-    "urlShortener": {
-      "links": {
-        "$code": {
-          ".read": true,
-          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && !data.exists()",
-          ".validate": "$code.matches(/^[A-HJ-NP-Z2-9]{8}$/) && newData.hasChildren(['url'])",
-          "url": {
-            ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
           },
           "$other": {
             ".validate": false
           }
         }
+      },
+      "timerPalette": {
+        ".validate": "newData.isString() && newData.val().length <= 32"
+      },
+      "$other": {
+        ".validate": false
+      }
+    }
+  },
+  "publicTournamentThemes": {
+    ".read": true,
+    "$event": {
+      ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tournaments').val() === true)) && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
+      ".validate": "newData.hasChildren(['palette','backgroundSrc','backgroundOpacity','updatedAt'])",
+      "palette": {
+        ".validate": "newData.isString() && newData.val().length <= 32"
+      },
+      "backgroundSrc": {
+        ".validate": "newData.isString() && newData.val().length <= 5800000"
+      },
+      "backgroundOpacity": {
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+      },
+      "updatedAt": {
+        ".validate": "newData.isNumber()"
+      },
+      "$other": {
+        ".validate": false
+      }
+    }
+  },
+  "urlShortener": {
+    "links": {
+      "$code": {
+        ".read": true,
+        ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('shortener').val() === true)) && !data.exists()",
+        ".validate": "$code.matches(/^[A-HJ-NP-Z2-9]{8}$/) && newData.hasChildren(['url'])",
+        "url": {
+          ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  },
+  "moduleAccess": {
+    "$uid": {
+      ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com'))",
+      ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com')",
+      ".validate": "newData.hasChildren(['flyer','agenda','tdf','shortener','tournaments'])",
+      "flyer": {
+        ".validate": "newData.isBoolean()"
+      },
+      "agenda": {
+        ".validate": "newData.isBoolean()"
+      },
+      "tdf": {
+        ".validate": "newData.isBoolean()"
+      },
+      "shortener": {
+        ".validate": "newData.isBoolean()"
+      },
+      "tournaments": {
+        ".validate": "newData.isBoolean()"
+      },
+      "$other": {
+        ".validate": false
+      }
+    }
+  },
+  "userDirectory": {
+    ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com')",
+    "$uid": {
+      ".write": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'",
+      ".validate": "newData.hasChildren(['email','name','updatedAt'])",
+      "email": {
+        ".validate": "newData.isString() && newData.val().length <= 254"
+      },
+      "name": {
+        ".validate": "newData.isString() && newData.val().length <= 120"
+      },
+      "updatedAt": {
+        ".validate": "newData.isNumber()"
+      },
+      "$other": {
+        ".validate": false
       }
     }
   }
