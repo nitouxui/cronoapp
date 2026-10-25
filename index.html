@@ -662,6 +662,7 @@
       <header class="module-dashboard-heading"><span class="welcome-eyebrow">CRONOAPP</span><h1 id="moduleDashboardTitle">Hola, <span id="dashboardUserName">organizador</span></h1><p>Elige el módulo que quieres usar.</p></header>
       <div class="module-cards" aria-label="Módulos de CronoApp">
         <a id="timerModuleLink" class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
+        <a class="module-card" data-module="admin" href="/admin/"><span class="module-card-icon" aria-hidden="true">⚙</span><strong>Administración</strong><span>Gestiona los accesos a los módulos →</span></a>
         <a class="module-card" data-module="tournaments" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
         <a class="module-card" data-module="flyer" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
         <a class="module-card" data-module="shortener" href="/acortador/"><span class="module-card-icon" aria-hidden="true">↗</span><strong>Acortador de URL</strong><span>Crea enlaces cortos para compartir →</span></a>
@@ -3862,6 +3863,8 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       if (publishPairingsButton) publishPairingsButton.disabled = !canControl || !canUploadTdf || !document.getElementById('tdfInput')?.files?.[0];
       const tdfControls = document.getElementById('tdfControls');
       if (tdfControls) tdfControls.hidden = !canUploadTdf;
+      const tdfOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
+      if (tdfOption) tdfOption.hidden = !canUploadTdf;
       roomDurationControl.hidden = !canControl;
       const hasGoogleAccount = !!currentUser?.providerData?.some(provider => provider.providerId === 'google.com');
       canUploadTdf = false;
@@ -4288,7 +4291,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
                 const accessSnap = await dbModule.get(dbModule.ref(db, 'moduleAccess/' + user.uid));
                 const access = accessSnap.val() || {};
                 const fullAccess = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
-                moduleLinks.forEach(link => { link.hidden = !fullAccess && access[link.dataset.module] !== true; });
+                moduleLinks.forEach(link => { link.hidden = link.dataset.module === 'admin' ? !fullAccess : (!fullAccess && access[link.dataset.module] !== true); });
               } catch (error) {
                 console.warn('No se pudo consultar el acceso a módulos:', error);
                 moduleLinks.forEach(link => { if (link.dataset.module !== 'agenda') link.hidden = true; });
