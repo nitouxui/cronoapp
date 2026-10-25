@@ -3843,7 +3843,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         status.textContent = 'No se pudo enviar el mensaje (' + (error?.code || 'error desconocido') + '). Revisa las reglas de Firebase.';
       }
     }
-    function updateAccess() {
+    async function updateAccess() {
       const verified = !!currentUser?.emailVerified;
       canControl = verified && currentUser.uid === roomOwner;
       startStaffRosterSubscriptions();
