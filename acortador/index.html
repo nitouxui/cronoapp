@@ -123,18 +123,20 @@
       auth = authModule.getAuth(app);
       database = dbModule;
       db = database.getDatabase(app);
-      authModule.onAuthStateChanged(auth, user => {
+      authModule.onAuthStateChanged(auth, async user => {
         currentUser = user;
         loading.hidden = true;
-        if (!allowedUser(user)) {
-          appShell.hidden = true;
-          loginPanel.hidden = false;
+        if (!allowedUser(user)) { appShell.hidden = true; loginPanel.hidden = false; return; }
+        let access = {};
+        try { const snap = await database.get(database.ref(db, 'moduleAccess/' + user.uid)); access = snap.val() || {}; } catch (_) {}
+        const owner = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
+        if (!owner && access.shortener !== true) {
+          appShell.hidden = true; loginPanel.hidden = false;
+          document.getElementById('loginStatus').textContent = 'Tu cuenta todavía no tiene acceso al acortador. Solicítalo al administrador.';
           return;
         }
-        loginPanel.hidden = true;
-        appShell.hidden = false;
-        const canManageAgenda = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
-        document.getElementById('agendaLink').hidden = !canManageAgenda;
+        loginPanel.hidden = true; appShell.hidden = false;
+        document.getElementById('agendaLink').hidden = !(owner || access.agenda === true);
       });
       document.getElementById('logout').addEventListener('click', async () => {
         await authModule.signOut(auth);
