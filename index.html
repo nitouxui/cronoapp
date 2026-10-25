@@ -4288,7 +4288,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             moduleLinks.forEach(link => { link.hidden = true; });
             if (hasGoogleAccount && user.emailVerified) {
               try {
-                await dbModule.set(dbModule.ref(db, 'userDirectory/' + user.uid), { email: user.email || '', name: user.displayName || '', updatedAt: Date.now() });
                 const accessSnap = await dbModule.get(dbModule.ref(db, 'moduleAccess/' + user.uid));
                 const access = accessSnap.val() || {};
                 const fullAccess = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
