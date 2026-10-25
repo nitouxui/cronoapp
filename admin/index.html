@@ -14,7 +14,10 @@
 <nav class="top"><span class="brand">CRONOAPP · ADMIN</span><a href="/">Volver a CronoApp</a></nav>
 <header class="hero"><span class="eyebrow">HERRAMIENTA ADMINISTRATIVA</span><h1>Salas de usuarios</h1><p class="muted">Consulta las salas y cruza sus UID con un CSV exportado desde Firebase Authentication.</p></header>
 <section id="loginPanel" class="panel"><h2>Acceso restringido</h2><p class="muted">Inicia sesión con la cuenta administradora autorizada.</p><button id="loginButton" type="button">Iniciar sesión con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
-<section id="adminPanel" class="panel hidden">
+<section id="moduleAccessPanel" class="panel hidden">
+<div class="row spread"><div><h2 style="margin:0">Acceso a módulos</h2><p class="muted" style="margin:4px 0 12px">Habilita los módulos por cuenta. Solo aparecen usuarios que ya iniciaron sesión en CronoApp.</p></div></div>
+<div id="usersEmpty" class="empty hidden">Aún no hay usuarios registrados. Pídeles que inicien sesión en CronoApp una vez.</div>
+<div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Usuario</th><th>Generador de flyers</th><th>Agenda</th><th>Subir TDF</th><th>Acortador URL</th><th>Torneos</th></tr></thead><tbody id="usersBody"></tbody></table></div><p id="usersStatus" class="status" role="status" aria-live="polite"></p></section><section id="adminPanel" class="panel hidden">
 <div class="row spread"><div><h2 style="margin:0">Salas registradas</h2><p id="accountLabel" class="muted" style="margin:4px 0 0"></p></div><div class="row"><button id="refreshButton" class="secondary" type="button">Actualizar</button><button id="logoutButton" class="secondary" type="button">Cerrar sesión</button></div></div>
 <div class="panel" style="margin:16px 0"><h3 style="margin:0 0 6px">Cargar correos de propietarios</h3><p class="muted" style="margin:0 0 12px">Exporta usuarios desde Firebase Authentication como CSV y selecciónalo aquí. El archivo se procesa solo en este navegador; no se sube ni se guarda. El CSV puede incluir campos sensibles: úsalo solo aquí y elimínalo después.</p><div class="row"><label for="usersCsv" class="muted">Archivo CSV de usuarios</label><input id="usersCsv" type="file" accept=".csv,text/csv" aria-describedby="csvHelp"><button id="clearCsvButton" class="secondary" type="button" disabled>Quitar archivo</button></div><p id="csvHelp" class="muted" style="font-size:13px">En Firebase CLI: <code>firebase auth:export usuarios.csv --format=csv</code></p><p id="csvStatus" class="status" role="status" aria-live="polite"></p></div><div class="summary"><div class="metric">Salas totales<strong id="totalCount">—</strong></div><div class="metric">Timer activo<strong id="activeCount">—</strong></div><div class="metric">Con código de sala<strong id="codeCount">—</strong></div></div>
 <p id="dataStatus" class="status" role="status" aria-live="polite"></p>
@@ -26,7 +29,7 @@
 const firebaseConfig={apiKey:"AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8",authDomain:"cronoapp-97aa6.firebaseapp.com",databaseURL:"https://cronoapp-97aa6-default-rtdb.firebaseio.com",projectId:"cronoapp-97aa6",storageBucket:"cronoapp-97aa6.firebasestorage.app",messagingSenderId:"482155443294",appId:"1:482155443294:web:b62c46a3ae16ca551630cf",measurementId:"G-ZR98354B0G"};
 const ADMIN_EMAIL="quidel.dsgn@gmail.com";
 const base="https://www.gstatic.com/firebasejs/12.19.0/";
-const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut},{getDatabase,ref,get}]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+"firebase-database.js")]);
+const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut},{getDatabase,ref,get,set}]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+"firebase-database.js")]);
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
 const $=id=>document.getElementById(id);let importedOwners=null;
 const loginPanel=$("loginPanel"),adminPanel=$("adminPanel"),loginStatus=$("loginStatus");
@@ -38,7 +41,23 @@ function parseCsv(text){const rows=[];let row=[],field="",quoted=false;for(let i
 function renderRooms(rooms,owners){window.cachedRooms=rooms||{};const rows=Object.entries(rooms||{}).map(([id,data])=>({id,data:data||{}})).sort((a,b)=>a.id.localeCompare(b.id));$("totalCount").textContent=rows.length; $("activeCount").textContent=rows.filter(x=>x.data.state?.running===true).length; $("codeCount").textContent=rows.filter(x=>!!x.data.shortCode).length;
 const body=$("roomsBody");body.replaceChildren();$("tableWrap").classList.toggle("hidden",!rows.length);$("emptyState").classList.toggle("hidden",!!rows.length);
 for(const {id,data} of rows){const tr=document.createElement("tr");const owner=cell(tr,id);owner.className="uid";cell(tr,owners?.[id]||"Pendiente de primer acceso");const state=cell(tr,"");const badge=document.createElement("span");const running=data.state?.running===true;badge.className="badge "+(running?"running":"paused");badge.textContent=running?"En marcha":"En pausa";state.append(badge);cell(tr,formatRemaining(data.state?.remainingMs),"hide-mobile");cell(tr,data.shortCode||"—");body.append(tr)}}
-async function refresh(){const b=$("refreshButton");b.disabled=true;status($("dataStatus"),"Consultando salas…");try{const snap=await get(ref(db,"rooms"));renderRooms(snap.val(),importedOwners||{});status($("dataStatus"),"Salas actualizadas.","good")}catch(e){console.error(e);status($("dataStatus"),"No se pudieron consultar las salas. Revisa las reglas de Firebase.","error")}finally{b.disabled=false}}
+async function refresh(){const b=$("refreshButton");b.disabled=true;status($("dataStatus"),"Consultando salas…");try{const snap=await get(ref(db,"rooms"));renderRooms(snap.val(),importedOwners||{});refreshUsers();status($("dataStatus"),"Salas actualizadas.","good")}catch(e){console.error(e);status($("dataStatus"),"No se pudieron consultar las salas. Revisa las reglas de Firebase.","error")}finally{b.disabled=false}}
+const MODULES=[["flyer","Generador de flyers"],["agenda","Agenda"],["tdf","Subir TDF"],["shortener","Acortador URL"],["tournaments","Torneos"]];
+async function refreshUsers(){
+ const tbody=$("usersBody");tbody.replaceChildren();status($("usersStatus"),"Cargando usuarios…");
+ try{
+  const [usersSnap,accessSnap]=await Promise.all([get(ref(db,"userDirectory")),get(ref(db,"moduleAccess"))]);
+  const users=usersSnap.val()||{},access=accessSnap.val()||{},entries=Object.entries(users).sort((a,b)=>(a[1]?.name||a[1]?.email||"").localeCompare(b[1]?.name||b[1]?.email||""));
+  $("usersEmpty").classList.toggle("hidden",entries.length>0);
+  for(const [uid,profile] of entries){
+   const tr=document.createElement("tr"),identity=cell(tr,(profile?.name||"Usuario")+"\n"+(profile?.email||""));identity.style.whiteSpace="pre-line";identity.title=uid;
+   const values={...Object.fromEntries(MODULES.map(([key])=>[key,false])),...(access[uid]||{})};
+   MODULES.forEach(([key,label])=>{const td=document.createElement("td"),input=document.createElement("input");input.type="checkbox";input.checked=values[key]===true;input.setAttribute("aria-label",label+" para "+(profile?.email||uid));input.addEventListener("change",async()=>{input.disabled=true;const next={...values,[key]:input.checked};try{await set(ref(db,"moduleAccess/"+uid),next);Object.assign(values,next);status($("usersStatus"),"Acceso actualizado para "+(profile?.email||uid)+".","good")}catch(e){input.checked=!input.checked;status($("usersStatus"),"No se pudo actualizar el acceso. Revisa las reglas de Firebase.","error")}finally{input.disabled=false}});td.append(input);tr.append(td)});tbody.append(tr)
+  }
+  status($("usersStatus"),entries.length?entries.length+" usuarios registrados.":"Aún no hay usuarios registrados.");
+ }catch(e){console.error(e);status($("usersStatus"),"No se pudieron consultar usuarios y permisos. Revisa las reglas de Firebase.","error")}
+}
+
 $("loginButton").addEventListener("click",async()=>{try{status(loginStatus,"Abriendo inicio de sesión…");await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){console.error(e);status(loginStatus,"No se pudo iniciar sesión con Google.","error")}});
 $("refreshButton").addEventListener("click",refresh);
 
@@ -49,6 +68,6 @@ $("logoutButton").addEventListener("click",()=>signOut(auth).catch(console.error
 onAuthStateChanged(auth,user=>{if(!user){loginPanel.classList.remove("hidden");adminPanel.classList.add("hidden");status(loginStatus,"");return}
 const authorized=user.emailVerified&&user.email?.toLowerCase()===ADMIN_EMAIL&&user.providerData.some(p=>p.providerId==="google.com");
 if(!authorized){adminPanel.classList.add("hidden");loginPanel.classList.remove("hidden");status(loginStatus,"Esta cuenta no tiene permisos para consultar las salas.","error");return}
-loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");$("accountLabel").textContent=user.email;refresh()});
+loginPanel.classList.add("hidden");adminPanel.classList.remove("hidden");$("moduleAccessPanel").classList.remove("hidden");$("accountLabel").textContent=user.email;refresh()});
 </script>
 </body></html>
