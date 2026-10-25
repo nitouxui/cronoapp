@@ -16,6 +16,7 @@
 <section id="loginPanel" class="panel"><h2>Acceso restringido</h2><p class="muted">Inicia sesión con la cuenta administradora autorizada.</p><button id="loginButton" type="button">Iniciar sesión con Google</button><p id="loginStatus" class="status" role="status" aria-live="polite"></p></section>
 <section id="moduleAccessPanel" class="panel hidden">
 <div class="row spread"><div><h2 style="margin:0">Acceso a módulos</h2><p class="muted" style="margin:4px 0 12px">Habilita los módulos por cuenta. Solo aparecen usuarios que ya iniciaron sesión en CronoApp.</p></div></div>
+<div class="panel" style="margin:12px 0"><h3 style="margin:0 0 6px">Importar usuarios de Firebase Authentication</h3><p class="muted" style="margin:0 0 12px">Carga el CSV exportado desde Firebase para incluir cuentas que todavía no han iniciado sesión en CronoApp. Solo se guardarán UID, correo y nombre; el archivo se procesa en este navegador.</p><div class="row"><label for="authUsersCsv" class="muted">CSV de usuarios de Firebase</label><input id="authUsersCsv" type="file" accept=".csv,text/csv"><button id="importAuthUsers" type="button" disabled>Importar usuarios</button></div><p id="authUsersImportStatus" class="status" role="status" aria-live="polite"></p></div>
 <div id="usersEmpty" class="empty hidden">Aún no hay usuarios registrados. Pídeles que inicien sesión en CronoApp una vez.</div>
 <div class="table-wrap"><table style="min-width:850px"><thead><tr><th>Usuario</th><th>Generador de flyers</th><th>Agenda</th><th>Subir TDF</th><th>Acortador URL</th><th>Torneos</th></tr></thead><tbody id="usersBody"></tbody></table></div><p id="usersStatus" class="status" role="status" aria-live="polite"></p></section><section id="adminPanel" class="panel hidden">
 <div class="row spread"><div><h2 style="margin:0">Salas registradas</h2><p id="accountLabel" class="muted" style="margin:4px 0 0"></p></div><div class="row"><button id="refreshButton" class="secondary" type="button">Actualizar</button><button id="logoutButton" class="secondary" type="button">Cerrar sesión</button></div></div>
@@ -63,6 +64,35 @@ $("refreshButton").addEventListener("click",refresh);
 
 $("usersCsv").addEventListener("change",async event=>{const file=event.target.files?.[0];if(!file)return;try{const records=parseCsv(await file.text());if(records.length<2)throw new Error("El archivo no contiene usuarios.");const headers=records[0].map(x=>x.trim().toLowerCase());const detectedUid=headers.findIndex(x=>["localid","uid","userid"].includes(x));const detectedEmail=headers.indexOf("email");const hasHeader=detectedUid>=0&&detectedEmail>=0;const uidIndex=hasHeader?detectedUid:0,emailIndex=hasHeader?detectedEmail:1;const owners={};for(const record of records.slice(hasHeader?1:0)){const uid=(record[uidIndex]||"").trim(),email=(record[emailIndex]||"").trim();if(uid&&email)owners[uid]=email}if(!Object.keys(owners).length)throw new Error("No hay cuentas con UID y correo en el CSV.");importedOwners=owners;$("clearCsvButton").disabled=false;renderRooms(window.cachedRooms||{},importedOwners);const rooms=window.cachedRooms||{};const count=Object.values(rooms).filter(room=>owners[room?.ownerUid]).length;status($("csvStatus"),"CSV leído: "+Object.keys(owners).length+" usuarios; "+count+" correos asociados a salas.","good")}catch(error){console.error(error);importedOwners=null;status($("csvStatus"),error.message||"No se pudo leer el CSV.","error")}});
 $("clearCsvButton").addEventListener("click",()=>{$("usersCsv").value="";importedOwners=null;$("clearCsvButton").disabled=true;status($("csvStatus"),"Archivo quitado. Los correos no se conservan al cerrar o actualizar esta página.");renderRooms(window.cachedRooms||{},{});});
+
+$("authUsersCsv").addEventListener("change",()=>{$("importAuthUsers").disabled=!$("authUsersCsv").files?.[0]});
+$("importAuthUsers").addEventListener("click",async()=>{
+ const file=$("authUsersCsv").files?.[0];if(!file)return;
+ const button=$("importAuthUsers");button.disabled=true;status($("authUsersImportStatus"),"Leyendo el CSV…");
+ try{
+  const rows=parseCsv(await file.text());if(rows.length<2)throw new Error("El archivo no contiene usuarios.");
+  const headers=rows[0].map(value=>value.trim().toLowerCase());
+  const uidIndex=headers.findIndex(value=>["localid","uid","userid"].includes(value));
+  const emailIndex=headers.indexOf("email");
+  const nameIndex=headers.findIndex(value=>["displayname","name","display_name"].includes(value));
+  if(uidIndex<0||emailIndex<0)throw new Error("No se encontraron las columnas localId y email. Usa el CSV exportado desde Firebase Authentication.");
+  const users=new Map();
+  for(const row of rows.slice(1)){
+   const uid=(row[uidIndex]||"").trim(),email=(row[emailIndex]||"").trim(),name=nameIndex>=0?(row[nameIndex]||"").trim():"";
+   if(uid)users.set(uid,{email,name});
+  }
+  if(!users.size)throw new Error("No se encontraron UID válidos en el archivo.");
+  const entries=[...users.entries()];
+  for(let start=0;start<entries.length;start+=10){
+   await Promise.all(entries.slice(start,start+10).map(([uid,profile])=>set(ref(db,"userDirectory/"+uid),{email:profile.email,name:profile.name,updatedAt:Date.now()})));
+   status($("authUsersImportStatus"),"Importando "+Math.min(start+10,entries.length)+" de "+entries.length+" cuentas…");
+  }
+  $("authUsersCsv").value="";button.disabled=true;
+  status($("authUsersImportStatus"),"Se importaron "+entries.length+" cuentas. Sus módulos quedan desactivados hasta que los habilites.","good");
+  await refreshUsers();
+ }catch(error){console.error(error);status($("authUsersImportStatus"),error.message||"No se pudo importar el CSV. Revisa las reglas de Firebase.","error");button.disabled=!$("authUsersCsv").files?.[0]}
+});
+
 
 $("logoutButton").addEventListener("click",()=>signOut(auth).catch(console.error));
 onAuthStateChanged(auth,user=>{if(!user){loginPanel.classList.remove("hidden");adminPanel.classList.add("hidden");status(loginStatus,"");return}
