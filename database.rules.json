@@ -7,7 +7,7 @@
       ],
       "$room": {
         ".read": "auth == null || (auth != null && (auth.token.firebase.sign_in_provider === 'anonymous' || (auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid) || root.child('roomStaff').child($room).child('members').child(auth.uid).child('status').val() === 'admitted'))",
-        ".write": "auth != null && auth.token.email_verified === true && (((!data.exists() && $room === auth.uid && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid)) && (data.child('pairings').val() === newData.child('pairings').val() || ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tdf').val() === true))))",
+        ".write": "auth != null && auth.token.email_verified === true && ((!data.exists() && $room === auth.uid && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid))",
         ".validate": "newData.hasChildren(['ownerUid', 'state']) && newData.child('state').hasChildren(['running', 'remainingMs', 'startedAt'])",
         "ownerUid": {
           ".validate": "newData.isString()"
@@ -51,7 +51,7 @@
       ".read": true,
       "events": {
         "$eventId": {
-          ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('agenda').val() === true))",
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'quidel.dsgn@gmail.com' && auth.token.firebase.sign_in_provider === 'google.com'",
           ".validate": "newData.hasChildren(['store', 'kind', 'date', 'time']) && (newData.child('kind').val() === 'free' ? newData.hasChild('endTime') && !newData.hasChild('type') && !newData.hasChild('format') && !newData.hasChild('value') && !newData.hasChild('entryType') : (!newData.hasChild('entryType') || newData.child('entryType').val() === 'free' || newData.child('entryType').val() === 'amount' || newData.child('entryType').val() === 'beverage') && newData.hasChildren(['type', 'format', 'value']) && !newData.hasChild('endTime') && (newData.child('type').val() !== 'Abacaxi Showdown' || newData.child('store').val() === 'neruda'))",
           "store": {
             ".validate": "newData.isString() && (newData.val() === 'trizano' || newData.val() === 'neruda' || newData.val() === 'bluecard')"
@@ -182,7 +182,7 @@
     "onlineTournaments": {
       ".read": true,
       "$event": {
-        ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tournaments').val() === true)) && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && (!newData.exists() || newData.child('ownerUid').val() === auth.uid)))",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.child('ownerUid').val() === auth.uid && (!newData.exists() || newData.child('ownerUid').val() === auth.uid)))",
         ".validate": "newData.hasChildren(['title','type','game','date','venue','description','ownerUid','status','createdAt']) && newData.child('title').isString() && newData.child('title').val().length >= 1 && newData.child('title').val().length <= 100 && newData.child('type').isString() && newData.child('type').val() === 'casual' && newData.child('game').isString() && (newData.child('game').val() === 'tcg' || newData.child('game').val() === 'vgc' || newData.child('game').val() === 'go') && newData.child('date').isString() && newData.child('venue').isString() && newData.child('venue').val().length <= 100 && newData.child('description').isString() && newData.child('description').val().length <= 240 && newData.child('ownerUid').isString() && newData.child('status').isString() && (newData.child('status').val() === 'registration' || newData.child('status').val() === 'active' || newData.child('status').val() === 'finished') && newData.child('createdAt').isNumber()",
         "title": {
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
@@ -333,7 +333,7 @@
     "publicTournamentThemes": {
       ".read": true,
       "$event": {
-        ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('tournaments').val() === true)) && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('onlineTournaments').child($event).child('ownerUid').val() === auth.uid",
         ".validate": "newData.hasChildren(['palette','backgroundSrc','backgroundOpacity','updatedAt'])",
         "palette": {
           ".validate": "newData.isString() && newData.val().length <= 32"
@@ -356,7 +356,7 @@
       "links": {
         "$code": {
           ".read": true,
-          ".write": "((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com') || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('moduleAccess').child(auth.uid).child('shortener').val() === true)) && !data.exists()",
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && !data.exists()",
           ".validate": "$code.matches(/^[A-HJ-NP-Z2-9]{8}$/) && newData.hasChildren(['url'])",
           "url": {
             ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
@@ -366,32 +366,6 @@
           }
         }
       }
-    },
-    "moduleAccess": {
-      "$uid": {
-        ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com'))",
-        ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com')",
-        ".validate": "newData.hasChildren(['flyer','agenda','tdf','shortener','tournaments'])",
-        "flyer": {
-          ".validate": "newData.isBoolean()"
-        },
-        "agenda": {
-          ".validate": "newData.isBoolean()"
-        },
-        "tdf": {
-          ".validate": "newData.isBoolean()"
-        },
-        "shortener": {
-          ".validate": "newData.isBoolean()"
-        },
-        "tournaments": {
-          ".validate": "newData.isBoolean()"
-        },
-        "$other": {
-          ".validate": false
-        }
-      },
-      ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.token.email === 'quidel.dsgn@gmail.com'"
     }
   }
 }

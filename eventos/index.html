@@ -348,11 +348,7 @@
         auth = getAuth(app);
         const signInButton = document.getElementById('signIn'), signOutButton = document.getElementById('signOut');
         onAuthStateChanged(auth,async user => {
-          let access = {};
-          if (user?.emailVerified && user.providerData?.some(provider => provider.providerId === 'google.com')) {
-            try { const snapshot = await database.get(database.ref(database.getDatabase(app), 'moduleAccess/' + user.uid)); access = snapshot.val() || {}; } catch (_) {}
-          }
-          isAdmin = Boolean(user && user.emailVerified && user.providerData.some(provider => provider.providerId === 'google.com') && (user.email?.toLowerCase() === adminEmail || access.agenda === true));
+          isAdmin = Boolean(user && user.emailVerified && user.email?.toLowerCase() === adminEmail && user.providerData.some(provider => provider.providerId === 'google.com'));
           document.getElementById('agendaModuleNav').hidden = !isAdmin;
           document.getElementById('publicHomeLink').hidden = isAdmin;
           form.hidden = !isAdmin;

@@ -662,11 +662,10 @@
       <header class="module-dashboard-heading"><span class="welcome-eyebrow">CRONOAPP</span><h1 id="moduleDashboardTitle">Hola, <span id="dashboardUserName">organizador</span></h1><p>Elige el módulo que quieres usar.</p></header>
       <div class="module-cards" aria-label="Módulos de CronoApp">
         <a id="timerModuleLink" class="module-card" href="/?openOwnRoom=1"><span class="module-card-icon" aria-hidden="true">◷</span><strong>Timer</strong><span>Controla tu sala, el tiempo y las vistas compartidas →</span></a>
-        <a class="module-card" data-module="admin" href="/admin/"><span class="module-card-icon" aria-hidden="true">⚙</span><strong>Administración</strong><span>Gestiona los accesos a los módulos →</span></a>
-        <a class="module-card" data-module="tournaments" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
-        <a class="module-card" data-module="flyer" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
-        <a class="module-card" data-module="shortener" href="/acortador/"><span class="module-card-icon" aria-hidden="true">↗</span><strong>Acortador de URL</strong><span>Crea enlaces cortos para compartir →</span></a>
-        <a id="agendaModuleLink" data-module="agenda" class="module-card" href="/eventos/?admin=1" hidden><span class="module-card-icon" aria-hidden="true">▦</span><strong>Agenda</strong><span>Administra y publica los eventos de la agenda →</span></a>
+        <a class="module-card" href="/torneos/"><span class="module-card-icon" aria-hidden="true">♧</span><strong>Torneos</strong><span>Organiza jugadores, rondas y resultados →</span></a>
+        <a class="module-card" href="/flyer/"><span class="module-card-icon" aria-hidden="true">▧</span><strong>Generador de flyers</strong><span>Diseña y descarga piezas para tus eventos →</span></a>
+        <a class="module-card" href="/acortador/"><span class="module-card-icon" aria-hidden="true">↗</span><strong>Acortador de URL</strong><span>Crea enlaces cortos para compartir →</span></a>
+        <a id="agendaModuleLink" class="module-card" href="/eventos/?admin=1" hidden><span class="module-card-icon" aria-hidden="true">▦</span><strong>Agenda</strong><span>Administra y publica los eventos de la agenda →</span></a>
       </div>
     </section>
   </section>
@@ -3844,7 +3843,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         status.textContent = 'No se pudo enviar el mensaje (' + (error?.code || 'error desconocido') + '). Revisa las reglas de Firebase.';
       }
     }
-    async function updateAccess() {
+    function updateAccess() {
       const verified = !!currentUser?.emailVerified;
       canControl = verified && currentUser.uid === roomOwner;
       startStaffRosterSubscriptions();
@@ -3860,20 +3859,9 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
       }
       startButton.disabled = resetButton.disabled = durationInput.disabled = saveDurationButton.disabled = !canControl;
       const publishPairingsButton = document.getElementById('publishPairings');
-      if (publishPairingsButton) publishPairingsButton.disabled = !canControl || !canUploadTdf || !document.getElementById('tdfInput')?.files?.[0];
-      const tdfControls = document.getElementById('tdfControls');
-      if (tdfControls) tdfControls.hidden = !canUploadTdf;
-      const tdfOption = document.querySelector('#leftVisualModeSelect option[value="tdf"]');
-      if (tdfOption) tdfOption.hidden = !canUploadTdf;
+      if (publishPairingsButton) publishPairingsButton.disabled = !canControl || !document.getElementById('tdfInput')?.files?.[0];
       roomDurationControl.hidden = !canControl;
       const hasGoogleAccount = !!currentUser?.providerData?.some(provider => provider.providerId === 'google.com');
-      canUploadTdf = false;
-      if (verified && hasGoogleAccount) {
-        try {
-          const accessSnap = await dbModule.get(dbModule.ref(db, 'moduleAccess/' + currentUser.uid));
-          canUploadTdf = currentUser.email?.toLowerCase() === 'quidel.dsgn@gmail.com' || accessSnap.child('tdf').val() === true;
-        } catch (_) { canUploadTdf = currentUser.email?.toLowerCase() === 'quidel.dsgn@gmail.com'; }
-      }
       googleButton.hidden = hasGoogleAccount;
       logoutButton.hidden = !hasGoogleAccount;
       createButton.hidden = !verified || canControl;
@@ -3946,7 +3934,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         authModule = authentication;
         const app = initializeApp(firebaseConfig);
         const db = dbModule.getDatabase(app);
-        let onlineTournamentData = {}; let canUploadTdf = false;
+        let onlineTournamentData = {};
         function refreshTimerTournamentOptions() {
           const select = document.getElementById('timerTournamentSelect');
           if (!select || isProjection) return;
@@ -4026,10 +4014,10 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
         },()=>{document.getElementById('pairingsStatus').textContent='No se pudo acceder a los pareos.';});
         if (pairingsRef && !isReadOnly) {
           const fileInput=document.getElementById('tdfInput'), uploadButton=document.getElementById('publishPairings');
-          fileInput.addEventListener('change',()=>{uploadButton.disabled=!canControl||!canUploadTdf||!fileInput.files?.[0];});
+          fileInput.addEventListener('change',()=>{uploadButton.disabled=!canControl||!fileInput.files?.[0];});
           uploadButton.addEventListener('click',async()=>{
             const status=document.getElementById('tdfStatus'),file=fileInput.files?.[0];
-            if(!canControl||!canUploadTdf){status.textContent='Tu cuenta no tiene habilitada la carga de TDF.';return;}
+            if(!canControl){status.textContent='Disponible solo para la persona propietaria de la sala.';return;}
             if(!file){status.textContent='Selecciona un archivo TDF.';return;}
             if(file.size>2_000_000){status.textContent='El archivo supera los 2 MB.';return;}
             uploadButton.disabled=true;status.textContent='Leyendo el TDF…';
@@ -4045,7 +4033,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
               status.textContent='TDF «'+pairings.title+'» publicado: '+players.size+' jugadores y pareos de '+rounds.size+' rondas.';
               document.getElementById('qrStatus').textContent='QR de pareos generado. Guarda los cambios para conservarlo en el Timer.';
             }catch(error){status.textContent=(error?.message||'No se pudo publicar el TDF.')+' Revisa las reglas de Firebase.';}
-            finally{uploadButton.disabled=!canControl||!canUploadTdf||!fileInput.files?.[0];}
+            finally{uploadButton.disabled=!canControl||!fileInput.files?.[0];}
           });
         }
         startStaffRosterSubscriptions();
@@ -4270,7 +4258,7 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
           const returnTo = new URLSearchParams(location.search).get('returnTo');
           let openOwnRoomOnLoad = new URLSearchParams(location.search).get('openOwnRoom') === '1';
           let returnedToModule = false;
-          authModule.onAuthStateChanged(auth, async user => {
+          authModule.onAuthStateChanged(auth, user => {
             currentUser = user;
             window.cronoCurrentUser = user;
             const hasGoogleAccount = !!user?.providerData?.some(provider => provider.providerId === 'google.com');
@@ -4284,19 +4272,6 @@ if (timeLeft < 0) document.getElementById('timer').style.color = 'var(--danger)'
             else welcomeCopy.append(homeAccountActions);
             const dashboard = document.getElementById('loggedInDashboard');
             dashboard.hidden = !hasGoogleAccount;
-            const moduleLinks = [...document.querySelectorAll('.module-card[data-module]')];
-            moduleLinks.forEach(link => { link.hidden = true; });
-            if (hasGoogleAccount && user.emailVerified) {
-              try {
-                const accessSnap = await dbModule.get(dbModule.ref(db, 'moduleAccess/' + user.uid));
-                const access = accessSnap.val() || {};
-                const fullAccess = user.email?.toLowerCase() === 'quidel.dsgn@gmail.com';
-                moduleLinks.forEach(link => { link.hidden = link.dataset.module === 'admin' ? !fullAccess : (!fullAccess && access[link.dataset.module] !== true); });
-              } catch (error) {
-                console.warn('No se pudo consultar el acceso a módulos:', error);
-                moduleLinks.forEach(link => { if (link.dataset.module !== 'agenda') link.hidden = true; });
-              }
-            } else moduleLinks.forEach(link => { link.hidden = true; });
             document.getElementById('dashboardUserName').textContent = user?.displayName?.trim().split(/\s+/)[0] || 'organizador';
             if (user && ['/flyer/', '/acortador/'].includes(returnTo) && !returnedToModule) { returnedToModule = true; location.replace(returnTo); return; }
             if (!(user?.emailVerified && openOwnRoomOnLoad)) document.documentElement.classList.remove('crono-route-pending');

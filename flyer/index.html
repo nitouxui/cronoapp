@@ -545,16 +545,11 @@
             location.assign(roomId&&isValidRoomId(roomId)?'/?sala='+encodeURIComponent(roomId):'/?openOwnRoom=1');
           }catch(error){location.assign('/?openOwnRoom=1');}
         });
-        authModule.onAuthStateChanged(auth,async user=>{
-          const google=Boolean(user?.emailVerified&&user.providerData?.some(provider=>provider.providerId==='google.com'));
-          let access={};
-          if(google){try{const snap=await databaseModule.get(databaseModule.ref(db,'moduleAccess/'+user.uid));access=snap.val()||{}}catch{}}
-          const isOwner=user?.email?.toLowerCase()==='quidel.dsgn@gmail.com';
-          const canUseFlyer=google&&(isOwner||access.flyer===true);
-          const canManageAgenda=google&&(isOwner||access.agenda===true);
+        authModule.onAuthStateChanged(auth,user=>{
+          const canManageAgenda=Boolean(user?.emailVerified&&user.email?.toLowerCase()==='quidel.dsgn@gmail.com'&&user.providerData?.some(provider=>provider.providerId==='google.com'));
           document.getElementById('agendaAdminMenuLink').hidden=!canManageAgenda;
-          if(canUseFlyer)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
-          else{currentUser=null;document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=true;document.getElementById('loginPanel').hidden=false;document.getElementById('googleLogin').hidden=google;document.getElementById('loginStatus').textContent=google?'Tu cuenta todavía no tiene acceso al generador de flyers. Solicítalo al administrador.':'';}
+          if(user)restoreDraft(user).catch(()=>{currentUser=user;document.getElementById('accountEmail').textContent=user.email||'Sesión iniciada';document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=false;document.getElementById('loginPanel').hidden=true;redraw();});
+          else{currentUser=null;document.getElementById('authLoading').hidden=true;document.getElementById('flyerShell').hidden=true;document.getElementById('loginPanel').hidden=false;}
         });
         document.getElementById('googleLogin').addEventListener('click',()=>{location.assign('/?returnTo='+encodeURIComponent('/flyer/'));});
         document.getElementById('logoutButton').addEventListener('click',()=>authModule.signOut(auth));
