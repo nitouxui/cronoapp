@@ -366,6 +366,75 @@
           }
         }
       }
+    },
+    "userDecklists": {
+      "$uid": {
+        ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+        "$deckId": {
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['name','cards','updatedAt']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 100 && newData.child('updatedAt').isNumber() && newData.child('cards').hasChildren(['items'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "cards": {
+            "items": {
+              "$cardId": {
+                ".validate": "newData.hasChildren(['name','quantity','category']) && newData.child('name').isString() && newData.child('name').val().length <= 120 && newData.child('quantity').isNumber() && newData.child('quantity').val() >= 1 && newData.child('quantity').val() <= 60 && newData.child('category').isString() && (newData.child('category').val() === 'pokemon' || newData.child('category').val() === 'trainer' || newData.child('category').val() === 'energy')",
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "roomDecklists": {
+      "$room": {
+        "enabled": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && (auth.uid === root.child('rooms').child($room).child('ownerUid').val() || root.child('shortRooms').child($room).exists())",
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
+          ".validate": "newData.isBoolean()"
+        },
+        "submissions": {
+          ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)",
+          "$uid": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && (((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('rooms').child($room).child('ownerUid').val() === auth.uid)) || (auth.uid === $uid && root.child('roomDecklists').child($room).child('enabled').val() === true && root.child('rooms').child($room).exists() && (!data.exists() || data.child('locked').val() !== true) && newData.exists() && newData.child('uid').val() === auth.uid && newData.child('locked').val() !== true))",
+            ".validate": "newData.hasChildren(['uid','playerName','deckName','cards','submittedAt']) && newData.child('uid').val() === $uid && newData.child('playerName').isString() && newData.child('playerName').val().length >= 1 && newData.child('playerName').val().length <= 80 && newData.child('deckName').isString() && newData.child('deckName').val().length >= 1 && newData.child('deckName').val().length <= 100 && newData.child('submittedAt').isNumber() && newData.child('cards').isString() && newData.child('cards').val().length <= 20000",
+            "uid": {
+              ".validate": "newData.isString()"
+            },
+            "playerName": {
+              ".validate": "newData.isString()"
+            },
+            "deckName": {
+              ".validate": "newData.isString()"
+            },
+            "submittedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "cards": {
+              ".validate": "newData.isString() && newData.val().length <= 20000"
+            },
+            "locked": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
     }
   }
 }
