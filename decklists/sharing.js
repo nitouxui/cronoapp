@@ -103,7 +103,7 @@ $('shareBtn').addEventListener('click',async()=>{
   current=code;
   cacheWrite(user.uid,code);
   open=true;
-  message('Decklist pública. Puedes copiar el código o el enlace desde el ícono de información.');
+  message('');
  }catch(e){message(friendlyError(e))}
  finally{busy=false;busyText='';syncUI()}
 });
@@ -117,7 +117,7 @@ $('unshareBtn').addEventListener('click',async()=>{
   await update(ref(db,'sharedDecklists/'+code),{active:false});
   cacheClear(user.uid);
   current=null;open=false;
-  message('Decklist privada nuevamente. El código y el enlace fueron revocados.');
+  message('');
  }catch(e){message(friendlyError(e))}
  finally{busy=false;busyText='';$('unshareBtn').disabled=false;syncUI()}
 });
