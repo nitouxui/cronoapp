@@ -1,5 +1,11 @@
 # Constructor de Decklists — fuentes y criterios
 
+## Publicación propuesta
+- Dominio propio: `https://deck.cronoapp.cl/` (pendiente de activación en Cloudflare Pages y autorización en Firebase).
+- Se despliega la carpeta `decklists/` del mismo repositorio, sin cambiar `cronoapp.cl`.
+- Instrucciones completas: [DEPLOY_SUBDOMAIN.md](./DEPLOY_SUBDOMAIN.md).
+- Mientras se activa, el constructor continúa en `https://cronoapp.cl/decklists/`.
+
 ## Objetivo
 Un único campo de búsqueda, sin filtros obligatorios, para jugadores de Pokémon TCG que conocen los nombres en español o en inglés. Se permite preparar listas de adelanto con impresiones japonesas de **Storm Emeralda (M6)**, diferenciadas de la legalidad Standard internacional.
 
