@@ -386,9 +386,6 @@
                 "$other": {
                   ".validate": false
                 }
-              },
-              "$other": {
-                ".validate": false
               }
             }
           },
