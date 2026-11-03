@@ -250,3 +250,13 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
 .catalog #catalog:empty{display:none}
 .catalog #catalog:not(:empty){margin-top:12px}
 .catalog #apiStatus:empty{display:none}
+
+/* Distribución vertical del constructor: búsqueda primero, mazo después.
+   En teléfonos se conservan las pestañas para evitar scroll prolongado. */
+@media(min-width:761px){
+ main{max-width:1080px}
+ .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+ .layout>.stack,.layout>.sidebar{width:100%;min-width:0}
+ .sidebar{position:static;top:auto}
+ #catalog.card-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr))}
+}
