@@ -354,3 +354,31 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
  #deck .deck-group .card-grid .deck-entry{padding:5px}
  #deck .deck-group .card-grid .deck-entry .actions{gap:3px}
 }
+
+/* Acciones del mazo: cuatro botones en una sola fila horizontal. */
+@media screen{
+ #export>.actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  align-items:stretch;
+ }
+ #export>.actions button{
+  min-width:0;
+  min-height:45px;
+  width:100%;
+  margin:0;
+  padding:9px 7px;
+  font-size:13px;
+  line-height:1.25;
+  white-space:normal;
+ }
+}
+@media screen and (max-width:760px){
+ #export>.actions{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ #export>.actions button{font-size:12px;padding:8px 3px;min-height:44px}
+}
+@media screen and (max-width:370px){
+ #export>.actions{gap:4px}
+ #export>.actions button{font-size:11px;padding:7px 2px;min-height:44px}
+}
