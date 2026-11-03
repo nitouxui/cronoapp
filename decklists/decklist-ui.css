@@ -135,3 +135,45 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
 @media(max-width:370px){#catalog.card-grid{gap:7px}#catalog.card-grid .item{padding:7px}#catalog.card-grid .item .actions button{min-width:36px;width:36px}#catalog:not(.card-grid) .item .card-art img{width:44px!important;height:62px!important}}
 @media print{.mobile-dock,.toplinks,.quick-search,#showMore{display:none!important}.has-mobile-tabs[data-mobile-view=search] .sidebar{display:block!important}.has-mobile-tabs[data-mobile-view=deck] .layout>.stack:first-child{display:block!important}main{padding:0}.layout{display:block}.panel{box-shadow:none}}
 @media(prefers-reduced-motion:reduce){button,html{scroll-behavior:auto;transition:none}}
+
+/* Header publishing: split status button and compact, keyboard-accessible details */
+.public-share{position:relative;min-width:0;z-index:40}
+.publish-controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.public-share button{font:inherit;font-size:13px;font-weight:700;min-height:42px}
+#loginBtn{white-space:nowrap;padding:9px 13px;background:#31455f;border:1px solid #51678b}
+.share-split{display:flex;align-items:stretch;min-width:0;border-radius:11px;gap:3px}
+#shareBtn{border:1px solid #8e83ff;background:#6256df;color:#fff;border-radius:11px;padding:10px 15px;white-space:normal;text-align:center;min-width:0;line-height:1.25}
+#shareBtn:hover:not(:disabled){background:#7569f6}
+#shareBtn.is-public{background:#244e43;border-color:#4ebaa0;color:#e4fff6;border-radius:11px 4px 4px 11px}
+#shareBtn.is-public:disabled{opacity:1;cursor:default}
+#shareDetailsBtn{display:flex;align-items:center;justify-content:center;flex:none;width:45px;padding:0;border:1px solid #4ebaa0;color:#e4fff6;background:#244e43;border-radius:4px 11px 11px 4px}
+#shareDetailsBtn:hover{background:#326f5d}
+#shareDetailsBtn[aria-expanded=true]{outline:2px solid #95edcf;outline-offset:1px}
+.public-share button[hidden],.share-popover[hidden]{display:none!important}
+.share-popover{position:absolute;right:0;top:calc(100% + 12px);width:min(388px,calc(100vw - 28px));padding:17px;border:1px solid #607393;border-radius:17px;background:#1c2d46;box-shadow:0 22px 48px rgba(0,0,0,.48);color:#fff;z-index:45;max-height:min(77dvh,720px);overflow-y:auto}
+.share-popover-heading{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.share-popover-heading strong{font-size:16px}
+.share-popover .helper{font-size:12px;margin:0 0 17px;line-height:1.5}
+.share-popover label{display:block;margin:10px 0 6px;font-size:12px;font-weight:690;color:#d9e5f5}
+.share-copy-field{display:flex;gap:8px;align-items:stretch;min-width:0}
+.share-copy-field input{flex:1;min-width:0;width:100%;border:1px solid #516582;border-radius:9px;background:#101e31;color:#f5f7ff;font:14px system-ui;padding:9px 10px;min-height:43px;letter-spacing:normal}
+#shareCode{font-weight:800;letter-spacing:.06em}
+.share-copy-field button{flex:none;min-height:43px;padding:8px 12px;background:#354e72;border-radius:9px}
+.share-close{width:36px;min-height:36px!important;padding:0;background:#31445f;color:#f6f7ff;font-size:23px!important;line-height:1;border-radius:9px}
+.share-close:hover{background:#405a7d}
+.share-unpublish{display:block;width:100%;margin-top:17px;background:#6d3b4c;border:1px solid #9b5a6b;font-size:13px!important;padding:10px 12px;min-height:44px}
+.share-message{font-size:12px;max-width:340px;margin:7px 0 0;color:#e2e8fa;line-height:1.35}
+.share-message:empty{display:none}
+@media(max-width:760px){
+  .toplinks{align-items:stretch}
+  .toplinks>a{flex:0 0 auto}
+  .public-share{flex:1 1 100%;width:100%}
+  .publish-controls{display:flex;gap:8px;justify-content:flex-start}
+  .share-split{flex:1;min-width:0}
+  #shareBtn{flex:1;min-width:0;white-space:normal;min-height:45px}
+  #loginBtn{flex:0 0 auto;min-height:45px}
+  .share-popover{width:100%;max-height:min(69dvh,580px);top:calc(100% + 10px);left:0;right:0;padding:15px}
+  .share-message{max-width:none}
+}
+@media(max-width:370px){.publish-controls{flex-wrap:wrap}#loginBtn{flex:1 1 100%}.share-split{flex:1 1 100%}}
+@media print{.public-share,.share-popover{display:none!important}}
