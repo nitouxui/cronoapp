@@ -312,3 +312,45 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
  #trainerPanel #player{background:transparent;color:#000;border:1px solid #777}
  #trainerPanel{border:0;box-shadow:none}
 }
+
+/* Grillas coherentes: cinco cartas en escritorio y tres cartas del mazo en móvil. */
+@media(min-width:761px){
+ #catalog.card-grid,
+ #deck .deck-group .card-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+ #deck .deck-group .card-grid .deck-entry{min-width:0;padding:10px}
+}
+@media(min-width:761px) and (max-width:980px){
+ #deck .deck-group .card-grid .deck-entry .actions{gap:4px;flex-wrap:nowrap}
+ #deck .deck-group .card-grid .deck-entry .actions button{width:35px;min-width:35px;min-height:42px}
+ #deck .deck-group .card-grid .deck-entry .quantity-input{width:40px;max-width:40px;flex-basis:40px}
+}
+@media(max-width:760px){
+ #deck .deck-group .card-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ #deck .deck-group .card-grid .deck-entry{min-width:0;padding:6px;gap:6px;overflow:hidden}
+ #deck .deck-group .card-grid .deck-entry img{width:100%!important;height:auto!important;max-height:none}
+ #deck .deck-group .card-grid .deck-card-copy{min-width:0}
+ #deck .deck-group .card-grid .deck-card-copy strong{font-size:12px;line-height:1.28;overflow-wrap:anywhere}
+ #deck .deck-group .card-grid .deck-card-details{margin-top:3px}
+ #deck .deck-group .card-grid .deck-expansion{font-size:10px;overflow-wrap:anywhere}
+ /* A tres columnas el control numérico utiliza dos filas para no desbordarse. */
+ #deck .deck-group .card-grid .deck-entry .actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-areas:"quantity quantity" "minus plus";
+  gap:4px;align-items:stretch;justify-content:stretch;
+  width:100%;margin-top:auto;padding-top:6px;
+ }
+ #deck .deck-group .card-grid .deck-entry .actions button{
+  width:100%;min-width:0;min-height:36px;height:36px;padding:0;font-size:19px;
+ }
+ #deck .deck-group .card-grid .deck-entry .actions button:first-child{grid-area:minus}
+ #deck .deck-group .card-grid .deck-entry .actions button:last-child{grid-area:plus}
+ #deck .deck-group .card-grid .deck-entry .quantity-input{
+  grid-area:quantity;width:100%;min-width:0;max-width:none;min-height:38px;height:38px;
+  padding:0 3px;font-size:15px;flex-basis:auto;
+ }
+}
+@media(max-width:370px){
+ #deck .deck-group .card-grid{gap:6px}
+ #deck .deck-group .card-grid .deck-entry{padding:5px}
+ #deck .deck-group .card-grid .deck-entry .actions{gap:3px}
+}
