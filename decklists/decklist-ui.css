@@ -228,3 +228,20 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
  .deck-entry--text .actions button{min-height:38px;min-width:33px;width:33px}
  .deck-entry--text .actions b{min-width:15px}
 }
+
+/* Cantidades editables: teclear un número o utilizar − / + */
+.panel .actions .quantity-input{flex:0 0 48px;width:48px;max-width:48px;height:42px;min-height:42px;min-width:0;margin:0;padding:0 3px;border-radius:9px;border:1px solid #7486a5;background:#101e31;color:#fff;text-align:center;font-size:16px;font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums;appearance:none}
+.panel .actions .quantity-input:focus-visible{outline:3px solid #bbb1ff;outline-offset:2px;border-color:#bbb1ff}
+.catalog .actions,.deck-entry .actions{flex-wrap:nowrap;align-items:center}
+.catalog .actions button,.deck-entry .actions button{min-height:42px}
+@media(max-width:760px){
+ .panel .actions .quantity-input{width:44px;flex-basis:44px;max-width:44px;height:42px;min-height:42px}
+ .catalog .actions,.deck-entry .actions{gap:4px}
+}
+@media(max-width:370px){
+ .panel .actions .quantity-input{width:38px;flex-basis:38px;max-width:38px;padding:0 1px}
+ .catalog #catalog.card-grid .item .actions button{width:33px;min-width:33px;min-height:42px}
+ .catalog #catalog.card-grid .item .actions{gap:3px}
+ .deck-entry--text .actions button{width:34px;min-width:34px;min-height:42px}
+}
+@media print{.panel .actions .quantity-input{border:0;background:transparent;color:#000}}
