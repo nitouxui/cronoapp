@@ -382,3 +382,27 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
  #export>.actions{gap:4px}
  #export>.actions button{font-size:11px;padding:7px 2px;min-height:44px}
 }
+
+/* Tarjeta superior: solo nombre entrenador. Progreso en la tarjeta del constructor. */
+#trainerPanel>.deck-owner{display:flex;flex-direction:column;width:100%;gap:7px}
+#trainerPanel .deck-owner-label{font-size:13px;font-weight:720;color:#ecf0ff}
+#export>.deck-progress{margin:0 0 20px;padding:0 0 18px;border-bottom:1px solid #3e516e}
+#export .deck-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#export .deck-progress-heading>strong:first-child{font-size:15px;font-weight:740;color:#f2f5ff}
+#export .deck-progress-heading #total{display:flex;align-items:center;justify-content:center;flex:none;min-height:42px;padding:8px 12px;background:#302c68;border:1px solid #7669e9;border-radius:10px;color:#f8f7ff;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#export>.deck-progress>.bar{height:8px;background:#34465f;margin:0 0 7px;border-radius:999px;overflow:hidden}
+#export>.deck-progress>.bar>div{height:100%;background:linear-gradient(90deg,#7972ff,#68d6ad);transition:width .2s}
+#export>.deck-progress #message{margin:7px 0 0;font-size:13px;color:#c3d0e4;line-height:1.4}
+#export>.deck-progress #message:empty{display:none}
+@media(max-width:760px){
+ #export>.deck-progress{margin-bottom:17px;padding-bottom:16px}
+ #export .deck-progress-heading{gap:8px;margin-bottom:10px}
+ #export .deck-progress-heading>strong:first-child{font-size:14px}
+ #export .deck-progress-heading #total{font-size:14px;min-height:40px;padding:7px 10px}
+}
+/* Mantener en una sola línea los cuatro botones finales también en móvil. */
+@media screen{
+ #export>.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ #export>.actions button{width:100%;min-width:0;white-space:normal}
+}
+@media screen and (max-width:760px){#export>.actions{gap:5px}}
