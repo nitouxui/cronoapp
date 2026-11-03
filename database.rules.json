@@ -437,7 +437,7 @@
       "$code": {
         ".read": "data.child('active').val() === true",
         ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ((!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('active').val() === true) || (data.child('ownerUid').val() === auth.uid && newData.child('ownerUid').val() === auth.uid && (newData.child('active').val() === false || (!newData.exists()))))",
-        ".validate": "newData.hasChildren(['ownerUid','active','name','cards','createdAt']) && newData.child('ownerUid').isString() && newData.child('active').isBoolean() && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 100 && newData.child('createdAt').isNumber() && newData.child('cards').hasChildren() && newData.child('cards').childrenCount <= 60 && $code.matches(/^DK-[A-Z0-9]{10}$/)",
+        ".validate": "newData.hasChildren(['ownerUid','active','name','cards','createdAt']) && newData.child('ownerUid').isString() && newData.child('active').isBoolean() && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 100 && newData.child('createdAt').isNumber() && newData.child('cards').hasChildren() && $code.matches(/^DK-[A-Z0-9]{10}$/)",
         "ownerUid": {
           ".validate": "newData.isString()"
         },
