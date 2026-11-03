@@ -12,6 +12,10 @@
  #deckPrint caption{text-align:left;font-weight:bold;padding-bottom:1mm;break-after:avoid}
  #deckPrint th,#deckPrint td{border:1px solid #888;padding:1mm 2mm;text-align:left;overflow-wrap:anywhere}
  #deckPrint tr{break-inside:avoid}
+ #deckPrint .print-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3mm}
+ #deckPrint .print-card{break-inside:avoid;margin:0;overflow-wrap:anywhere}
+ #deckPrint .print-card img{display:block;width:100%;aspect-ratio:5/7;object-fit:contain}
+ #deckPrint h2{break-after:avoid;font-size:12pt;margin:4mm 0 2mm}
  #deckPrint thead{display:table-header-group}
  #deckPrint th:first-child{width:13mm}
  #deckPrint th:last-child{width:34mm}
@@ -75,7 +79,7 @@
   </div>
   <div id="deck" aria-label="Cartas de mi mazo"></div>
  </div>
- <div class="actions"><button class="secondary" id="clearDeck" type="button">Vaciar mazo</button><button class="secondary" onclick="copyList()">Copiar lista</button><button class="secondary" onclick="printDeck()">PDF</button><button class="secondary" onclick="downloadPNG()">PNG</button></div>
+ <div class="actions"><button class="secondary" id="clearDeck" type="button">Vaciar mazo</button><button class="secondary" onclick="copyList()">Copiar lista</button><button class="secondary" onclick="printDeck()">PDF</button><button class="secondary" type="button" onclick="printDeckWithImages()">PDF con imágenes</button><button class="secondary" onclick="downloadPNG()">PNG</button></div>
 </section>
 </div></main><article id="deckPrint" aria-label="Lista de mazo para imprimir"></article><script src="./catalog-m6.js?v=20261102-energyart-v4"></script><script>let deckMode='list',visibleCount=24;const cards=[];let results=[];let searchTimer;let requestId=0;const API='https://api.tcgdex.net/v2/en';const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const legalMarks=new Set(['H','I','J']);const detailsCache=new Map();async function detail(c){if(detailsCache.has(c.id))return detailsCache.get(c.id);const p=fetch(API+'/cards/'+encodeURIComponent(c.id)).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).catch(()=>{detailsCache.delete(c.id);return null});detailsCache.set(c.id,p);return p}function standardCard(c){if(!c)return false;const id=String(c.id||'').toLowerCase();if(id.includes('pocket')||id.startsWith('a1-')||id.startsWith('a2-'))return false;const mark=String(c.regulationMark||'').toUpperCase();const setId=String(c.set?.id||'').toLowerCase();const setName=String(c.set?.name||'').toLowerCase();const isDeltaReign=['dlr','me06'].includes(setId)||setName.includes('delta reign')||setName.includes('dominio delta');const basicNames=new Set(['grass energy','fire energy','water energy','lightning energy','psychic energy','fighting energy','darkness energy','metal energy','energía planta','energía fuego','energía agua','energía rayo','energía psíquica','energía lucha','energía oscuridad','energía metálica']);const name=String(c.name||'').toLowerCase().trim();const basicEnergy=c.category==='Energy'&&(c.energyType==='Normal'||c.energyType==='Basic'||c.energyType==='basic'||basicNames.has(name));return basicEnergy||isDeltaReign||(legalMarks.has(mark)&&c.legal?.standard!==false)}const JA_API='https://api.tcgdex.net/v2/ja';
 const M6=window.CronoM6||{cards:[],find:()=>[],findEnergies:()=>[],basicEnergies:[],normalize:x=>String(x||'').toLowerCase()};
@@ -261,12 +265,21 @@ function render(){
  $('deck').innerHTML=['Pokémon','Entrenadores','Energías'].map(cat=>{const rows=cards.map((c,i)=>({c,i})).filter(x=>x.c[1]===cat&&counts[x.i]>0);if(!rows.length)return '';const subtotal=rows.reduce((n,x)=>n+counts[x.i],0);return '<section class="deck-group"><h3>'+cat+' ('+subtotal+')</h3><div class="'+(deckMode==='grid'?'card-grid':'')+'">'+rows.map(({c,i})=>{const detail=deckCardDetails(c);return '<div class="deck-entry '+(deckMode==='list'?'deck-entry--text':'')+'">'+(deckMode==='grid'?cardImage(c,'deck'):'')+'<div class="deck-card-copy"><strong>'+safe(c[0])+'</strong><div class="deck-card-details"><span class="deck-expansion" title="'+safe(detail.expansion)+'">'+safe(detail.code)+'</span></div></div>'+action(i,c[0],counts[i])+'</div>'}).join('')+'</div></section>'}).join('')||'<p class="deck-empty">Tu mazo está vacío. Busca una carta y presiona + para comenzar.</p>';
  const n=total();$('total').textContent=n+' / 60';$('progress').style.width=n/60*100+'%';$('progress').parentElement.setAttribute('aria-valuenow',n);$('message').textContent=n===60?'':'Te faltan '+(60-n)+' cartas para completar tu mazo.';
 }
+let printWithImages=false;
 function prepareDeckPrint(){
  const groups=['Pokémon','Entrenadores','Energías'].map(category=>{
   const entries=cards.map((card,i)=>({card,quantity:counts[i]||0}))
    .filter(({card,quantity})=>card[1]===category&&quantity>0);
   if(!entries.length)return '';
   const subtotal=entries.reduce((sum,{quantity})=>sum+quantity,0);
+  if(printWithImages){
+   const images=entries.map(({card,quantity})=>{
+    const image=cardImage(card,'deck').replace('loading="lazy"','loading="eager"');
+    return '<figure class="print-card">'+image+'<figcaption><strong>'+quantity+' × '+safe(card[0])+
+     '</strong><br>'+safe(deckCardDetails(card).code)+'</figcaption></figure>';
+   }).join('');
+   return '<h2>'+category+' ('+subtotal+')</h2><div class="print-cards">'+images+'</div>';
+  }
   const rows=entries.map(({card,quantity})=>
    '<tr><td>'+quantity+'</td><td>'+safe(card[0])+'</td><td>'+safe(deckCardDetails(card).code)+'</td></tr>'
   ).join('');
@@ -281,10 +294,24 @@ function prepareDeckPrint(){
   (groups||'<p class="print-total">El mazo está vacío.</p>');
 }
 function printDeck(){
+ printWithImages=false;
  prepareDeckPrint();
  window.print();
 }
-window.addEventListener('beforeprint',prepareDeckPrint);
+async function printDeckWithImages(){
+ printWithImages=true;
+ prepareDeckPrint();
+ const images=Array.from($('deckPrint').querySelectorAll('img'));
+ await Promise.race([
+  Promise.allSettled(images.map(img=>img.decode())),
+  new Promise(resolve=>setTimeout(resolve,5000))
+ ]);
+ window.print();
+}
+window.addEventListener('beforeprint',()=>{
+ if(!printWithImages)prepareDeckPrint();
+});
+window.addEventListener('afterprint',()=>{printWithImages=false});
 function listText(){return ['Decklist de '+($('player').value.trim()||'Jugador'),...cards.map((c,i)=>counts[i]?counts[i]+' '+c[0]+' '+deckCardDetails(c).code:'').filter(Boolean),'Total: '+total()].join('\n')}async function copyList(){try{await navigator.clipboard.writeText(listText());alert('Lista copiada')}catch(e){alert('No se pudo copiar; usa una conexión segura')}}function downloadPNG(){const lines=listText().split('\n');const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=Math.max(480,140+lines.length*38);const ctx=canvas.getContext('2d');ctx.fillStyle='#101827';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff';ctx.font='bold 36px system-ui';ctx.fillText('CronoApp · Decklist',40,65);ctx.font='26px system-ui';lines.forEach((s,i)=>ctx.fillText(s,40,120+i*38));const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='cronoapp-decklist.png';a.click()}$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(findCards,350)});$('showMore').addEventListener('click',()=>{visibleCount+=24;render()});['player'].forEach(x=>$(x).addEventListener('input',()=>{render();saveDraft()}));$('clearDeck').addEventListener('click',()=>{if(!total()||confirm('¿Vaciar las '+total()+' cartas del mazo?')){Object.keys(counts).forEach(k=>delete counts[k]);render();saveDraft()}});for(const [id,mode] of [['deckList','list'],['deckGrid','grid']])$(id).addEventListener('click',()=>{deckMode=mode;for(const v of ['list','grid'])$('deck'+(v==='list'?'List':'Grid')).setAttribute('aria-pressed',String(mode===v));render()});function saveDraft(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({player:$('player').value,cards:cards.map((c,i)=>({card:c,count:counts[i]||0})).filter(x=>x.count>0)}))}catch(e){console.warn('No se pudo guardar el borrador.',e)}}function restoreDraft(){
  try{
   const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return;
