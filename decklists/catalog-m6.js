@@ -28,7 +28,7 @@ const aliases={
 'Mega Rayquaza ex':['mega rayquaza','レックウザ','メガレックウザ']};
 const normalize=s=>String(s??'').normalize('NFD').replace(/\p{M}/gu,'').toLocaleLowerCase().replace(/[‐‑‒–—]/g,'-').trim();
 function category(n){if(n>=104&&n<=106)return 'Energías';if((n>=63&&n<=76)||(n>=97&&n<=103)||n===111||n===112)return 'Entrenadores';return 'Pokémon'}
-const cards=Object.freeze(names.map((name,i)=>{const number=i+1;const localId=String(number).padStart(3,'0');return Object.freeze({id:'jp:m6-'+localId,localId,name,category:category(number),japanese:true,setName:'Storm Emeralda (JP)',altNames:[...(aliases[name]||[]),...(jpTrainers[number]?[jpTrainers[number]]:[])],sourceUrl:'https://limitlesstcg.com/cards/jp/M6/'+number,image:'',basic:false})}));
+const cards=Object.freeze(names.map((name,i)=>{const number=i+1;const localId=String(number).padStart(3,'0');return Object.freeze({id:'jp:m6-'+localId,localId,name,category:category(number),japanese:true,setName:'Storm Emeralda (JP)',altNames:[...(aliases[name]||[]),...(jpTrainers[number]?[jpTrainers[number]]:[])],sourceUrl:'https://limitlesstcg.com/cards/jp/M6/'+number+'?translate=en',image:'',basic:false})}));
 function find(q){const n=normalize(q);if(n.length<2)return [];if(['storm emeralda','esmeralda','delta reign','dominio delta','m6'].includes(n))return [...cards];return cards.filter(c=>[c.name,...c.altNames,c.localId].some(t=>normalize(t).includes(n)))}
 const energyData=[
 ['Grass','Planta','🌿','#328b54','草'],['Fire','Fuego','🔥','#c8583b','炎'],['Water','Agua','💧','#3578c0','水'],['Lightning','Rayo','⚡','#b48a21','雷'],['Psychic','Psíquica','✦','#8457ac','超'],['Fighting','Lucha','✊','#a36b40','闘'],['Darkness','Oscuridad','☾','#41425d','悪'],['Metal','Metálica','⬡','#70818b','鋼']];
