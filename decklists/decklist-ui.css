@@ -291,3 +291,24 @@ main{padding:15px 12px calc(108px + env(safe-area-inset-bottom,0px))}
  .deck-collection{border-top:0}
  .deck-builder-layout #export>.actions{display:none!important}
 }
+
+/* Resumen del entrenador independiente, arriba del constructor */
+.deck-builder-layout{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.deck-builder-layout>.panel{width:100%;min-width:0;margin:0}
+#trainerPanel #player{display:block;width:100%;min-width:0;max-width:100%;height:45px;min-height:45px;padding:10px 12px;border:1px solid #506783;border-radius:10px;background:#101e31;color:#f4f7ff;font-size:16px;font-weight:600}
+#trainerPanel #player::placeholder{color:#a7b7cc;font-weight:450}
+#trainerPanel #player:focus-visible{outline:3px solid rgba(141,127,255,.35);border-color:#aaa1ff;outline-offset:0}
+#trainerPanel>.bar{height:8px;background:#34465f;margin:14px 0 5px;border-radius:20px;overflow:hidden}
+#trainerPanel>.bar>div{height:100%;background:linear-gradient(90deg,#7972ff,#68d6ad);transition:width .2s}
+#trainerPanel #message{margin:8px 0 0}
+#export>.deck-search{border-top:0;margin-top:0;padding-top:0}
+@media(max-width:760px){
+ .deck-builder-layout{gap:12px}
+ #trainerPanel #player{height:45px;min-height:45px}
+ #trainerPanel>.bar{margin-top:12px}
+ #export>.deck-search{margin-top:0;padding-top:0}
+}
+@media print{
+ #trainerPanel #player{background:transparent;color:#000;border:1px solid #777}
+ #trainerPanel{border:0;box-shadow:none}
+}
