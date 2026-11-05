@@ -6,13 +6,23 @@ const app=initializeApp({apiKey:"AIzaSyDQpTvOLF-RqYZQJHe8cCk_0E8E5M5GkK8",authDo
 const auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
 const valid=code=>/^DK-[A-Z0-9]{10}$/.test(code);
 const PUBLISHED_KEY="cronoapp-published-decklist-v1:";
-let current=null,open=false,busy=false,busyText="",authRevision=0;
+let current=null,open=false,busy=false,busyText="",authRevision=0,canPublish=false;
 
 function cacheKey(uid){return PUBLISHED_KEY+uid}
 function cacheRead(uid){try{return localStorage.getItem(cacheKey(uid))}catch(e){return null}}
 function cacheWrite(uid,code){try{localStorage.setItem(cacheKey(uid),code)}catch(e){}}
 function cacheClear(uid){try{localStorage.removeItem(cacheKey(uid))}catch(e){}}
 function message(text){$('shareStatus').textContent=text||''}
+async function verifiedGoogleUser(user){
+ if(!user)return false;
+ try{
+  await user.reload();
+  const fresh=auth.currentUser;
+  if(!fresh||fresh.uid!==user.uid)return false;
+  const token=await fresh.getIdTokenResult(true);
+  return fresh.emailVerified===true&&token.claims.email_verified===true&&token.signInProvider==='google.com';
+ }catch(e){return false}
+}
 function friendlyError(e){
  const code=String(e?.code||'');
  if(code.includes("permission-denied")||code.includes("PERMISSION_DENIED"))return 'Firebase denegó el permiso. Verifica las reglas de acceso.';
@@ -21,8 +31,9 @@ function friendlyError(e){
 function shareLink(code){return new URL('./consultar/?list='+encodeURIComponent(code),location.href).href}
 function syncUI(){
  const signedIn=!!auth.currentUser;
- $('loginBtn').hidden=signedIn;
- $('shareBtn').disabled=!signedIn||busy||!!current;
+ $('loginBtn').hidden=canPublish;
+ $('loginBtn').textContent=signedIn?'Elegir cuenta Google':'Iniciar sesión con Google';
+ $('shareBtn').disabled=!canPublish||busy||!!current;
  $('shareBtn').textContent=current?'Decklist pública':busy?busyText:'Hacer Decklist pública';
  $('shareBtn').classList.toggle('is-public',!!current);
  $('shareDetailsBtn').hidden=!current;
@@ -35,7 +46,7 @@ function syncUI(){
   $('shareCode').value='';
   $('shareUrl').value='';
  }
- $('authStatus').textContent=signedIn?'Sesión iniciada: '+(auth.currentUser.email||auth.currentUser.displayName||'Cuenta Google'):'Inicia sesión con Google para hacer pública tu Decklist.';
+ $('authStatus').textContent=canPublish?'Sesión Google verificada: '+(auth.currentUser.email||auth.currentUser.displayName||'Cuenta Google'):signedIn?'La sesión actual no confirmó una cuenta Google verificada. Elige otra cuenta para publicar.':'Inicia sesión con Google para hacer pública tu Decklist.';
 }
 function setDetails(visible,focus=false){
  open=!!visible&&!!current;
@@ -54,8 +65,12 @@ document.addEventListener('pointerdown',e=>{
 
 onAuthStateChanged(auth,async user=>{
  const thisRevision=++authRevision;
- current=null;open=false;busy=false;busyText='';message('');syncUI();
+ current=null;open=false;busy=false;busyText='';canPublish=false;message('');syncUI();
  if(!user)return;
+ canPublish=await verifiedGoogleUser(user);
+ if(thisRevision!==authRevision)return;
+ syncUI();
+ if(!canPublish){message('La sesión actual no confirmó una cuenta Google con correo verificado. Usa «Elegir cuenta Google» para cambiar de cuenta.');return}
  const saved=cacheRead(user.uid);
  if(!saved||!valid(saved))return;
  busy=true;busyText='Comprobando publicación…';syncUI();
@@ -77,15 +92,15 @@ onAuthStateChanged(auth,async user=>{
 });
 
 $('loginBtn').addEventListener('click',async()=>{
- try{await signInWithPopup(auth,new GoogleAuthProvider())}
+ try{const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,provider)}
  catch(e){message(friendlyError(e))}
 });
 
 $('shareBtn').addEventListener('click',async()=>{
  if(busy||current)return;
  const user=auth.currentUser;
- if(!user||!user.emailVerified){
-  message('Inicia sesión con una cuenta Google verificada para publicar tu Decklist.');
+ if(!user||!canPublish){
+  message('Inicia sesión con una cuenta Google con correo verificado para publicar tu Decklist.');
   return;
  }
  const deck=window.getDeckSnapshot();
