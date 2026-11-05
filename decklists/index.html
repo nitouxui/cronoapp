@@ -150,7 +150,8 @@ async function findCards(){
  const detailed=await Promise.all(brief.map(c=>detail(c)));
  if(id!==requestId)return;
  const playableNames=new Set(detailed.filter(standardCard).map(c=>norm(c.name)));
- // Una reimpresión legal en Standard habilita las versiones antiguas del mismo nombre (p. ej., Boss's Orders de Cyrus).\n const eligible=detailed.filter(c=>standardCard(c)||(!String(c.id||'').toLowerCase().includes('pocket')&&playableNames.has(norm(c.name))));
+ // Una reimpresión legal en Standard habilita las versiones antiguas del mismo nombre (p. ej., Boss's Orders de Cyrus).
+ const eligible=detailed.filter(c=>standardCard(c)||(!String(c.id||'').toLowerCase().includes('pocket')&&playableNames.has(norm(c.name))));
  const extra=eligible.filter(c=>!canonicalBasicEnergy(c)).map(c=>putCard({id:c.id,name:c.name,category:({Pokemon:'Pokémon',Trainer:'Entrenadores',Energy:'Energías'})[c.category]||'Pokémon',image:c.image||'',setName:(c.set?.name||'')+' · '+(c.localId||''),basic:c.category==='Energy'&&(c.energyType==='Normal'||c.energyType==='Basic'||M6.basicEnergies.some(e=>norm(e.name)===norm(c.name)))}));
  results=[...new Set([...results,...extra])];
  const ok=settled.some(x=>x.status==='fulfilled');
