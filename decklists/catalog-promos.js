@@ -15,3 +15,6 @@ function find(q){
  if(n.length<2)return [];
  const codeQuery=/^mep\d*$/.test(compact);
  return cards.filter(c=>['H','I','J'].includes(String(c.regulationMark).toUpperCase())&&(codeQuery?(compact==='mep'||('mep'+c.localId).startsWith(compact)):[c.name,...c.altNames,c.id,c.localId,'mep '+c.localId].some(x=>normalize(x).includes(n))));
+}
+global.CronoPromos=Object.freeze({cards,find,normalize});
+})(window);
