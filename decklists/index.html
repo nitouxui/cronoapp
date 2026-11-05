@@ -122,12 +122,14 @@ function localResults(q){
 // Do not replace them with API metadata that may lack images.
 function enrichImages(){return Promise.resolve()}
 async function searchBrief(lang,name){
- const url='https://api.tcgdex.net/v2/'+lang+'/cards?name='+encodeURIComponent(name)+'&pagination:itemsPerPage=80';
+ const url='https://api.tcgdex.net/v2/'+lang+'/cards?name='+encodeURIComponent(name)+'&pagination:itemsPerPage=100';
  const response=await fetch(url);if(!response.ok)throw Error('HTTP '+response.status);
  const body=await response.json();return Array.isArray(body)?body:[];
 }
 function translateQuery(q){
- const n=norm(q),alias=aliases.find(([es])=>n===es||n.startsWith(es+' '));
+ const n=norm(q);
+ if(n==='erin')return 'Eri';
+ const alias=aliases.find(([es])=>n===es||n.startsWith(es+' '));
  return alias?alias[1]+q.slice(alias[0].length):q;
 }
 async function findCards(){
@@ -139,10 +141,11 @@ async function findCards(){
  enrichImages().catch(()=>{});
  // La búsqueda local de M6 y energías funciona aunque falle el servicio remoto.
  const translated=translateQuery(q);
- const requests=[searchBrief('en',translated),searchBrief('es',q)];
+ const spanishQuery=['eri','erin'].includes(norm(q))?'Erin':q;
+ const requests=[searchBrief('en',translated),searchBrief('es',spanishQuery)];
  const settled=await Promise.allSettled(requests);
  if(id!==requestId)return;
- const brief=Array.from(new Map(settled.flatMap(x=>x.status==='fulfilled'?x.value:[]).map(c=>[c.id,c])).values()).slice(0,50);
+ const brief=Array.from(new Map(settled.flatMap(x=>x.status==='fulfilled'?x.value:[]).map(c=>[c.id,c])).values());
  const detailed=await Promise.all(brief.map(c=>detail(c)));
  if(id!==requestId)return;
  const eligible=detailed.filter(standardCard);
