@@ -137,7 +137,7 @@ async function findCards(){
  const q=$('search').value.trim(),id=++requestId;visibleCount=24;
  if(q.length<2){results=[];$('apiStatus').textContent='';render();return}
  results=localResults(q);
- $('apiStatus').textContent=results.length+' coincidencias del catálogo japonés y energías. Buscando cartas Standard…';
+ $('apiStatus').textContent=results.length+' coincidencias del catálogo M6, promociones MEP y energías. Buscando cartas Standard…';
  render();
  enrichImages().catch(()=>{});
  // La búsqueda local de M6 y energías funciona aunque falle el servicio remoto.
